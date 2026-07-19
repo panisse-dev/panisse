@@ -67,6 +67,8 @@ export default function AdminPage() {
   const [connError, setConnError] = useState(false);
   const [flash, setFlash] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
+  const [noteEditId, setNoteEditId] = useState<string | null>(null);
+  const [noteDraft, setNoteDraft] = useState("");
 
   const seenIds = useRef<Set<string>>(new Set());
   const audioCtx = useRef<AudioContext | null>(null);
@@ -206,6 +208,26 @@ export default function AdminPage() {
     }
   };
 
+  const startEditNote = (order: Order) => {
+    setNoteEditId(order.id);
+    setNoteDraft(order.staffNote || "");
+  };
+
+  const saveNote = async (order: Order) => {
+    const note = noteDraft.trim();
+    setNoteEditId(null);
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, staffNote: note } : o)));
+    try {
+      await fetch("/api/orders/note", {
+        method: "POST",
+        headers: { "content-type": "application/json", "x-staff-code": code },
+        body: JSON.stringify({ id: order.id, note }),
+      });
+    } catch {
+      poll(code);
+    }
+  };
+
   // ── Login ──
   if (!authed) {
     return (
@@ -326,9 +348,65 @@ export default function AdminPage() {
 
                 {o.customer.note && (
                   <p className="mx-4 mb-1 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
+                    <span className="smallcaps mr-1 text-[9px] not-italic text-gold-deep">Cliente:</span>
                     “{o.customer.note}”
                   </p>
                 )}
+
+                {/* Nota interna del restaurante */}
+                <div className="border-t border-gold-soft/25 px-4 py-2">
+                  {noteEditId === o.id ? (
+                    <div>
+                      <textarea
+                        value={noteDraft}
+                        onChange={(e) => setNoteDraft(e.target.value)}
+                        rows={2}
+                        autoFocus
+                        placeholder="Nota interna (ej. pagó, mesa 5, cliente frecuente…)"
+                        className="w-full resize-none border border-gold-soft/70 bg-paper px-2.5 py-2 text-[13px] text-ink outline-none focus:border-navy"
+                      />
+                      <div className="mt-1.5 flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => saveNote(o)}
+                          className="h-9 flex-1 bg-navy text-[12.5px] font-semibold text-gold-soft"
+                        >
+                          Guardar nota
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNoteEditId(null)}
+                          className="h-9 border border-gold-soft/60 px-4 text-[12.5px] text-ink-soft"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  ) : o.staffNote ? (
+                    <button
+                      type="button"
+                      onClick={() => startEditNote(o)}
+                      className="flex w-full items-start gap-2 border-l-2 border-navy bg-navy/[0.03] px-2.5 py-1.5 text-left"
+                    >
+                      <svg viewBox="0 0 24 24" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-navy" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                      </svg>
+                      <span className="flex-1 text-[12.5px] text-navy">{o.staffNote}</span>
+                      <span className="smallcaps shrink-0 text-[9px] text-gold-deep">Editar</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => startEditNote(o)}
+                      className="flex items-center gap-1.5 text-[12px] font-medium text-gold-deep"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Agregar nota interna
+                    </button>
+                  )}
+                </div>
 
                 <div className="flex items-center justify-between gap-3 border-t border-gold-soft/25 px-4 py-2">
                   <span className="text-[13px] font-semibold text-navy">

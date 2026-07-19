@@ -29,6 +29,7 @@ export interface Order {
   customer: { name: string; phone: string; note: string };
   items: OrderItem[];
   total: number;
+  staffNote?: string; // nota interna que agrega el restaurante desde el panel
 }
 
 // El cliente sólo ve un subconjunto público del pedido (sin datos de otros).
