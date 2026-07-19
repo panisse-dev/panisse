@@ -134,7 +134,17 @@ export default function CartBar() {
                 <h3 className="font-display text-[19px] text-navy">
                   {view === "cart" ? "Mi pedido" : view === "checkout" ? "Tus datos" : "¡Pedido enviado!"}
                 </h3>
-                <span className="w-8" />
+                {view === "cart" && cart.lines.length > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => cart.clear()}
+                    className="text-[12px] font-medium text-ink-faint underline underline-offset-2"
+                  >
+                    Vaciar
+                  </button>
+                ) : (
+                  <span className="w-8" />
+                )}
               </div>
 
               {/* ── Vista carrito ── */}

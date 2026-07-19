@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from "react";
 
 export interface CartLine {
   productId: string;
@@ -23,18 +23,31 @@ interface CartAPI {
 }
 
 const KEY = "panisse-cart";
+const MAX_AGE = 3 * 60 * 60 * 1000; // el carrito caduca a las 3 horas del primer producto
 const CartCtx = createContext<CartAPI | null>(null);
 const lineKey = (p: string, v: string) => `${p}::${v}`;
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [ready, setReady] = useState(false);
+  const atRef = useRef<number | null>(null); // cuándo se agregó el primer producto
 
   // Cargar tras montar (evita desajuste servidor/cliente)
   useEffect(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) setLines(JSON.parse(raw) as CartLine[]);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && Array.isArray(parsed.lines)) {
+          const age = Date.now() - (parsed.at || 0);
+          if (parsed.lines.length > 0 && age <= MAX_AGE) {
+            setLines(parsed.lines as CartLine[]);
+            atRef.current = parsed.at || Date.now();
+          } else {
+            localStorage.removeItem(KEY); // carrito viejo → se descarta
+          }
+        }
+      }
     } catch {
       /* ignore */
     }
@@ -44,7 +57,13 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!ready) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify(lines));
+      if (lines.length === 0) {
+        atRef.current = null;
+        localStorage.removeItem(KEY);
+      } else {
+        if (atRef.current == null) atRef.current = Date.now();
+        localStorage.setItem(KEY, JSON.stringify({ at: atRef.current, lines }));
+      }
     } catch {
       /* ignore */
     }
