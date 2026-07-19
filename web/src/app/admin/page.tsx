@@ -5,7 +5,7 @@ import { formatCOP } from "@/lib/format";
 import { STATUS_LABEL, type Order, type OrderStatus } from "@/lib/orders";
 
 const CODE_KEY = "panisse-staff-code";
-const POLL_MS = 4000;
+const POLL_MS = 8000;
 
 const NEXT: Record<OrderStatus, OrderStatus | null> = {
   recibido: "preparacion",
@@ -140,14 +140,25 @@ export default function AdminPage() {
     }
   }, [beep]);
 
-  // Polling
+  // Polling — pausa cuando el panel no está visible (pantalla apagada / otra app)
+  // para no gastar cupo de Netlify haciendo chequeos innecesarios.
   useEffect(() => {
     if (!authed || !code) return;
     firstLoad.current = true;
     seenIds.current = new Set();
     poll(code);
-    const iv = setInterval(() => poll(code), POLL_MS);
-    return () => clearInterval(iv);
+    const iv = setInterval(() => {
+      if (!document.hidden) poll(code);
+    }, POLL_MS);
+    // Al volver a ver el panel, refresca de inmediato
+    const onVisible = () => {
+      if (!document.hidden) poll(code);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(iv);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [authed, code, poll]);
 
   const login = async () => {

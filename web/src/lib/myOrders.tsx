@@ -76,6 +76,7 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     if (!ready) return;
     let stop = false;
     const tick = async () => {
+      if (document.hidden) return; // no chequear con la pantalla apagada / en otra app
       const list = ordersRef.current.filter(
         (o) => o.status !== "recogido" && Date.now() - new Date(o.createdAt).getTime() < MAX_AGE,
       );

@@ -36,6 +36,7 @@ export default function CartBar() {
     if (view !== "done" || !order) return;
     let stop = false;
     const tick = async () => {
+      if (document.hidden) return; // no chequear con la pantalla apagada
       try {
         const s = await getOrderStatus(order.id);
         if (!stop) setLiveStatus(s.status);
