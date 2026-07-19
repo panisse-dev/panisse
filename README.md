@@ -14,6 +14,13 @@ cd web && npm run build  # producción
 
 El contenido sale de `web/src/data/menu.json`, generado por `node scripts/build-web-data.mjs` a partir de los datos extraídos. Las imágenes viven en `web/public/images/`.
 
+### 🧾 Pedidos para recoger + panel de administración
+
+- **Cliente**: agrega platos al carrito, hace el pedido (nombre, teléfono, nota) y ve el estado en vivo. Solo recoger en tienda; se paga al recoger.
+- **Empleado**: panel en `/admin` (protegido con clave). Ve los pedidos en tiempo real, con alerta sonora + destello al llegar uno nuevo, y botones grandes para avanzar el estado: **Recibido → En preparación → Listo para recoger → Recogido**.
+- **Motor**: funciones serverless de Netlify (`web/netlify/functions/`) + Netlify Blobs como almacén (sin base de datos externa ni cuentas nuevas).
+- **Clave del empleado**: variable de entorno `STAFF_ACCESS_CODE` en Netlify. Cambiar con `netlify env:set STAFF_ACCESS_CODE "nueva-clave"` y redesplegar.
+
 ---
 
 # Extracción completa del menú (paso 1)
