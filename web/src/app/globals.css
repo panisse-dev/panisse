@@ -1,0 +1,131 @@
+@import "tailwindcss";
+
+@theme {
+  /* PANISSE palette — mármol blanco, tinta azul noche, oro (fiel a la carta original) */
+  --color-paper: #f6f6f5;
+  --color-paper-deep: #ececea;
+  --color-card: #ffffff;
+  --color-ink: #10202f;
+  --color-ink-soft: #47535e;
+  --color-ink-faint: #6d7680;
+  --color-navy: #041b31;
+  --color-gold: #b28f4c;
+  --color-gold-deep: #8f7434;
+  --color-gold-soft: #d9bb73;
+  --color-gold-faint: #e7d9b4;
+  --color-verde: #11572e;
+
+  --font-display: var(--font-playfair), "Playfair Display", Georgia, serif;
+  --font-body: var(--font-outfit), "Outfit", system-ui, sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #e8e8e6;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Columna de página: superficie clara con sombra lateral en escritorio ── */
+.page-col {
+  background-color: var(--color-paper);
+  box-shadow: 0 0 40px rgba(4, 27, 49, 0.12);
+}
+
+/* ── Mármol FIJO (igual que menupp: capa fixed de 100vh; solo scrollea el contenido) ── */
+.marble-fixed {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  margin-inline: auto;
+  width: 100%;
+  max-width: 28rem; /* = max-w-md, ancho de la columna */
+  background-image: url("/images/menus/dfc3a969-3a35-45ba-88f0-630986c314bb.webp");
+  background-size: 100% auto;
+  background-repeat: repeat;
+  background-position: top center;
+  pointer-events: none;
+}
+
+/* Mármol para superficies que NO scrollean (p. ej. el buscador a pantalla completa) */
+.marble-col {
+  background-color: var(--color-paper);
+  background-image: url("/images/menus/dfc3a969-3a35-45ba-88f0-630986c314bb.webp");
+  background-size: 100% auto;
+  background-repeat: repeat;
+  background-position: top center;
+}
+
+/* ── Dotted leader between dish name and price, like a typeset menu ── */
+.leader {
+  flex: 1 1 1.25rem;
+  min-width: 1.25rem;
+  border-bottom: 2px dotted color-mix(in srgb, var(--color-gold) 40%, transparent);
+  transform: translateY(-0.3em);
+}
+
+/* ── Gold hairline ornament for section titles ── */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.ornament::before,
+.ornament::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+}
+.ornament::before {
+  background: linear-gradient(to right, transparent, var(--color-gold-soft));
+}
+.ornament::after {
+  background: linear-gradient(to left, transparent, var(--color-gold-soft));
+}
+
+/* ── Entrance animations (respect reduced motion) ── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.anim-fade-up { animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-fade-in { animation: fade-in 0.25s ease-out both; }
+.anim-sheet-up { animation: sheet-up 0.34s cubic-bezier(0.22, 1, 0.36, 1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .anim-fade-up, .anim-fade-in, .anim-sheet-up { animation: none; }
+}
+
+/* ── Horizontal chip scroller: hide scrollbar, fade edges to hint overflow ── */
+.chips-scroll {
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
+}
+.chips-scroll::-webkit-scrollbar { display: none; }
+
+/* ── Body scroll lock when a sheet/overlay is open ── */
+.scroll-locked {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* Small caps utility for labels */
+.smallcaps {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}

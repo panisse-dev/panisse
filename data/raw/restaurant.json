@@ -1,0 +1,69 @@
+{
+  "_id": "toscana",
+  "locations_count": 3,
+  "currency": {
+    "symbol": "$",
+    "value": "COP",
+    "name": "Peso colombiano"
+  },
+  "orders": {
+    "allowPendingPaymentsWithMenuppPay": false
+  },
+  "logo_url": "",
+  "socialLinks": {
+    "tiktok": "",
+    "homepage": "",
+    "youtube": "",
+    "facebook": "",
+    "instagram": "panisse.pei"
+  },
+  "main_menu_url": "https://firebasestorage.googleapis.com/v0/b/menupp-next.appspot.com/o/fotos_temporales%2Fflores%20revel.gif?alt=media&token=b7a60cd3-f0ff-42bb-ac9d-cae8dd6e6f0f",
+  "timezone": "America/Bogota",
+  "ads": [],
+  "showMenuppPolicy": true,
+  "banner_background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/ae4a9791-902b-4432-b69c-a1d5f6d6eaf1.webp",
+  "survey": null,
+  "allowScheduledPickup": true,
+  "eventsView": "list",
+  "allowScheduledDelivery": true,
+  "lang": "es",
+  "country": "CO",
+  "theme": {
+    "info": "#11572E",
+    "banner": "#e3e3e3",
+    "accent": "#000000",
+    "primary": "#D9BB73"
+  },
+  "version": "3.0",
+  "background_opacity": 0,
+  "minOrderValues": {
+    "delivery": 25000,
+    "takeaway": 10000
+  },
+  "name": "PANISSE",
+  "administrators": [
+    "kU4U6ZkdLTMyPquBjKM2ppswDy13",
+    "NsaG1DyZU4bc1ZGkpLT5rRx88th1",
+    "ms1cQCv23uUYYeAKc9bkfd77mGm1",
+    "c5EalA5ILFV0n2DPc1vlBVGORlT2",
+    "p97GloOCpZRkvl0jVfK737n3xFu1"
+  ],
+  "btnStyle": {
+    "blur": 0,
+    "colorShadow": "",
+    "textColor": "#827c52",
+    "borders": "rounded-borders-50",
+    "width": "80%",
+    "borderColor": "",
+    "socialMediaIconsColors": "#ffffff",
+    "fill": "#ffffff"
+  },
+  "fonts": {
+    "label": "DM Serif Display",
+    "bold": false,
+    "value": "'DM Serif Display', serif",
+    "shadow": false,
+    "color": "#000000",
+    "size": 17
+  }
+}

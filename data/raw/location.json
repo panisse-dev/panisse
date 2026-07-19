@@ -1,0 +1,135 @@
+{
+  "_id": "1vr1yK8rCvD7eaiZXHDj",
+  "services": [],
+  "allowManualAddress": false,
+  "wa_phone": "+573128179235",
+  "policy": "",
+  "location_images": [],
+  "openSchedule": {
+    "blocked_days": [],
+    "timeZone": "America/Bogota",
+    "active": false
+  },
+  "booking_ads": [],
+  "reservationPayments": [],
+  "mail": "",
+  "country": "CO",
+  "max_future_days": 30,
+  "paymentGateway": null,
+  "reservationPrice": {
+    "type": "per_person",
+    "value": 0,
+    "enabled": false,
+    "threshold": 0,
+    "schedule": null,
+    "policy": ""
+  },
+  "visibility": "public",
+  "payments": [
+    "Efectivo",
+    "Transferencia",
+    "Tarjeta"
+  ],
+  "ads": [],
+  "senders": {
+    "admin": "whatsapp-business",
+    "diner": "whatsapp-business"
+  },
+  "logo_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/others/77690b74-5642-40b9-b93f-616216c8a646.webp",
+  "allowReservationSpaces": true,
+  "phone": "+573128179235",
+  "name": "Mall Pilares del Bosque, Pereira",
+  "order": 0,
+  "shippingTime": 45,
+  "onTablePayments": [],
+  "price": 0,
+  "checkoutReservationOptions": {
+    "identification": {
+      "show": false,
+      "required": false
+    },
+    "comments": {
+      "show": true,
+      "required": false
+    },
+    "birthday": {
+      "show": false,
+      "required": false
+    },
+    "mail": {
+      "show": true,
+      "required": false
+    },
+    "gender": {
+      "show": false,
+      "required": false
+    },
+    "event": {
+      "show": true,
+      "required": false
+    }
+  },
+  "duration": "01:00",
+  "preparationTime": 25,
+  "location": {
+    "_lat": 4.8005892,
+    "_long": -75.7644175
+  },
+  "max_capacity": 0,
+  "zones": [
+    {
+      "id": "7cd50d81-379b-4b30-8b9e-0358c8b33ffd",
+      "price": 0,
+      "polygon": {
+        "fillColor": "#c22b2b",
+        "strokeWeight": 2,
+        "type": "polygon",
+        "fillOpacity": 0.4,
+        "strokeColor": "#c22b2b",
+        "paths": [
+          {
+            "lat": 4.8170022668474015,
+            "lng": -75.7853814154322
+          },
+          {
+            "lat": 4.865238078698121,
+            "lng": -75.65182886416267
+          },
+          {
+            "lat": 4.789290782468433,
+            "lng": -75.65766535097907
+          },
+          {
+            "lng": -75.68822107607673,
+            "lat": 4.754393242517054
+          },
+          {
+            "lng": -75.74383936220954,
+            "lat": 4.788948658346469
+          }
+        ]
+      },
+      "active": true,
+      "name": "Pereira"
+    }
+  ],
+  "background_opacity": 0,
+  "address": "Mall Pilares del Bosque, Local 2",
+  "pickupPayments": [
+    "Transferencia"
+  ],
+  "min_capacity": 1,
+  "deliveryPayments": [
+    "Transferencia"
+  ],
+  "schedule": {
+    "timeZone": "America/Bogota",
+    "blocked_days": [],
+    "active": false
+  },
+  "available": false,
+  "autoAcceptReservations": true,
+  "minReservationTime": 120,
+  "whatsappConfirmation": true,
+  "allowBetweenTimeSlotsReservations": true
+}

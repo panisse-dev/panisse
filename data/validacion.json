@@ -1,0 +1,41 @@
+{
+  "menus": [
+    {
+      "menu": "BRUNCH",
+      "categorias": 59,
+      "productos": 251,
+      "categorias_sin_padre": 0,
+      "productos_sin_categoria": 3
+    },
+    {
+      "menu": "LUNCH Y DINNER",
+      "categorias": 59,
+      "productos": 250,
+      "categorias_sin_padre": 2,
+      "productos_sin_categoria": 3
+    },
+    {
+      "menu": "VINOS",
+      "categorias": 27,
+      "productos": 130,
+      "categorias_sin_padre": 0,
+      "productos_sin_categoria": 0
+    },
+    {
+      "menu": "DOMICILIO",
+      "categorias": 1,
+      "productos": 11,
+      "categorias_sin_padre": 0,
+      "productos_sin_categoria": 0
+    }
+  ],
+  "issues": [
+    "BRUNCH: 3 productos sin categoría resuelta",
+    "LUNCH Y DINNER: 2 subcategorías con padre no encontrado",
+    "LUNCH Y DINNER: 3 productos sin categoría resuelta"
+  ],
+  "total_filas": 642,
+  "productos_unicos": 263,
+  "filas_con_imagen": 87,
+  "productos_unicos_con_imagen": 44
+}

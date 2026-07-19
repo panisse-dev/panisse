@@ -1,0 +1,18 @@
+# Dependencias y builds (no se suben)
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Sistema
+.DS_Store
+*.log
+
+# Entorno y credenciales
+.env
+.env.*
+.vercel
+
+# TypeScript
+*.tsbuildinfo

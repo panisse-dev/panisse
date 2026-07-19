@@ -1,0 +1,1471 @@
+[
+  {
+    "_id": "a0cef4c4-c3ec-41c8-8f9a-0241323fcc43",
+    "restaurant": "toscana",
+    "updatedFrom": "admin",
+    "maxAheadDaysUnit": "days",
+    "fonts": {
+      "product-description": {
+        "shadow": false,
+        "value": "'Outfit', sans-serif",
+        "size": 12,
+        "bold": false,
+        "color": "#000000",
+        "label": "Outfit"
+      },
+      "product": {
+        "value": "'Playfair Display', serif",
+        "size": 16,
+        "bold": true,
+        "shadow": false,
+        "color": "#041b31",
+        "label": "Playfair Display"
+      },
+      "category-description": {
+        "color": "#000000",
+        "label": "Outfit",
+        "value": "'Outfit', sans-serif",
+        "bold": false,
+        "size": 16,
+        "shadow": false
+      },
+      "category": {
+        "value": "'Playfair Display', serif",
+        "bold": false,
+        "size": 24,
+        "shadow": false,
+        "color": "#041b31",
+        "label": "Playfair Display"
+      }
+    },
+    "scheduleDelivery": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "checkoutOptionsOnTable": {
+      "invoice": {
+        "required": false,
+        "show": true
+      },
+      "payLater": false,
+      "comments": {
+        "show": true
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "room": {
+        "required": false,
+        "show": false
+      },
+      "phone": {
+        "required": true,
+        "show": true
+      },
+      "city": {
+        "show": false,
+        "required": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "tip": {
+        "show": false
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "identification": {
+        "show": false,
+        "required": false
+      },
+      "gender": {
+        "required": false,
+        "show": false
+      }
+    },
+    "style": {
+      "homepage": {
+        "display": true
+      },
+      "product_desc": true,
+      "shadows_card": false,
+      "contact": {
+        "display": true
+      },
+      "dialogbg": {
+        "display": true
+      },
+      "product_titles": true,
+      "facebook": {
+        "display": true
+      },
+      "search": {
+        "display": true
+      },
+      "header": {
+        "display": true
+      },
+      "banner": {
+        "display": true
+      },
+      "favorite": {
+        "display": true
+      },
+      "recommended": {
+        "display": true
+      },
+      "notification": {
+        "position": "bottom",
+        "background": "",
+        "color": "",
+        "time": 60
+      },
+      "homeBtn": {
+        "fill": "#707070",
+        "color": "#D9BB73",
+        "border": "#D9BB73",
+        "opacity": 70
+      },
+      "instagram": {
+        "display": true
+      },
+      "product_price_symbol": true,
+      "general_card": {
+        "opacity": "30",
+        "fill": "#ffffff"
+      }
+    },
+    "hide": false,
+    "services": [],
+    "category_carousel": {
+      "show": true,
+      "color": "#ffffff"
+    },
+    "primary": "#04111d",
+    "allowCurrentTimeSlotsPickup": true,
+    "maxAheadDays": 30,
+    "blockedDaysForOrders": [],
+    "checkoutOptionsPickup": {
+      "gender": {
+        "required": false,
+        "show": false
+      },
+      "identification": {
+        "show": false,
+        "required": false
+      },
+      "mail": {
+        "show": false,
+        "required": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "tip": {
+        "show": false
+      },
+      "birthday": {
+        "required": false,
+        "show": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "city": {
+        "required": false,
+        "show": false
+      },
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "room": {
+        "required": false,
+        "show": false
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "comments": {
+        "show": true
+      },
+      "invoice": {
+        "show": true,
+        "required": false
+      }
+    },
+    "allowProductNotes": false,
+    "zones": [],
+    "minAheadDays": 0,
+    "ads": [],
+    "scheduleDeliveryType": "delivery",
+    "order": 0,
+    "minAheadDaysUnit": "days",
+    "allowWaiterCall": false,
+    "config-category": {
+      "hide_category_dialog": false,
+      "hide_category_labels": true
+    },
+    "updatedAt": "2026-07-18T03:06:32.839Z",
+    "desktop": "#ffffff",
+    "info": "#04111d",
+    "allowCurrentTimeSlotsDelivery": true,
+    "preparationTime": 30,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/dfc3a969-3a35-45ba-88f0-630986c314bb.webp",
+    "deliveryDiscount": {
+      "threshold": 0
+    },
+    "accent": "#ffffff",
+    "banner_background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/others/448a0f6c-0222-4ce9-8c87-3a2a55293d07.webp",
+    "id": "2kQRsdPgracn8Db2q1Qh",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "tuesdays": [
+        {
+          "end": "21:30",
+          "start": "07:30"
+        }
+      ],
+      "wednesday": [
+        {
+          "start": "07:30",
+          "end": "21:30"
+        }
+      ],
+      "friday": [
+        {
+          "end": "22:00",
+          "start": "07:30"
+        }
+      ],
+      "blocked_days": [],
+      "active": false,
+      "sunday": [
+        {
+          "start": "07:30",
+          "end": "20:30"
+        }
+      ],
+      "thursday": [
+        {
+          "end": "21:30",
+          "start": "07:30"
+        }
+      ],
+      "monday": [
+        {
+          "end": "21:30",
+          "start": "07:30"
+        }
+      ],
+      "saturdays": [
+        {
+          "start": "07:30",
+          "end": "22:00"
+        }
+      ]
+    },
+    "background_color": "#e3e3e3",
+    "allowBetweenTimeSlotsDelivery": true,
+    "name": "BRUNCH",
+    "blockedDaysForPickup": [],
+    "type": "normal",
+    "lang": {
+      "label": "",
+      "value": "es"
+    },
+    "currency": {
+      "symbol": "$",
+      "label": "COP",
+      "value": "COP"
+    },
+    "shippingTime": 30,
+    "shippingTimeUnit": "minutes",
+    "checkoutOptions": {
+      "invoice": {
+        "show": true,
+        "required": false
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "comments": {
+        "show": true
+      },
+      "allowScheduledPickup": false,
+      "allowScheduledDelivery": false,
+      "room": {
+        "required": false,
+        "show": false
+      },
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "tip": {
+        "show": false
+      },
+      "birthday": {
+        "required": false,
+        "show": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "city": {
+        "required": false,
+        "show": false
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "identification": {
+        "show": false,
+        "required": false
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      }
+    },
+    "notify": true,
+    "allowBetweenTimeSlotsPickup": true,
+    "active": true,
+    "taxes": {
+      "rate": 0,
+      "pricesIncludeTax": true
+    },
+    "schedulePickupType": "delivery",
+    "automaticOrderStatusTransitions": {
+      "accepted": false,
+      "preparation": false
+    },
+    "schedulePickup": {
+      "active": false,
+      "timeZone": "America/Bogota",
+      "blocked_days": []
+    },
+    "preparationTimeUnit": "minutes"
+  },
+  {
+    "_id": "4d1181ef-d153-4942-8d86-cf696890c016",
+    "notify": true,
+    "checkoutOptions": {
+      "full_name": {
+        "required": true,
+        "show": true
+      },
+      "comments": {
+        "show": true
+      },
+      "invoice": {
+        "show": true,
+        "required": false
+      },
+      "room": {
+        "required": false,
+        "show": false
+      },
+      "allowScheduledDelivery": false,
+      "allowScheduledPickup": false,
+      "city": {
+        "show": false,
+        "required": false
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "tip": {
+        "show": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "phone": {
+        "required": true,
+        "show": true
+      },
+      "gender": {
+        "required": false,
+        "show": false
+      },
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "mail": {
+        "show": false,
+        "required": false
+      }
+    },
+    "shippingTimeUnit": "minutes",
+    "schedulePickup": {
+      "blocked_days": [],
+      "timeZone": "America/Bogota",
+      "active": false
+    },
+    "automaticOrderStatusTransitions": {
+      "accepted": false,
+      "preparation": false
+    },
+    "preparationTimeUnit": "minutes",
+    "schedulePickupType": "delivery",
+    "allowBetweenTimeSlotsPickup": true,
+    "taxes": {
+      "pricesIncludeTax": true,
+      "rate": 0
+    },
+    "active": true,
+    "schedule": {
+      "wednesday": [
+        {
+          "start": "07:30",
+          "end": "21:30"
+        }
+      ],
+      "friday": [
+        {
+          "end": "22:00",
+          "start": "07:30"
+        }
+      ],
+      "tuesdays": [
+        {
+          "end": "21:30",
+          "start": "07:30"
+        }
+      ],
+      "timeZone": "America/Bogota",
+      "sunday": [
+        {
+          "start": "07:30",
+          "end": "20:30"
+        }
+      ],
+      "monday": [
+        {
+          "start": "07:30",
+          "end": "21:30"
+        }
+      ],
+      "thursday": [
+        {
+          "end": "21:30",
+          "start": "07:30"
+        }
+      ],
+      "saturdays": [
+        {
+          "start": "07:30",
+          "end": "22:00"
+        }
+      ],
+      "active": false,
+      "blocked_days": []
+    },
+    "banner_background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/others/448a0f6c-0222-4ce9-8c87-3a2a55293d07.webp",
+    "accent": "#ffffff",
+    "id": "2kQRsdPgracn8Db2q1Qh",
+    "background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/dfc3a969-3a35-45ba-88f0-630986c314bb.webp",
+    "deliveryDiscount": {
+      "threshold": 0
+    },
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "shippingTime": 30,
+    "type": "normal",
+    "createdFrom": "admin",
+    "blockedDaysForPickup": [],
+    "currency": {
+      "value": "COP",
+      "symbol": "$",
+      "label": "COP"
+    },
+    "lang": {
+      "value": "es",
+      "label": ""
+    },
+    "allowBetweenTimeSlotsDelivery": true,
+    "name": "LUNCH Y DINNER ",
+    "background_color": "#e3e3e3",
+    "order": 0.5,
+    "minAheadDaysUnit": "days",
+    "allowWaiterCall": false,
+    "scheduleDeliveryType": "delivery",
+    "zones": [],
+    "ads": [],
+    "minAheadDays": 0,
+    "allowCurrentTimeSlotsDelivery": true,
+    "preparationTime": 30,
+    "updatedAt": "2026-07-18T03:04:33.158Z",
+    "info": "#04111d",
+    "desktop": "#ffffff",
+    "config-category": {
+      "hide_category_dialog": false,
+      "hide_category_labels": true
+    },
+    "style": {
+      "product_price_symbol": true,
+      "general_card": {
+        "fill": "#ffffff",
+        "opacity": "30"
+      },
+      "banner": {
+        "display": true
+      },
+      "favorite": {
+        "display": true
+      },
+      "recommended": {
+        "display": true
+      },
+      "notification": {
+        "time": 60,
+        "color": "",
+        "background": "",
+        "position": "bottom"
+      },
+      "instagram": {
+        "display": true
+      },
+      "homeBtn": {
+        "color": "#D9BB73",
+        "border": "#D9BB73",
+        "opacity": 70,
+        "fill": "#707070"
+      },
+      "facebook": {
+        "display": true
+      },
+      "search": {
+        "display": true
+      },
+      "header": {
+        "display": true
+      },
+      "homepage": {
+        "display": true
+      },
+      "product_desc": true,
+      "shadows_card": false,
+      "contact": {
+        "display": true
+      },
+      "dialogbg": {
+        "display": true
+      },
+      "product_titles": true
+    },
+    "fonts": {
+      "product-description": {
+        "color": "#000000",
+        "label": "Outfit",
+        "value": "'Outfit', sans-serif",
+        "bold": false,
+        "size": 12,
+        "shadow": false
+      },
+      "product": {
+        "label": "Playfair Display",
+        "color": "#041b31",
+        "shadow": false,
+        "bold": true,
+        "size": 16,
+        "value": "'Playfair Display', serif"
+      },
+      "category": {
+        "value": "'Playfair Display', serif",
+        "size": 24,
+        "bold": false,
+        "shadow": false,
+        "color": "#041b31",
+        "label": "Playfair Display"
+      },
+      "category-description": {
+        "color": "#000000",
+        "label": "Outfit",
+        "value": "'Outfit', sans-serif",
+        "bold": false,
+        "size": 16,
+        "shadow": false
+      }
+    },
+    "checkoutOptionsOnTable": {
+      "full_name": {
+        "required": true,
+        "show": true
+      },
+      "payLater": false,
+      "comments": {
+        "show": true
+      },
+      "invoice": {
+        "show": true,
+        "required": false
+      },
+      "room": {
+        "show": false,
+        "required": false
+      },
+      "tip": {
+        "show": false
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "city": {
+        "required": false,
+        "show": false
+      },
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "payment_methods": {
+        "show": true
+      }
+    },
+    "scheduleDelivery": {
+      "blocked_days": [],
+      "timeZone": "America/Bogota",
+      "active": false
+    },
+    "updatedFrom": "admin",
+    "maxAheadDaysUnit": "days",
+    "restaurant": "toscana",
+    "allowProductNotes": false,
+    "checkoutOptionsPickup": {
+      "phone": {
+        "required": true,
+        "show": true
+      },
+      "city": {
+        "show": false,
+        "required": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "tip": {
+        "show": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "identification": {
+        "show": false,
+        "required": false
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      },
+      "invoice": {
+        "required": false,
+        "show": true
+      },
+      "comments": {
+        "show": true
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "room": {
+        "required": false,
+        "show": false
+      }
+    },
+    "blockedDaysForOrders": [],
+    "primary": "#04111d",
+    "createdAt": "2026-07-14T14:31:53.464Z",
+    "category_carousel": {
+      "color": "#ffffff",
+      "show": true
+    },
+    "allowCurrentTimeSlotsPickup": true,
+    "maxAheadDays": 30,
+    "hide": false,
+    "createdBy": "asantos@menupp.co",
+    "services": []
+  },
+  {
+    "_id": "726e6ed2-70a2-40e7-b1dc-50ac007d0d76",
+    "maxAheadDays": 30,
+    "allowCurrentTimeSlotsPickup": true,
+    "createdAt": "2026-07-14T14:11:01.560Z",
+    "primary": "#04111d",
+    "category_carousel": {
+      "show": true,
+      "color": "#ffffff"
+    },
+    "services": [],
+    "hide": false,
+    "createdBy": "asantos@menupp.co",
+    "allowProductNotes": false,
+    "checkoutOptionsPickup": {
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "birthday": {
+        "required": false,
+        "show": false
+      },
+      "tip": {
+        "show": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "city": {
+        "required": false,
+        "show": false
+      },
+      "mail": {
+        "show": false,
+        "required": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "gender": {
+        "required": false,
+        "show": false
+      },
+      "invoice": {
+        "show": true,
+        "required": false
+      },
+      "full_name": {
+        "required": true,
+        "show": true
+      },
+      "comments": {
+        "show": true
+      },
+      "room": {
+        "show": false,
+        "required": false
+      }
+    },
+    "blockedDaysForOrders": [],
+    "checkoutOptionsOnTable": {
+      "gender": {
+        "required": false,
+        "show": false
+      },
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "city": {
+        "required": false,
+        "show": false
+      },
+      "birthday": {
+        "required": false,
+        "show": false
+      },
+      "tip": {
+        "show": false
+      },
+      "coupons": {
+        "show": true
+      },
+      "phone": {
+        "required": true,
+        "show": true
+      },
+      "room": {
+        "required": false,
+        "show": false
+      },
+      "full_name": {
+        "required": true,
+        "show": true
+      },
+      "comments": {
+        "show": true
+      },
+      "payLater": false,
+      "invoice": {
+        "show": true,
+        "required": false
+      }
+    },
+    "scheduleDelivery": {
+      "blocked_days": [],
+      "timeZone": "America/Bogota",
+      "active": false
+    },
+    "fonts": {
+      "category": {
+        "size": 24,
+        "bold": false,
+        "value": "'Playfair Display', serif",
+        "shadow": false,
+        "label": "Playfair Display",
+        "color": "#041b31"
+      },
+      "category-description": {
+        "label": "Outfit",
+        "color": "#000000",
+        "size": 16,
+        "bold": false,
+        "value": "'Outfit', sans-serif",
+        "shadow": false
+      },
+      "product-description": {
+        "label": "Outfit",
+        "color": "#000000",
+        "shadow": false,
+        "size": 12,
+        "bold": false,
+        "value": "'Outfit', sans-serif"
+      },
+      "product": {
+        "label": "Playfair Display",
+        "color": "#041b31",
+        "shadow": false,
+        "size": 16,
+        "bold": true,
+        "value": "'Playfair Display', serif"
+      }
+    },
+    "maxAheadDaysUnit": "days",
+    "updatedFrom": "admin",
+    "restaurant": "toscana",
+    "style": {
+      "product_desc": true,
+      "homepage": {
+        "display": true
+      },
+      "shadows_card": false,
+      "contact": {
+        "display": true
+      },
+      "dialogbg": {
+        "display": true
+      },
+      "product_titles": true,
+      "facebook": {
+        "display": true
+      },
+      "search": {
+        "display": true
+      },
+      "header": {
+        "display": true
+      },
+      "favorite": {
+        "display": true
+      },
+      "banner": {
+        "display": true
+      },
+      "recommended": {
+        "display": true
+      },
+      "notification": {
+        "time": 60,
+        "color": "",
+        "position": "bottom",
+        "background": ""
+      },
+      "homeBtn": {
+        "opacity": 70,
+        "border": "#D9BB73",
+        "color": "#D9BB73",
+        "fill": "#707070"
+      },
+      "instagram": {
+        "display": true
+      },
+      "product_price_symbol": true,
+      "general_card": {
+        "opacity": "30",
+        "fill": "#ffffff"
+      }
+    },
+    "config-category": {
+      "hide_category_labels": true,
+      "hide_category_dialog": false
+    },
+    "allowCurrentTimeSlotsDelivery": true,
+    "preparationTime": 30,
+    "info": "#04111d",
+    "desktop": "#ffffff",
+    "updatedAt": "2026-07-18T03:05:20.747Z",
+    "scheduleDeliveryType": "delivery",
+    "minAheadDays": 0,
+    "ads": [],
+    "zones": [],
+    "allowWaiterCall": false,
+    "minAheadDaysUnit": "days",
+    "order": 0.5,
+    "name": "VINOS",
+    "allowBetweenTimeSlotsDelivery": true,
+    "background_color": "#e3e3e3",
+    "shippingTime": 30,
+    "currency": {
+      "value": "COP",
+      "label": "COP",
+      "symbol": "$"
+    },
+    "lang": {
+      "value": "es",
+      "label": ""
+    },
+    "type": "normal",
+    "createdFrom": "admin",
+    "blockedDaysForPickup": [],
+    "deliveryDiscount": {
+      "threshold": 0
+    },
+    "background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/dfc3a969-3a35-45ba-88f0-630986c314bb.webp",
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "schedule": {
+      "wednesday": [
+        {
+          "start": "07:30",
+          "end": "21:30"
+        }
+      ],
+      "friday": [
+        {
+          "start": "07:30",
+          "end": "22:00"
+        }
+      ],
+      "tuesdays": [
+        {
+          "start": "07:30",
+          "end": "21:30"
+        }
+      ],
+      "timeZone": "America/Bogota",
+      "sunday": [
+        {
+          "end": "20:30",
+          "start": "07:30"
+        }
+      ],
+      "monday": [
+        {
+          "start": "07:30",
+          "end": "21:30"
+        }
+      ],
+      "thursday": [
+        {
+          "end": "21:30",
+          "start": "07:30"
+        }
+      ],
+      "saturdays": [
+        {
+          "end": "22:00",
+          "start": "07:30"
+        }
+      ],
+      "active": false,
+      "blocked_days": []
+    },
+    "id": "2kQRsdPgracn8Db2q1Qh",
+    "accent": "#ffffff",
+    "banner_background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/others/448a0f6c-0222-4ce9-8c87-3a2a55293d07.webp",
+    "taxes": {
+      "pricesIncludeTax": true,
+      "rate": 0
+    },
+    "active": true,
+    "allowBetweenTimeSlotsPickup": true,
+    "preparationTimeUnit": "minutes",
+    "schedulePickup": {
+      "active": false,
+      "timeZone": "America/Bogota",
+      "blocked_days": []
+    },
+    "automaticOrderStatusTransitions": {
+      "preparation": false,
+      "accepted": false
+    },
+    "schedulePickupType": "delivery",
+    "checkoutOptions": {
+      "allowScheduledPickup": false,
+      "allowScheduledDelivery": false,
+      "room": {
+        "show": false,
+        "required": false
+      },
+      "invoice": {
+        "show": true,
+        "required": false
+      },
+      "comments": {
+        "show": true
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "mail": {
+        "show": false,
+        "required": false
+      },
+      "payment_methods": {
+        "show": true
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      },
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "phone": {
+        "required": true,
+        "show": true
+      },
+      "coupons": {
+        "show": true
+      },
+      "tip": {
+        "show": false
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "city": {
+        "required": false,
+        "show": false
+      }
+    },
+    "shippingTimeUnit": "minutes",
+    "notify": true
+  },
+  {
+    "_id": "98406303-7dd6-4415-a4e9-71f5a80aa316",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "banner_background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/others/448a0f6c-0222-4ce9-8c87-3a2a55293d07.webp",
+    "accent": "",
+    "background_url": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/dfc3a969-3a35-45ba-88f0-630986c314bb.webp",
+    "updatedBy": "lsierra@menupp.co",
+    "shippingTime": 20,
+    "lang": {
+      "value": "es",
+      "label": ""
+    },
+    "currency": {
+      "value": "COP",
+      "symbol": "$",
+      "label": "COP"
+    },
+    "blockedDaysForPickup": [],
+    "type": {
+      "value": "delivery",
+      "label": "Recibir pedidos"
+    },
+    "name": "DOMICILIO",
+    "allowBetweenTimeSlotsDelivery": true,
+    "background_color": "#e3e3e3",
+    "notify": true,
+    "deliveries": [
+      "1vr1yK8rCvD7eaiZXHDj"
+    ],
+    "checkoutOptions": {
+      "invoice": {
+        "required": false,
+        "show": true
+      },
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "comments": {
+        "show": true
+      },
+      "coupons": {
+        "show": true
+      },
+      "tip": {
+        "show": false
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "allowScheduledPickup": false,
+      "allowScheduledDelivery": false,
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      }
+    },
+    "shippingTimeUnit": "minutes",
+    "preparationTimeUnit": "minutes",
+    "schedulePickup": {
+      "timeZone": "America/Bogota",
+      "wednesday": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "friday": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "tuesdays": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "blocked_days": [],
+      "sunday": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "thursday": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "monday": [
+        {
+          "end": "18:00",
+          "start": "12:00"
+        }
+      ],
+      "saturdays": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "active": false
+    },
+    "active": false,
+    "allowBetweenTimeSlotsPickup": true,
+    "style": {
+      "shadows_card": false,
+      "homepage": {
+        "display": true
+      },
+      "product_desc": true,
+      "dialogbg": {
+        "display": true
+      },
+      "contact": {
+        "display": true
+      },
+      "product_titles": true,
+      "facebook": {
+        "display": true
+      },
+      "search": {
+        "display": true
+      },
+      "header": {
+        "display": true
+      },
+      "recommended": {
+        "display": true
+      },
+      "banner": {
+        "display": true
+      },
+      "homeBtn": {
+        "fill": "#707070",
+        "border": "#D9BB73",
+        "opacity": 70,
+        "color": "#D9BB73"
+      },
+      "instagram": {
+        "display": true
+      },
+      "notification": {
+        "time": 60,
+        "color": "",
+        "position": "bottom",
+        "background": ""
+      },
+      "product_price_symbol": true,
+      "general_card": {
+        "fill": "#ffffff",
+        "opacity": "30"
+      }
+    },
+    "scheduleDelivery": {
+      "thursday": [
+        {
+          "end": "18:00",
+          "start": "12:00"
+        }
+      ],
+      "monday": [
+        {
+          "end": "18:00",
+          "start": "12:00"
+        }
+      ],
+      "sunday": [
+        {
+          "end": "18:00",
+          "start": "12:00"
+        }
+      ],
+      "saturdays": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "active": false,
+      "blocked_days": [],
+      "wednesday": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "friday": [
+        {
+          "end": "18:00",
+          "start": "12:00"
+        }
+      ],
+      "tuesdays": [
+        {
+          "start": "12:00",
+          "end": "18:00"
+        }
+      ],
+      "timeZone": "America/Bogota"
+    },
+    "checkoutOptionsOnTable": {
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "identification": {
+        "required": false,
+        "show": false
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      },
+      "invoice": {
+        "required": false,
+        "show": true
+      },
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "comments": {
+        "show": true
+      },
+      "coupons": {
+        "show": true
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "tip": {
+        "show": false
+      }
+    },
+    "fonts": {
+      "category": {
+        "label": "Playfair Display",
+        "color": "#11572E",
+        "bold": false,
+        "size": 24,
+        "value": "'Playfair Display', serif",
+        "shadow": false
+      },
+      "category-description": {
+        "color": "#bd9b4b",
+        "label": "Lato",
+        "value": "'Lato', sans-serif",
+        "bold": false,
+        "shadow": false
+      },
+      "product-description": {
+        "shadow": false,
+        "value": "'Poiret One', cursive",
+        "bold": false,
+        "size": 16,
+        "color": "#11572E",
+        "label": "Poiret One"
+      },
+      "product": {
+        "label": "Playfair Display",
+        "color": "#bd9b4b",
+        "shadow": false,
+        "size": 18,
+        "bold": false,
+        "value": "'Playfair Display', serif"
+      }
+    },
+    "maxAheadDaysUnit": "days",
+    "updatedFrom": "admin",
+    "allowProductNotes": false,
+    "checkoutOptionsPickup": {
+      "identification": {
+        "show": false,
+        "required": false
+      },
+      "gender": {
+        "show": false,
+        "required": false
+      },
+      "mail": {
+        "required": false,
+        "show": false
+      },
+      "full_name": {
+        "show": true,
+        "required": true
+      },
+      "birthday": {
+        "show": false,
+        "required": false
+      },
+      "tip": {
+        "show": false
+      },
+      "comments": {
+        "show": true
+      },
+      "coupons": {
+        "show": true
+      },
+      "phone": {
+        "show": true,
+        "required": true
+      },
+      "invoice": {
+        "required": false,
+        "show": true
+      }
+    },
+    "blockedDaysForOrders": [],
+    "maxAheadDays": 30,
+    "allowCurrentTimeSlotsPickup": true,
+    "category_carousel": {
+      "show": true,
+      "color": "#ffffff"
+    },
+    "primary": "",
+    "services": [
+      "delivery",
+      "takeaway"
+    ],
+    "hide": false,
+    "allowWaiterCall": false,
+    "minAheadDaysUnit": "days",
+    "order": 1,
+    "banner_background_color": "",
+    "ads": [],
+    "minAheadDays": 0,
+    "zones": [],
+    "allowCurrentTimeSlotsDelivery": true,
+    "preparationTime": 20,
+    "desktop": "",
+    "info": "",
+    "updatedAt": "2026-07-14T15:58:34.592Z",
+    "config-category": {
+      "hide_category_labels": true,
+      "hide_category_dialog": false
+    }
+  }
+]

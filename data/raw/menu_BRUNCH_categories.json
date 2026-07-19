@@ -1,0 +1,1721 @@
+[
+  {
+    "_id": "3SuC0dDELsgQO36t5nox",
+    "hide_title": false,
+    "type": "hybrid",
+    "order": -2,
+    "centered": true,
+    "design": {
+      "title_font": {
+        "label": "Playfair Display",
+        "shadow": false,
+        "bold": false,
+        "value": "'Playfair Display', serif",
+        "color": "#041b31",
+        "size": 22
+      },
+      "products": {}
+    },
+    "hierarchy": "root",
+    "openBannerInNewTab": false,
+    "name": "DESAYUNOS ESPECIALES",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:39:18.908Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "styles": "col-6",
+    "disabled": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": false,
+    "createdAt": "2026-07-05T16:11:32.409Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none"
+  },
+  {
+    "_id": "TuwhF3URRaX8Vs87rjSd",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "with_ellipsis": false,
+    "updatedBy": "lsierra@menupp.co",
+    "createdAt": "2026-07-06T04:10:23.818Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "name": "RISOTTOS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:41:26.607Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "createdFrom": "admin",
+    "styles": "col-6",
+    "type": "hybrid",
+    "hide_title": false,
+    "centered": true,
+    "order": -2,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "1Dv5MikuDSPHAYPHS8gt",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "Dm1ZNt2FniGfld7sA91R",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "createdFrom": "admin",
+    "name": "PANINI ITALIANO",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:41:54.004Z",
+    "styles": "col-6",
+    "hierarchy": "M0QDFdxER9dApC2i1Z8Z",
+    "design": {
+      "products": {}
+    },
+    "order": -1,
+    "centered": true,
+    "hide_title": false,
+    "type": "hybrid",
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "Acompañados con papas Chips .",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "createdAt": "2026-07-05T16:45:25.310Z",
+    "createdBy": "admon1.rokatoscana@gmail.com"
+  },
+  {
+    "_id": "WLQHu6UbBjIlL94QODO1",
+    "createdAt": "2026-07-05T16:32:58.548Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "hierarchy": "1Dv5MikuDSPHAYPHS8gt",
+    "centered": true,
+    "order": -1,
+    "design": {
+      "products": {}
+    },
+    "type": "hybrid",
+    "hide_title": false,
+    "styles": "col-6",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "createdFrom": "admin",
+    "name": "PASTA TRADIZIONALE",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:41:31.153Z"
+  },
+  {
+    "_id": "K5sCHoSszBpVAViTrMiq",
+    "styles": "col-6",
+    "updatedAt": "2026-07-10T20:41:36.216Z",
+    "scroll_direction": "vertical",
+    "name": "PASTA ESPECIALI",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin",
+    "openBannerInNewTab": false,
+    "type": "hybrid",
+    "hide_title": false,
+    "centered": true,
+    "order": -0.5,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "1Dv5MikuDSPHAYPHS8gt",
+    "description": "Pasta fettuccine acompañada de pan artesanal de masa madre.",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "createdAt": "2026-07-05T16:34:57.784Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false
+  },
+  {
+    "_id": "ziRyc0q206yDZDKxWZXQ",
+    "with_ellipsis": true,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "createdAt": "2026-07-05T16:13:38.439Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "",
+    "order": -0.5,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "hide_title": false,
+    "type": "hybrid",
+    "hierarchy": "root",
+    "openBannerInNewTab": false,
+    "updatedAt": "2026-07-06T17:40:31.055Z",
+    "name": "DESAYUNOS CLÁSICOS",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "createdFrom": "admin",
+    "styles": "col-6"
+  },
+  {
+    "_id": "LkE8sgn8MkOkEf1QCFGt",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "id": "LkE8sgn8MkOkEf1QCFGt",
+    "hide_title": false,
+    "type": "hybrid",
+    "order": 0,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "hierarchy": "Hf2GWAUwlrLL8DDGhKzS",
+    "styles": "col-6",
+    "scroll_direction": "vertical",
+    "name": "GALLETERÍA",
+    "updatedAt": "2026-07-10T21:18:10.467Z",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    }
+  },
+  {
+    "_id": "RFV536ilulj30CsVtpIm",
+    "styles": "col-12",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "updatedAt": "2026-07-10T21:20:32.290Z",
+    "name": "VINOS POR COPA",
+    "scroll_direction": "vertical",
+    "openBannerInNewTab": false,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "centered": true,
+    "order": 0,
+    "design": {
+      "products": {}
+    },
+    "type": "list",
+    "hide_title": false,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true
+  },
+  {
+    "_id": "RMKG3sVjZQ0VBvNBr9mS",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "Base de pan de hogaza.",
+    "hide_product_titles": false,
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "sunday": [
+        {
+          "end": "23:59",
+          "start": "00:00"
+        }
+      ],
+      "timeZone": "America/Bogota"
+    },
+    "updatedAt": "2026-07-10T20:37:45.793Z",
+    "scroll_direction": "vertical",
+    "name": "TOSTADAS",
+    "styles": "col-6",
+    "hierarchy": "3SuC0dDELsgQO36t5nox",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 0,
+    "id": "RMKG3sVjZQ0VBvNBr9mS",
+    "hide_title": false,
+    "type": "hybrid",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "ctX67UOJb4Nr4diJbA3z",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "updatedAt": "2026-07-10T21:26:35.153Z",
+    "scroll_direction": "vertical",
+    "name": "LIMONATA",
+    "styles": "col-12",
+    "hierarchy": "oNvoqEZQPwGGnVJeNZHx",
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 0,
+    "id": "ctX67UOJb4Nr4diJbA3z",
+    "hide_title": false,
+    "type": "list",
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true
+  },
+  {
+    "_id": "eGijHkKQu0jXlUMZ50gX",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "Acompañados con ensalada&nbsp; y papas de la casa.",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "updatedAt": "2026-07-10T20:42:05.289Z",
+    "scroll_direction": "vertical",
+    "name": "CORTES TRADICIONALES ",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "styles": "col-6",
+    "design": {
+      "products": {}
+    },
+    "order": 0,
+    "centered": true,
+    "hide_title": false,
+    "type": "hybrid",
+    "hierarchy": "mfnvMVGIBggloQRkHcF6",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "kbvkXfhaLhGjh1cQAVxH",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "createdAt": "2026-07-04T19:40:51.540Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "name": "D'AUTORE",
+    "updatedAt": "2026-07-10T21:26:17.761Z",
+    "scroll_direction": "vertical",
+    "styles": "col-12",
+    "hierarchy": "JlatCbARFaeg9RSfC4QM",
+    "hide_title": false,
+    "type": "list",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 0,
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "woQ9ngT4TOIEomwCwNGS",
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "hide_product_titles": false,
+    "bannerAction": "none",
+    "description": "<div style=\"text-align: center;\"><br></div><div style=\"text-align: center;\"><br></div>",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 0,
+    "hide_title": true,
+    "id": "woQ9ngT4TOIEomwCwNGS",
+    "type": "list",
+    "hierarchy": "ziRyc0q206yDZDKxWZXQ",
+    "styles": "col-12",
+    "name": "DESAYUNO TOSCANA ",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-06T17:42:40.180Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "image_url": ""
+  },
+  {
+    "_id": "5qzaC7PMj0uUpqY1KBBi",
+    "openBannerInNewTab": false,
+    "hierarchy": "1Dv5MikuDSPHAYPHS8gt",
+    "centered": true,
+    "order": 0.25,
+    "design": {
+      "products": {}
+    },
+    "type": "hybrid",
+    "hide_title": false,
+    "styles": "col-6",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin",
+    "name": "PASTA ARTIGIANALE",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:41:40.545Z",
+    "createdAt": "2026-07-05T16:38:09.518Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": false,
+    "updatedBy": "lsierra@menupp.co",
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "Pasta artesanal hecha en casa acompañada con pan de masa madre.",
+    "updatedFrom": "admin"
+  },
+  {
+    "_id": "RAa5FiKxYfUhUjYytVlM",
+    "createdAt": "2026-07-05T16:15:09.159Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": true,
+    "with_ellipsis": false,
+    "updatedBy": "asantos@menupp.co",
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "hide_title": false,
+    "type": "hybrid",
+    "centered": true,
+    "order": 0.5,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "root",
+    "styles": "col-6",
+    "name": "ENTRADAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-14T14:12:06.086Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    }
+  },
+  {
+    "_id": "2NruVfF4PoQJZecOI2SR",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "hide_title": false,
+    "type": "list",
+    "design": {
+      "products": {}
+    },
+    "order": 1,
+    "centered": true,
+    "styles": "col-12",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "name": "DELLA CASA",
+    "updatedAt": "2026-07-10T21:20:35.425Z",
+    "scroll_direction": "vertical"
+  },
+  {
+    "_id": "9Qx3pnQdoCucYJkXAyfP",
+    "openBannerInNewTab": false,
+    "id": "9Qx3pnQdoCucYJkXAyfP",
+    "type": "hybrid",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 1,
+    "centered": true,
+    "hierarchy": "ziRyc0q206yDZDKxWZXQ",
+    "styles": "col-6",
+    "name": "TRADICIONALES ",
+    "updatedAt": "2026-07-10T20:40:36.122Z",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "disabled": false,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin"
+  },
+  {
+    "_id": "FNwoIwcuTl2zEP3AZuR6",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "Los cortes de la marca CERTIFIED ANGUS BEEF son de la mas alta calidad con excelente marmoleo y sabor. Acompañados con ensalada&nbsp; y papas de la casa.",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "updatedAt": "2026-07-10T20:42:09.594Z",
+    "scroll_direction": "vertical",
+    "name": "CORTES CERTIFIED ANGUS BEEF ",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "styles": "col-6",
+    "centered": true,
+    "order": 1,
+    "design": {
+      "products": {}
+    },
+    "hide_title": false,
+    "type": "hybrid",
+    "hierarchy": "mfnvMVGIBggloQRkHcF6",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "MVUl7PGXBMnuaavH7oV2",
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 1,
+    "id": "MVUl7PGXBMnuaavH7oV2",
+    "hide_title": false,
+    "type": "hybrid",
+    "hierarchy": "Hf2GWAUwlrLL8DDGhKzS",
+    "openBannerInNewTab": false,
+    "name": "TARTALETAS/PIE",
+    "updatedAt": "2026-07-10T21:18:16.178Z",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-6",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "<br>"
+  },
+  {
+    "_id": "SToC5qHsdZTHzjmE2Q9v",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "name": "JUGOS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:26:38.809Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "styles": "col-12",
+    "type": "list",
+    "id": "SToC5qHsdZTHzjmE2Q9v",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 1,
+    "centered": true,
+    "hierarchy": "oNvoqEZQPwGGnVJeNZHx",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "aLvsNc6LPmvVWvpTPCSN",
+    "openBannerInNewTab": false,
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo",
+    "type": "list",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 1,
+    "centered": true,
+    "styles": "col-12",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin",
+    "updatedAt": "2026-07-18T01:23:11.389Z",
+    "scroll_direction": "vertical",
+    "name": "CAPUCCINO/LATTE",
+    "createdAt": "2026-07-04T20:06:42.597Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin"
+  },
+  {
+    "_id": "jjqoEXKXUms5S5dTEQ64",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "name": "SPRITZ DELLA CASA",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:26:20.838Z",
+    "styles": "col-12",
+    "hierarchy": "JlatCbARFaeg9RSfC4QM",
+    "hide_title": false,
+    "type": "list",
+    "design": {
+      "products": {}
+    },
+    "order": 1,
+    "centered": true,
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "khYijxRprwxYAfGfUZix",
+    "disabled": false,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "type": "hybrid",
+    "hide_title": false,
+    "id": "khYijxRprwxYAfGfUZix",
+    "centered": true,
+    "order": 1,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "3SuC0dDELsgQO36t5nox",
+    "styles": "col-6",
+    "updatedAt": "2026-07-10T20:40:17.233Z",
+    "scroll_direction": "vertical",
+    "name": "PANINI",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    }
+  },
+  {
+    "_id": "iiqcWRAJ4wIuYCiIl2VU",
+    "styles": "col-6",
+    "name": "SOPAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-14T14:12:07.765Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "openBannerInNewTab": false,
+    "type": "hybrid",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 1.125,
+    "centered": true,
+    "hierarchy": "root",
+    "description": "Acompañados con pan artesanal de masa madre.",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "createdAt": "2026-07-05T16:18:41.705Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": true,
+    "with_ellipsis": false,
+    "updatedBy": "asantos@menupp.co"
+  },
+  {
+    "_id": "i90LEZ9iJLc1VYsy1qrO",
+    "hierarchy": "root",
+    "hide_title": false,
+    "type": "hybrid",
+    "design": {
+      "products": {}
+    },
+    "order": 1.453125,
+    "centered": true,
+    "openBannerInNewTab": false,
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "name": "ENSALADAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-14T14:12:08.775Z",
+    "styles": "col-6",
+    "disabled": true,
+    "with_ellipsis": false,
+    "updatedBy": "asantos@menupp.co",
+    "createdAt": "2026-07-05T16:20:55.111Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none"
+  },
+  {
+    "_id": "1Dv5MikuDSPHAYPHS8gt",
+    "hierarchy": "root",
+    "type": "hybrid",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 1.6328125,
+    "centered": true,
+    "openBannerInNewTab": false,
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin",
+    "updatedAt": "2026-07-10T20:41:20.361Z",
+    "scroll_direction": "vertical",
+    "name": "RISOTTOS & PASTAS",
+    "styles": "col-6",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "createdAt": "2026-07-05T16:24:50.034Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none"
+  },
+  {
+    "_id": "BO904lJmngJkSyq29pL2",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin",
+    "name": "POLLOS & PESCADOS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:34:18.085Z",
+    "styles": "col-6",
+    "hierarchy": "root",
+    "hide_title": false,
+    "type": "hybrid",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 1.80859375,
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "createdAt": "2026-07-05T16:40:41.640Z",
+    "createdBy": "admon1.rokatoscana@gmail.com"
+  },
+  {
+    "_id": "M0QDFdxER9dApC2i1Z8Z",
+    "name": "CACEROLAS & PANINI",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:41:47.362Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-6",
+    "type": "hybrid",
+    "hide_title": false,
+    "order": 1.900390625,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "root",
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "createdAt": "2026-07-05T16:42:56.750Z",
+    "createdBy": "admon1.rokatoscana@gmail.com"
+  },
+  {
+    "_id": "mfnvMVGIBggloQRkHcF6",
+    "createdAt": "2026-07-05T16:47:35.984Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "type": "hybrid",
+    "hide_title": false,
+    "centered": true,
+    "order": 1.94781494140625,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "root",
+    "styles": "col-6",
+    "updatedAt": "2026-07-10T20:42:01.734Z",
+    "scroll_direction": "vertical",
+    "name": "PARRILLA",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin"
+  },
+  {
+    "_id": "TD6OgqEuCQGAL7xZMqMB",
+    "createdAt": "2026-07-05T17:00:50.929Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "Para nuestras masas utilizamos Harina Italiana y fermentamos durante 24 horas para asegurarnos de brindar una pizza de alta calidad y con inigualable sabor.",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "hierarchy": "root",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 1.973907470703125,
+    "hide_title": false,
+    "type": "hybrid",
+    "styles": "col-6",
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "name": "PIZZAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:17:57.564Z"
+  },
+  {
+    "_id": "6B4u7pQ26STmaBmypkcg",
+    "openBannerInNewTab": false,
+    "type": "list",
+    "hide_title": false,
+    "order": 2,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "styles": "col-12",
+    "name": "GENEROSOS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-06T17:45:14.636Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "createdAt": "2026-07-03T22:37:24.516Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": true,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin"
+  },
+  {
+    "_id": "bPE2YzFU1gWuw5UkdBgJ",
+    "centered": true,
+    "order": 2,
+    "design": {
+      "products": {}
+    },
+    "type": "hybrid",
+    "hide_title": false,
+    "id": "bPE2YzFU1gWuw5UkdBgJ",
+    "hierarchy": "Hf2GWAUwlrLL8DDGhKzS",
+    "openBannerInNewTab": false,
+    "scroll_direction": "vertical",
+    "name": "PASTELES",
+    "updatedAt": "2026-07-10T21:18:21.163Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "styles": "col-6",
+    "with_ellipsis": false,
+    "updatedBy": "lsierra@menupp.co",
+    "disabled": true,
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": ""
+  },
+  {
+    "_id": "pthTTlp9Ly1MELRURuEa",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": false,
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "createdAt": "2026-07-04T20:04:35.618Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "name": "ESPRESSO",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-18T01:23:12.351Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-12",
+    "type": "list",
+    "hide_title": false,
+    "order": 2,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "qsa1YYj5D3D59skto0fb",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "CÓCTELES SIN ALCOHOL",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 2,
+    "type": "list",
+    "hide_title": false,
+    "hierarchy": "JlatCbARFaeg9RSfC4QM",
+    "styles": "col-12",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:26:24.393Z",
+    "name": "MOCKTAIL",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    }
+  },
+  {
+    "_id": "vYp1PgSuGNEw0sYqE2SM",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "hierarchy": "oNvoqEZQPwGGnVJeNZHx",
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 2,
+    "type": "list",
+    "id": "vYp1PgSuGNEw0sYqE2SM",
+    "hide_title": false,
+    "styles": "col-12",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:26:42.352Z",
+    "name": "SODAS ITALIANAS"
+  },
+  {
+    "_id": "vfDWMhNR2ovddCdpkBZe",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "updatedAt": "2026-07-10T20:40:57.868Z",
+    "scroll_direction": "vertical",
+    "name": "ESPECIALES DE LA CASA",
+    "styles": "col-6",
+    "hierarchy": "3SuC0dDELsgQO36t5nox",
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 2,
+    "id": "vfDWMhNR2ovddCdpkBZe",
+    "hide_title": false,
+    "type": "hybrid",
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "<br>",
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false
+  },
+  {
+    "_id": "yt1KjNP8YdY3aFCnrLgP",
+    "disabled": false,
+    "with_ellipsis": false,
+    "updatedBy": "lsierra@menupp.co",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "hide_title": false,
+    "type": "hybrid",
+    "id": "yt1KjNP8YdY3aFCnrLgP",
+    "order": 2,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "hierarchy": "ziRyc0q206yDZDKxWZXQ",
+    "openBannerInNewTab": false,
+    "name": "FAVORITOS ",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T20:40:42.220Z",
+    "image_url": "",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-6"
+  },
+  {
+    "_id": "5yZoE1fUZgQTIY4w8f2b",
+    "styles": "col-12",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin",
+    "updatedAt": "2026-07-10T21:18:02.179Z",
+    "scroll_direction": "vertical",
+    "name": "MENÚ BAMBINI",
+    "openBannerInNewTab": false,
+    "hierarchy": "root",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 2.5,
+    "type": "list",
+    "hide_title": false,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "createdAt": "2026-07-05T00:55:02.823Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true
+  },
+  {
+    "_id": "Hf2GWAUwlrLL8DDGhKzS",
+    "name": "PASTICCERIA",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:18:06.496Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "createdFrom": "admin",
+    "styles": "col-6",
+    "hide_title": false,
+    "type": "hybrid",
+    "design": {
+      "products": {}
+    },
+    "order": 2.75,
+    "centered": true,
+    "hierarchy": "root",
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "description": "Información sobre alérgenos: si tienes alguna alergia alimentaria, restricción y/o intolerancia, te pedimos informarlo.",
+    "bannerAction": "none",
+    "disabled": true,
+    "with_ellipsis": false,
+    "updatedBy": "lsierra@menupp.co",
+    "createdAt": "2026-07-05T17:07:26.520Z",
+    "createdBy": "admon1.rokatoscana@gmail.com"
+  },
+  {
+    "_id": "4gA2kaqDHLq3zGmg93kU",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "updatedAt": "2026-07-10T21:26:45.810Z",
+    "name": "CERVEZAS & OTROS ",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "styles": "col-12",
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 3,
+    "type": "list",
+    "id": "4gA2kaqDHLq3zGmg93kU",
+    "hide_title": false,
+    "hierarchy": "oNvoqEZQPwGGnVJeNZHx",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "8YYD4gQCMYCkzsu9DGZX",
+    "openBannerInNewTab": false,
+    "type": "list",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 3,
+    "hierarchy": "JlatCbARFaeg9RSfC4QM",
+    "styles": "col-12",
+    "updatedAt": "2026-07-10T21:26:29.488Z",
+    "name": "CLASSICI",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin"
+  },
+  {
+    "_id": "VEyozh8C7nlDFNaHSflZ",
+    "openBannerInNewTab": false,
+    "order": 3,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "type": "list",
+    "hide_title": false,
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo",
+    "styles": "col-12",
+    "scroll_direction": "vertical",
+    "name": "PREPARACIONES CON CAFÉ FRÍAS",
+    "updatedAt": "2026-07-18T01:23:13.296Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "createdAt": "2026-07-04T20:11:14.606Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin"
+  },
+  {
+    "_id": "qKZRMLwiP9jwBUCPucYM",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "order": 3,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "type": "list",
+    "hide_title": false,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "styles": "col-12",
+    "name": "FRIZZANTE",
+    "updatedAt": "2026-07-10T21:20:41.270Z",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    }
+  },
+  {
+    "_id": "vBjBcQt9xWGyUW0i4RsS",
+    "description": "Omelette al mejor estilo francés.",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "disabled": false,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "styles": "col-6",
+    "name": "FRENCH OMELETTE",
+    "updatedAt": "2026-07-10T20:40:26.873Z",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "openBannerInNewTab": false,
+    "id": "vBjBcQt9xWGyUW0i4RsS",
+    "type": "hybrid",
+    "hide_title": false,
+    "order": 3,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "hierarchy": "3SuC0dDELsgQO36t5nox"
+  },
+  {
+    "_id": "oXuIvkvbwfsF3i6uCZwF",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "VIENNOISERIE",
+    "hierarchy": "root",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 3.19873046875,
+    "hide_title": false,
+    "type": "hybrid",
+    "openBannerInNewTab": false,
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "name": "PANETTERIA",
+    "updatedAt": "2026-07-10T21:20:24.637Z",
+    "scroll_direction": "vertical",
+    "styles": "col-6"
+  },
+  {
+    "_id": "fI6yHWzb4FjTaksMXDw4",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true,
+    "createdAt": "2026-07-05T17:10:48.781Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "",
+    "hierarchy": "root",
+    "design": {
+      "products": {}
+    },
+    "order": 3.6474609375,
+    "centered": true,
+    "type": "list",
+    "hide_title": false,
+    "openBannerInNewTab": false,
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "name": "VINOS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:20:29.146Z",
+    "styles": "col-12"
+  },
+  {
+    "_id": "axnDPjsEGtRrSfyAZbVw",
+    "createdAt": "2026-07-05T17:22:54.593Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "type": "list",
+    "hide_title": false,
+    "order": 4,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo",
+    "styles": "col-12",
+    "updatedAt": "2026-07-18T01:23:14.690Z",
+    "scroll_direction": "vertical",
+    "name": "BEBIDAS CALIENTES",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "createdFrom": "admin"
+  },
+  {
+    "_id": "xGxcjY5a2nBwMHVnfZgh",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "type": "list",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 4,
+    "centered": true,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "openBannerInNewTab": false,
+    "updatedAt": "2026-07-10T21:25:52.527Z",
+    "name": "BLANCO",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "styles": "col-12"
+  },
+  {
+    "_id": "0Xnj0mLdRlxHQW2IXEFE",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "scroll_direction": "vertical",
+    "name": "ROSÉ",
+    "updatedAt": "2026-07-10T21:25:56.890Z",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-12",
+    "hide_title": false,
+    "type": "list",
+    "order": 5,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "P5V2BRpVzwqjRrlGZwD8",
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "styles": "col-12",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-18T01:39:55.577Z",
+    "name": "BEBIDAS FRÍAS",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "openBannerInNewTab": false,
+    "order": 5,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "type": "list",
+    "hide_title": false,
+    "id": "P5V2BRpVzwqjRrlGZwD8",
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo"
+  },
+  {
+    "_id": "1skNDl9aXcrnZGkaxqx6",
+    "styles": "col-12",
+    "createdFrom": "admin",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "scroll_direction": "vertical",
+    "name": "SMOOTHIES & JUGOS ",
+    "updatedAt": "2026-07-18T01:41:55.891Z",
+    "openBannerInNewTab": false,
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo",
+    "type": "list",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "order": 6,
+    "centered": true,
+    "description": "",
+    "bannerAction": "none",
+    "updatedFrom": "admin",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "createdAt": "2026-07-18T01:41:35.613Z",
+    "disabled": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": false
+  },
+  {
+    "_id": "3dY1mQZwJMItEccXizOs",
+    "updatedAt": "2026-07-10T21:26:00.777Z",
+    "name": "TINTO",
+    "scroll_direction": "vertical",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-12",
+    "type": "list",
+    "hide_title": false,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 6,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false
+  },
+  {
+    "_id": "JlatCbARFaeg9RSfC4QM",
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "createdAt": "2026-07-05T15:48:19Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": true,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": true,
+    "styles": "col-12",
+    "name": "IL BAR",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-05T15:49:36.763Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "openBannerInNewTab": false,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 6.2197265625,
+    "type": "list",
+    "hide_title": false,
+    "hierarchy": "root"
+  },
+  {
+    "_id": "q350tWs7BiqCpmJhRF26",
+    "updatedFrom": "admin",
+    "bannerAction": "none",
+    "description": "",
+    "with_ellipsis": true,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false,
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "createdAt": "2026-07-18T02:58:48.858Z",
+    "scroll_direction": "vertical",
+    "name": "PREPARACIONES ESPECIALES",
+    "updatedAt": "2026-07-18T01:53:08.110Z",
+    "createdFrom": "admin",
+    "schedule": {
+      "blocked_days": [],
+      "active": false,
+      "timeZone": "America/Bogota"
+    },
+    "styles": "col-12",
+    "centered": true,
+    "order": 7,
+    "design": {
+      "products": {}
+    },
+    "hide_title": false,
+    "type": "list",
+    "hierarchy": "iMW8nkCzz6BcNEWJHfSo",
+    "openBannerInNewTab": false
+  },
+  {
+    "_id": "sekd7Xu4HPOfL79Zwd8m",
+    "styles": "col-12",
+    "createdFrom": "admin",
+    "schedule": {
+      "active": false,
+      "blocked_days": [],
+      "timeZone": "America/Bogota"
+    },
+    "name": "POSTRES",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:26:04.321Z",
+    "openBannerInNewTab": false,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 7,
+    "type": "list",
+    "hide_title": false,
+    "bannerAction": "none",
+    "description": "Vinos de cosecha tardia",
+    "updatedFrom": "admin",
+    "createdAt": "2026-07-03T23:24:43.942Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "disabled": true
+  },
+  {
+    "_id": "oNvoqEZQPwGGnVJeNZHx",
+    "createdAt": "2026-07-05T17:13:06.219Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": true,
+    "disabled": true,
+    "bannerAction": "none",
+    "description": "",
+    "updatedFrom": "admin",
+    "openBannerInNewTab": false,
+    "design": {
+      "products": {}
+    },
+    "centered": true,
+    "order": 7.081573486328125,
+    "hide_title": false,
+    "type": "list",
+    "hierarchy": "root",
+    "styles": "col-12",
+    "name": "BEBIDAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-05T17:13:53.757Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "createdFrom": "admin"
+  },
+  {
+    "_id": "RbD1bIr6fPhQTLJEcxrM",
+    "createdFrom": "admin",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "name": "MEDIAS BOTELLAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-10T21:26:07.404Z",
+    "styles": "col-12",
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "type": "list",
+    "hide_title": false,
+    "order": 8,
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "openBannerInNewTab": false,
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none",
+    "disabled": true,
+    "updatedBy": "lsierra@menupp.co",
+    "with_ellipsis": false,
+    "createdAt": "2026-07-03T23:28:52.436Z",
+    "createdBy": "admon1.rokatoscana@gmail.com"
+  },
+  {
+    "_id": "fDryGjEiBt3zhl0Ny7WC",
+    "hide_title": false,
+    "type": "list",
+    "design": {
+      "products": {}
+    },
+    "order": 9,
+    "centered": true,
+    "hierarchy": "fI6yHWzb4FjTaksMXDw4",
+    "openBannerInNewTab": false,
+    "scroll_direction": "vertical",
+    "name": "SANGRÍAS ",
+    "updatedAt": "2026-07-10T21:26:10.514Z",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "active": false,
+      "blocked_days": []
+    },
+    "styles": "col-12",
+    "disabled": true,
+    "with_ellipsis": false,
+    "updatedBy": "lsierra@menupp.co",
+    "updatedFrom": "admin",
+    "description": "",
+    "bannerAction": "none"
+  },
+  {
+    "_id": "iMW8nkCzz6BcNEWJHfSo",
+    "styles": "col-12",
+    "schedule": {
+      "timeZone": "America/Bogota",
+      "blocked_days": [],
+      "active": false
+    },
+    "createdFrom": "admin",
+    "name": "BEBIDAS",
+    "scroll_direction": "vertical",
+    "updatedAt": "2026-07-18T01:33:26.856Z",
+    "openBannerInNewTab": false,
+    "hierarchy": "root",
+    "centered": true,
+    "design": {
+      "products": {}
+    },
+    "order": 10,
+    "type": "list",
+    "hide_title": false,
+    "bannerAction": "none",
+    "description": "CAFFÉ PANISSE",
+    "updatedFrom": "admin",
+    "createdAt": "2026-07-15T18:55:54.816Z",
+    "createdBy": "admon1.rokatoscana@gmail.com",
+    "with_ellipsis": false,
+    "updatedBy": "admon1.rokatoscana@gmail.com",
+    "disabled": false
+  }
+]

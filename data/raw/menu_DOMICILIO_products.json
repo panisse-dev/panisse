@@ -1,0 +1,159 @@
+[
+  {
+    "_id": "rLxmqXdMWcW7KzzIiUMs",
+    "description": "",
+    "createdDate": {
+      "seconds": 1736449844,
+      "nanoseconds": 365000000
+    },
+    "disabled": false,
+    "recommended": false,
+    "product_name": "MARGHERITA",
+    "options": [],
+    "price": {
+      "price": "39000",
+      "label": ""
+    },
+    "updated": {
+      "by": "rokabytoscana@gmail.com",
+      "at": "2025-01-10T19:55:59.830Z"
+    },
+    "details": {},
+    "new": false,
+    "order": 0,
+    "id": "rLxmqXdMWcW7KzzIiUMs",
+    "restaurant": "toscana",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS"
+  },
+  {
+    "_id": "CrTgQVIVe9qdeDhjRKuV",
+    "price": 26900,
+    "order": 1,
+    "new": false,
+    "disabled": false,
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "HAWAIANA ",
+    "restaurant": "toscana",
+    "description": "",
+    "createdDate": "2025-01-10T19:47:05.072Z"
+  },
+  {
+    "_id": "yjvGU7jvv38pCsCGdQf3",
+    "new": false,
+    "disabled": false,
+    "order": 2,
+    "restaurant": "toscana",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "TOSCANA MADURADA",
+    "price": 30900,
+    "createdDate": "2025-01-10T19:47:19.206Z",
+    "description": ""
+  },
+  {
+    "_id": "4zP1EpUC75tjPfLFo46y",
+    "description": "",
+    "createdDate": "2025-01-10T19:47:37.097Z",
+    "image": "https://dvzwo3mu4ucsq.cloudfront.net/images/restaurants/toscana/20de90e4-060a-4aea-b160-c8eaff9914fc.webp",
+    "price": 34900,
+    "restaurant": "toscana",
+    "recommended": false,
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "product_name": "PESTO & STRACCIATELLA",
+    "new": false,
+    "disabled": false,
+    "order": 3
+  },
+  {
+    "_id": "PcgTPfoA21nuWjuvYmCS",
+    "createdDate": "2025-01-10T19:47:50.607Z",
+    "description": "",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "QUATTRO FORMAGGI",
+    "restaurant": "toscana",
+    "order": 4,
+    "new": false,
+    "disabled": false,
+    "price": 30900
+  },
+  {
+    "_id": "bqfRkTZ3TQg4v8cNgQT9",
+    "description": "",
+    "createdDate": "2025-01-10T19:48:03.049Z",
+    "price": 28900,
+    "restaurant": "toscana",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "DEL HUERTO",
+    "new": false,
+    "disabled": false,
+    "order": 5
+  },
+  {
+    "_id": "InJl7dKTgoFtmRZuuUKE",
+    "price": 28900,
+    "new": false,
+    "disabled": false,
+    "order": 6,
+    "restaurant": "toscana",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "QUESO AZUL Y MANZANA ",
+    "description": "",
+    "createdDate": "2025-01-10T19:48:16.978Z"
+  },
+  {
+    "_id": "xzwQWDIWBbJDHbgNDVTh",
+    "createdDate": "2025-01-10T19:48:26.812Z",
+    "description": "",
+    "product_name": "BURRATA ",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "restaurant": "toscana",
+    "order": 7,
+    "disabled": false,
+    "new": false,
+    "price": 46900
+  },
+  {
+    "_id": "SCzyTAgaL6rkBHl49fRI",
+    "order": 8,
+    "disabled": false,
+    "new": false,
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "SETAS Y TARTUFO",
+    "restaurant": "toscana",
+    "price": 40900,
+    "createdDate": "2025-01-10T19:48:37.517Z",
+    "description": ""
+  },
+  {
+    "_id": "aI1OANYEoD9FjjP6HAws",
+    "price": 24900,
+    "restaurant": "toscana",
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "JAMON & MOZZARELLA ",
+    "new": false,
+    "disabled": false,
+    "order": 9,
+    "description": "",
+    "createdDate": "2025-01-10T19:49:03.058Z"
+  },
+  {
+    "_id": "YSSX1mrPqtIwPs5Q96xr",
+    "createdDate": "2025-01-10T19:49:19.618Z",
+    "description": "",
+    "order": 10,
+    "new": false,
+    "disabled": false,
+    "product_category": "OxSrSO0XEKg6JmUMhLOS",
+    "recommended": false,
+    "product_name": "CHORIZO ROSTIZADO ",
+    "restaurant": "toscana",
+    "price": 30900
+  }
+]
