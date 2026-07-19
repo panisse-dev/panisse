@@ -1,0 +1,5 @@
+# La app Next.js vive en la subcarpeta web/ y se exporta como sitio estático.
+[build]
+  base = "web"
+  command = "npm run build"
+  publish = "out"
