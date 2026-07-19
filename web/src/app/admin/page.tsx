@@ -34,6 +34,30 @@ function timeAgo(iso: string): string {
   return `hace ${h} h ${mins % 60} min`;
 }
 
+// ── Aviso por WhatsApp (semiautomático: abre WhatsApp con el mensaje escrito) ──
+function waPhone(raw: string): string {
+  let d = (raw || "").replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.length === 10 && d.startsWith("3")) d = "57" + d; // móvil colombiano sin indicativo
+  return d;
+}
+function waMessage(o: Order): string {
+  const name = (o.customer.name || "").trim().split(" ")[0];
+  const hola = name ? `¡Hola ${name}!` : "¡Hola!";
+  const msg: Record<OrderStatus, string> = {
+    recibido: `${hola} Recibimos tu pedido #${o.code} en PANISSE. ✅ Te avisamos cuando esté listo.`,
+    preparacion: `${hola} Tu pedido #${o.code} en PANISSE ya está en preparación. 👨‍🍳`,
+    listo: `${hola} Tu pedido #${o.code} en PANISSE ya está listo para recoger. 🎉 ¡Te esperamos!`,
+    recogido: `¡Gracias por tu compra${name ? `, ${name}` : ""}! 🙌 Te esperamos pronto en PANISSE.`,
+  };
+  return msg[o.status];
+}
+function waLink(o: Order): string | null {
+  const phone = waPhone(o.customer.phone);
+  if (!phone) return null;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(waMessage(o))}`;
+}
+
 export default function AdminPage() {
   const [code, setCode] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -320,6 +344,26 @@ export default function AdminPage() {
                     </button>
                   )}
                 </div>
+
+                {waLink(o) ? (
+                  <a
+                    href={waLink(o)!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex h-11 w-full items-center justify-center gap-2 border-t border-gold-soft/25 bg-verde/10 text-[13.5px] font-semibold text-verde"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+                      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
+                    </svg>
+                    Avisar por WhatsApp
+                  </a>
+                ) : (
+                  o.customer.phone ? null : (
+                    <p className="border-t border-gold-soft/25 px-4 py-1.5 text-center text-[11px] text-ink-faint">
+                      Sin teléfono para avisar
+                    </p>
+                  )
+                )}
 
                 {NEXT[o.status] && (
                   <button
