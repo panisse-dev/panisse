@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
+import { CartProvider } from "@/lib/cart";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -37,7 +38,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`${playfair.variable} ${outfit.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
   );
 }

@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Menu, Product, Section } from "@/lib/menu";
-import { useFavorites } from "@/lib/useFavorites";
 import ProductRow from "./ProductRow";
 import ProductSheet from "./ProductSheet";
 import SearchOverlay from "./SearchOverlay";
-import FavoritesSheet from "./FavoritesSheet";
+import CartBar from "./CartBar";
 
 const HEADER_OFFSET = 128; // alto aprox. del encabezado sticky (barra + chips)
 
@@ -68,8 +67,6 @@ export default function MenuClient({ menu }: { menu: Menu }) {
   const [active, setActive] = useState(menu.sections[0]?.slug ?? "");
   const [sheetProduct, setSheetProduct] = useState<Product | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [favsOpen, setFavsOpen] = useState(false);
-  const { favorites, toggle } = useFavorites();
   const chipsRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const suppressSpy = useRef(false);
@@ -114,10 +111,10 @@ export default function MenuClient({ menu }: { menu: Menu }) {
 
   // ── Bloquea el scroll del fondo cuando hay un overlay abierto ──
   useEffect(() => {
-    const locked = !!sheetProduct || searchOpen || favsOpen;
+    const locked = !!sheetProduct || searchOpen;
     document.documentElement.classList.toggle("scroll-locked", locked);
     return () => document.documentElement.classList.remove("scroll-locked");
-  }, [sheetProduct, searchOpen, favsOpen]);
+  }, [sheetProduct, searchOpen]);
 
   const goTo = useCallback((slug: string) => {
     setActive(slug);
@@ -214,21 +211,6 @@ export default function MenuClient({ menu }: { menu: Menu }) {
         </footer>
       </main>
 
-      {/* ── Botón flotante: mi selección ── */}
-      {favorites.size > 0 && (
-        <button
-          type="button"
-          onClick={() => setFavsOpen(true)}
-          aria-label={`Mi selección: ${favorites.size} platos`}
-          className="anim-fade-up fixed bottom-[calc(env(safe-area-inset-bottom)+20px)] right-5 z-30 flex h-13 items-center gap-2 rounded-full bg-navy px-5 text-gold-soft shadow-[0_10px_28px_-8px_rgba(4,17,29,0.5)]"
-        >
-          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="currentColor" aria-hidden>
-            <path d="M12 21s-7.5-4.6-10-9.3C.6 8.6 2.6 5 6.2 5c2.2 0 3.6 1.2 4.4 2.5L12 9l1.4-1.5C14.2 6.2 15.6 5 17.8 5c3.6 0 5.6 3.6 4.2 6.7C19.5 16.4 12 21 12 21Z" />
-          </svg>
-          <span className="text-[13px] font-semibold">{favorites.size}</span>
-        </button>
-      )}
-
       {/* ── Overlays ── */}
       <SearchOverlay
         menu={menu}
@@ -236,20 +218,8 @@ export default function MenuClient({ menu }: { menu: Menu }) {
         onClose={() => setSearchOpen(false)}
         onOpenProduct={openProduct}
       />
-      <FavoritesSheet
-        menu={menu}
-        favorites={favorites}
-        open={favsOpen}
-        onClose={() => setFavsOpen(false)}
-        onOpenProduct={openProduct}
-        onRemove={toggle}
-      />
-      <ProductSheet
-        product={sheetProduct}
-        isFavorite={sheetProduct ? favorites.has(sheetProduct.id) : false}
-        onToggleFavorite={() => sheetProduct && toggle(sheetProduct.id)}
-        onClose={() => setSheetProduct(null)}
-      />
+      <ProductSheet product={sheetProduct} onClose={() => setSheetProduct(null)} />
+      <CartBar />
     </div>
   );
 }
