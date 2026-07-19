@@ -7,6 +7,7 @@ interface OrderItem {
   productId: string;
   name: string;
   variant: string;
+  note: string;
   unitPrice: number;
   qty: number;
 }
@@ -73,6 +74,7 @@ export default async (req: Request, context: Context) => {
         productId: sanitize(i.productId, 64),
         name: sanitize(i.name, 120),
         variant: sanitize(i.variant, 80),
+        note: sanitize(i.note, 200),
         unitPrice: Math.max(0, Math.round(Number(i.unitPrice) || 0)),
         qty: Math.min(50, Math.max(1, Math.round(Number(i.qty) || 1))),
       }))

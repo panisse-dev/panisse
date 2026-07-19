@@ -7,6 +7,7 @@ import ProductRow from "./ProductRow";
 import ProductSheet from "./ProductSheet";
 import SearchOverlay from "./SearchOverlay";
 import CartBar from "./CartBar";
+import MyOrders from "./MyOrders";
 
 const HEADER_OFFSET = 128; // alto aprox. del encabezado sticky (barra + chips)
 
@@ -190,6 +191,9 @@ export default function MenuClient({ menu }: { menu: Menu }) {
             </button>
           ))}
         </div>
+
+        {/* Seguimiento del pedido del cliente */}
+        <MyOrders />
       </div>
 
       {/* ── Contenido ── */}

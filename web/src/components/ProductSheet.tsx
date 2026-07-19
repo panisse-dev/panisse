@@ -17,12 +17,14 @@ export default function ProductSheet({
   const cart = useCart();
   const [priceIdx, setPriceIdx] = useState(0);
   const [qty, setQty] = useState(1);
+  const [note, setNote] = useState("");
   const [added, setAdded] = useState(false);
 
   // Reinicia selección al abrir otro producto
   useEffect(() => {
     setPriceIdx(0);
     setQty(1);
+    setNote("");
     setAdded(false);
   }, [product?.id]);
 
@@ -47,6 +49,7 @@ export default function ProductSheet({
         productId: product.id,
         name: product.name,
         variant: hasVariants ? sel.label || `Opción ${priceIdx + 1}` : "",
+        note: note.trim(),
         unitPrice: unit,
         image: product.image,
       },
@@ -156,8 +159,21 @@ export default function ProductSheet({
               </div>
             )}
 
+            {orderable && (
+              <label className="mt-5 block">
+                <span className="smallcaps text-[10px] text-gold-deep">Nota para este plato (opcional)</span>
+                <textarea
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  placeholder="Ej. sin cebolla, término medio, sin picante…"
+                  rows={2}
+                  className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3 py-2.5 text-[14px] text-ink outline-none focus:border-navy"
+                />
+              </label>
+            )}
+
             {orderable ? (
-              <div className="mt-6 flex items-stretch gap-3">
+              <div className="mt-4 flex items-stretch gap-3">
                 {/* Cantidad */}
                 <div className="flex items-center border border-gold-soft/70 bg-paper">
                   <button

@@ -18,6 +18,7 @@ export interface OrderItem {
   variant: string; // etiqueta de la variante (vacío si no aplica)
   unitPrice: number;
   qty: number;
+  note?: string; // nota/descripción que el cliente escribe para este plato
 }
 
 export interface Order {

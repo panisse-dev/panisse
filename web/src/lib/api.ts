@@ -20,6 +20,7 @@ export async function createOrder(
         productId: l.productId,
         name: l.name,
         variant: l.variant,
+        note: l.note,
         unitPrice: l.unitPrice,
         qty: l.qty,
       })),

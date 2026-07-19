@@ -1,15 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
+import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
-import { createOrder, type CreatedOrder } from "@/lib/api";
+import { createOrder, getOrderStatus, type CreatedOrder } from "@/lib/api";
+import { type OrderStatus } from "@/lib/orders";
+import StatusTrack from "./StatusTrack";
 
 type View = "hidden" | "cart" | "checkout" | "done";
 
 export default function CartBar() {
   const cart = useCart();
+  const { addOrder } = useMyOrders();
   const [view, setView] = useState<View>("hidden");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -17,6 +21,7 @@ export default function CartBar() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [order, setOrder] = useState<CreatedOrder | null>(null);
+  const [liveStatus, setLiveStatus] = useState<OrderStatus>("recibido");
 
   const open = view !== "hidden";
 
@@ -25,6 +30,26 @@ export default function CartBar() {
     document.documentElement.classList.toggle("scroll-locked", open);
     return () => document.documentElement.classList.remove("scroll-locked");
   }, [open]);
+
+  // Seguimiento en vivo del pedido tras enviarlo
+  useEffect(() => {
+    if (view !== "done" || !order) return;
+    let stop = false;
+    const tick = async () => {
+      try {
+        const s = await getOrderStatus(order.id);
+        if (!stop) setLiveStatus(s.status);
+      } catch {
+        /* reintenta en el próximo ciclo */
+      }
+    };
+    tick();
+    const iv = setInterval(tick, 6000);
+    return () => {
+      stop = true;
+      clearInterval(iv);
+    };
+  }, [view, order]);
 
   const submit = async () => {
     setError("");
@@ -39,6 +64,8 @@ export default function CartBar() {
         cart.lines,
       );
       setOrder(created);
+      setLiveStatus("recibido");
+      addOrder({ id: created.id, code: created.code }); // queda guardado para que el cliente lo siga viendo
       cart.clear();
       setView("done");
     } catch (e) {
@@ -131,7 +158,7 @@ export default function CartBar() {
                     <>
                       <ul className="divide-y divide-gold-soft/25">
                         {cart.lines.map((l) => (
-                          <li key={`${l.productId}::${l.variant}`} className="flex items-center gap-3 py-3">
+                          <li key={`${l.productId}::${l.variant}::${l.note}`} className="flex items-start gap-3 py-3">
                             {l.image ? (
                               <div className="relative h-14 w-14 shrink-0 overflow-hidden border border-gold-soft/50">
                                 <Image src={l.image} alt={l.name} fill sizes="56px" className="object-cover" />
@@ -142,6 +169,11 @@ export default function CartBar() {
                             <div className="min-w-0 flex-1">
                               <p className="font-display text-[15px] leading-snug text-navy">{l.name}</p>
                               {l.variant && <p className="text-[11.5px] text-ink-faint">{l.variant}</p>}
+                              {l.note && (
+                                <p className="mt-0.5 border-l-2 border-gold pl-1.5 text-[11.5px] italic text-ink-soft">
+                                  {l.note}
+                                </p>
+                              )}
                               <p className="mt-0.5 text-[13px] font-semibold text-gold-deep">
                                 {formatCOP(l.unitPrice)}
                               </p>
@@ -150,7 +182,7 @@ export default function CartBar() {
                               <button
                                 type="button"
                                 aria-label="Quitar uno"
-                                onClick={() => cart.setQty(l.productId, l.variant, l.qty - 1)}
+                                onClick={() => cart.setQty(l.productId, l.variant, l.note, l.qty - 1)}
                                 className="flex h-9 w-9 items-center justify-center text-[18px] text-ink-soft active:bg-gold-soft/20"
                               >
                                 −
@@ -159,7 +191,7 @@ export default function CartBar() {
                               <button
                                 type="button"
                                 aria-label="Agregar uno"
-                                onClick={() => cart.setQty(l.productId, l.variant, l.qty + 1)}
+                                onClick={() => cart.setQty(l.productId, l.variant, l.note, l.qty + 1)}
                                 className="flex h-9 w-9 items-center justify-center text-[18px] text-ink-soft active:bg-gold-soft/20"
                               >
                                 +
@@ -244,24 +276,27 @@ export default function CartBar() {
 
               {/* ── Vista confirmación ── */}
               {view === "done" && order && (
-                <div className="px-6 pb-2 pt-8 text-center">
+                <div className="px-6 pb-2 pt-6 text-center">
                   <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-verde/12 text-verde">
                     <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                       <path d="M20 6 9 17l-5-5" />
                     </svg>
                   </div>
                   <p className="mt-4 text-[13px] text-ink-soft">Tu número de pedido</p>
-                  <p className="font-display text-[52px] font-semibold leading-none text-navy">#{order.code}</p>
-                  <p className="mt-4 text-[13.5px] leading-relaxed text-ink-soft">
-                    Muéstralo en tienda para recoger.
-                    <br />
-                    ¡Gracias por tu pedido! 🎉
+                  <p className="font-display text-[44px] font-semibold leading-none text-navy">#{order.code}</p>
+                  <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
+                    Muéstralo en tienda para recoger. Te avisamos cuando esté listo.
                   </p>
+
+                  <div className="mt-5 border border-gold-soft/50 bg-paper px-4 py-4">
+                    <p className="smallcaps text-[10px] text-gold-deep">Estado</p>
+                    <StatusTrack status={liveStatus} />
+                  </div>
 
                   <button
                     type="button"
                     onClick={closeAll}
-                    className="mt-7 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft"
+                    className="mt-5 h-12 w-full border border-gold-soft/70 bg-card text-[14px] font-medium text-ink-soft"
                   >
                     Seguir viendo el menú
                   </button>

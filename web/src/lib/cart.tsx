@@ -6,6 +6,7 @@ export interface CartLine {
   productId: string;
   name: string;
   variant: string; // etiqueta de variante ("" si no aplica)
+  note: string; // nota/descripción para este plato ("" si no aplica)
   unitPrice: number;
   qty: number;
   image: string | null;
@@ -16,16 +17,17 @@ interface CartAPI {
   count: number;
   total: number;
   add: (line: Omit<CartLine, "qty">, qty?: number) => void;
-  setQty: (productId: string, variant: string, qty: number) => void;
-  remove: (productId: string, variant: string) => void;
+  setQty: (productId: string, variant: string, note: string, qty: number) => void;
+  remove: (productId: string, variant: string, note: string) => void;
   clear: () => void;
-  qtyOf: (productId: string, variant: string) => number;
 }
 
 const KEY = "panisse-cart";
 const MAX_AGE = 3 * 60 * 60 * 1000; // el carrito caduca a las 3 horas del primer producto
 const CartCtx = createContext<CartAPI | null>(null);
-const lineKey = (p: string, v: string) => `${p}::${v}`;
+// Dos platos iguales con notas distintas son líneas separadas.
+const lineKey = (p: string, v: string, n: string) => `${p}::${v}::${n}`;
+const keyOf = (l: CartLine) => lineKey(l.productId, l.variant, l.note);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
@@ -41,7 +43,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         if (parsed && Array.isArray(parsed.lines)) {
           const age = Date.now() - (parsed.at || 0);
           if (parsed.lines.length > 0 && age <= MAX_AGE) {
-            setLines(parsed.lines as CartLine[]);
+            // normaliza líneas viejas sin `note`
+            setLines((parsed.lines as CartLine[]).map((l) => ({ ...l, note: l.note || "" })));
             atRef.current = parsed.at || Date.now();
           } else {
             localStorage.removeItem(KEY); // carrito viejo → se descarta
@@ -71,8 +74,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback((line: Omit<CartLine, "qty">, qty = 1) => {
     setLines((prev) => {
-      const k = lineKey(line.productId, line.variant);
-      const i = prev.findIndex((l) => lineKey(l.productId, l.variant) === k);
+      const k = lineKey(line.productId, line.variant, line.note);
+      const i = prev.findIndex((l) => keyOf(l) === k);
       if (i === -1) return [...prev, { ...line, qty }];
       const next = [...prev];
       next[i] = { ...next[i], qty: next[i].qty + qty };
@@ -80,17 +83,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  const setQty = useCallback((productId: string, variant: string, qty: number) => {
+  const setQty = useCallback((productId: string, variant: string, note: string, qty: number) => {
     setLines((prev) => {
-      const k = lineKey(productId, variant);
-      if (qty <= 0) return prev.filter((l) => lineKey(l.productId, l.variant) !== k);
-      return prev.map((l) => (lineKey(l.productId, l.variant) === k ? { ...l, qty } : l));
+      const k = lineKey(productId, variant, note);
+      if (qty <= 0) return prev.filter((l) => keyOf(l) !== k);
+      return prev.map((l) => (keyOf(l) === k ? { ...l, qty } : l));
     });
   }, []);
 
-  const remove = useCallback((productId: string, variant: string) => {
-    const k = lineKey(productId, variant);
-    setLines((prev) => prev.filter((l) => lineKey(l.productId, l.variant) !== k));
+  const remove = useCallback((productId: string, variant: string, note: string) => {
+    const k = lineKey(productId, variant, note);
+    setLines((prev) => prev.filter((l) => keyOf(l) !== k));
   }, []);
 
   const clear = useCallback(() => setLines([]), []);
@@ -98,16 +101,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<CartAPI>(() => {
     const count = lines.reduce((s, l) => s + l.qty, 0);
     const total = lines.reduce((s, l) => s + l.qty * l.unitPrice, 0);
-    return {
-      lines,
-      count,
-      total,
-      add,
-      setQty,
-      remove,
-      clear,
-      qtyOf: (p, v) => lines.find((l) => lineKey(l.productId, l.variant) === lineKey(p, v))?.qty ?? 0,
-    };
+    return { lines, count, total, add, setQty, remove, clear };
   }, [lines, add, setQty, remove, clear]);
 
   return <CartCtx.Provider value={value}>{children}</CartCtx.Provider>;

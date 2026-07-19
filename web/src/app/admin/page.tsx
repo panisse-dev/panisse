@@ -336,12 +336,19 @@ export default function AdminPage() {
 
                 <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
                   {o.items.map((it, i) => (
-                    <li key={i} className="flex justify-between gap-2 py-0.5">
-                      <span>
-                        <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
-                        {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
-                      </span>
-                      <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
+                    <li key={i} className="py-0.5">
+                      <div className="flex justify-between gap-2">
+                        <span>
+                          <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
+                          {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
+                        </span>
+                        <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
+                      </div>
+                      {it.note && (
+                        <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">
+                          ↳ {it.note}
+                        </p>
+                      )}
                     </li>
                   ))}
                 </ul>
