@@ -129,3 +129,14 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
+
+/* ── iOS: evita el auto-zoom al enfocar un campo ──
+   Safari en móvil hace zoom si la letra del input es < 16px. Forzamos 16px
+   en táctiles y pantallas pequeñas para que no se descuadre nada al escribir. */
+@media (pointer: coarse), (max-width: 900px) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
