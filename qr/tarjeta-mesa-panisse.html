@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PANISSE · Tarjeta de mesa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600&family=Outfit:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root { --navy:#041b31; --gold:#b28f4c; --gold-soft:#d9bb73; --paper:#f6f6f5; --ink-soft:#47535e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:#e8e8e6; font-family:'Outfit',system-ui,sans-serif; color:var(--navy);
+         display:flex; flex-direction:column; align-items:center; gap:16px; padding:28px 16px; }
+  .toolbar { text-align:center; color:var(--ink-soft); font-size:13px; line-height:1.5; }
+  .toolbar button { font:inherit; font-weight:500; cursor:pointer; margin-top:8px;
+    background:var(--navy); color:var(--gold-soft); border:none; padding:10px 22px; border-radius:2px; }
+
+  .card {
+    width:340px; background:var(--paper); border:1px solid var(--gold-soft);
+    outline:1px solid rgba(178,143,76,.4); outline-offset:5px;
+    padding:34px 30px 30px; text-align:center;
+    box-shadow:0 10px 30px rgba(4,27,49,.12);
+  }
+  .kicker { font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--gold); }
+  .brand { font-family:'Playfair Display',serif; font-weight:600; font-size:40px; letter-spacing:.16em;
+           color:var(--navy); margin:8px 0 2px; }
+  .tag { font-family:'Playfair Display',serif; font-style:italic; font-size:14px; color:var(--ink-soft); }
+  .rule { display:flex; align-items:center; gap:10px; margin:18px 0; }
+  .rule::before, .rule::after { content:""; flex:1; height:1px; background:var(--gold-soft); }
+  .rule span { color:var(--gold); font-size:11px; }
+  .qr { width:210px; height:210px; margin:0 auto; padding:12px; background:#fff; border:1px solid var(--gold-soft); }
+  .qr svg { width:100%; height:100%; display:block; }
+  .cta { font-family:'Playfair Display',serif; font-size:19px; color:var(--navy); margin-top:18px; }
+  .steps { font-size:12.5px; color:var(--ink-soft); line-height:1.7; margin-top:6px; }
+  .url { margin-top:14px; font-size:11px; letter-spacing:.04em; color:var(--gold); }
+
+  @media print {
+    body { background:#fff; padding:0; }
+    .toolbar { display:none; }
+    .card { box-shadow:none; margin:40px auto; page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    Tarjeta lista para imprimir y poner en las mesas.
+    <br /><button onclick="window.print()">Imprimir</button>
+  </div>
+
+  <div class="card">
+    <p class="kicker">Ristorante · Caffè</p>
+    <h1 class="brand">PANISSE</h1>
+    <p class="tag">Cocina italiana en Pereira</p>
+
+    <div class="rule"><span>❦</span></div>
+
+    <div class="qr">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" shape-rendering="crispEdges"><path fill="#ffffff" d="M0 0h41v41H0z"/><path stroke="#041b31" d="M4 4.5h7m1 0h3m3 0h1m2 0h1m3 0h1m1 0h2m1 0h7M4 5.5h1m5 0h1m1 0h1m1 0h2m1 0h1m2 0h1m2 0h1m1 0h2m1 0h1m1 0h1m5 0h1M4 6.5h1m1 0h3m1 0h1m1 0h6m1 0h2m1 0h1m2 0h4m1 0h1m1 0h3m1 0h1M4 7.5h1m1 0h3m1 0h1m5 0h1m3 0h1m1 0h1m1 0h1m2 0h2m1 0h1m1 0h3m1 0h1M4 8.5h1m1 0h3m1 0h1m3 0h2m1 0h2m1 0h3m7 0h1m1 0h3m1 0h1M4 9.5h1m5 0h1m1 0h1m2 0h1m4 0h2m1 0h2m1 0h3m1 0h1m5 0h1M4 10.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M12 11.5h1m2 0h1m4 0h6m1 0h1M6 12.5h3m1 0h1m1 0h1m2 0h2m3 0h1m5 0h6m2 0h3M5 13.5h2m1 0h2m5 0h2m1 0h2m1 0h1m1 0h1m1 0h1m1 0h4m2 0h2m1 0h1M6 14.5h5m3 0h8m1 0h1m1 0h1m4 0h2m1 0h3M5 15.5h2m2 0h1m4 0h1m1 0h1m5 0h1m2 0h2m1 0h2m3 0h2M4 16.5h3m1 0h4m1 0h5m1 0h3m2 0h2m1 0h3m3 0h1M4 17.5h1m3 0h2m1 0h2m2 0h1m2 0h3m2 0h1m2 0h2m1 0h3m2 0h1m1 0h1M5 18.5h1m1 0h4m4 0h2m1 0h1m3 0h1m3 0h1m3 0h1m3 0h2M6 19.5h2m1 0h1m2 0h1m1 0h1m3 0h2m1 0h2m1 0h6m1 0h1m2 0h3M8 20.5h3m2 0h2m1 0h1m1 0h1m2 0h1m1 0h2m4 0h1m1 0h2m1 0h1m1 0h1M4 21.5h1m1 0h1m2 0h1m2 0h2m1 0h2m1 0h2m2 0h1m1 0h1m2 0h2m1 0h1m4 0h2M5 22.5h2m2 0h2m3 0h2m1 0h4m1 0h3m1 0h1m2 0h3m2 0h2M6 23.5h4m3 0h1m2 0h2m1 0h2m1 0h1m2 0h1m1 0h2m1 0h1m1 0h3M4 24.5h4m1 0h2m1 0h2m3 0h3m3 0h2m1 0h1m2 0h5M4 25.5h2m1 0h2m4 0h3m2 0h2m2 0h1m1 0h2m2 0h1m5 0h1m1 0h1M4 26.5h1m1 0h2m2 0h1m2 0h3m5 0h5m5 0h5M4 27.5h1m2 0h1m1 0h1m1 0h1m2 0h1m2 0h2m1 0h1m1 0h1m2 0h2m1 0h1m3 0h3m1 0h1M4 28.5h1m3 0h1m1 0h1m2 0h2m2 0h4m1 0h1m1 0h1m1 0h1m1 0h5m2 0h2M12 29.5h1m3 0h4m2 0h1m3 0h3m3 0h5M4 30.5h7m4 0h4m2 0h2m1 0h1m1 0h3m1 0h1m1 0h1m1 0h2M4 31.5h1m5 0h1m3 0h1m3 0h1m1 0h1m1 0h2m3 0h2m3 0h5M4 32.5h1m1 0h3m1 0h1m1 0h1m1 0h2m1 0h1m3 0h3m1 0h2m1 0h5m2 0h2M4 33.5h1m1 0h3m1 0h1m1 0h1m5 0h2m4 0h1m4 0h1m2 0h2m1 0h1M4 34.5h1m1 0h3m1 0h1m1 0h1m4 0h1m1 0h1m6 0h5M4 35.5h1m5 0h1m4 0h1m5 0h2m2 0h3m3 0h1m1 0h1M4 36.5h7m2 0h1m2 0h1m1 0h1m1 0h1m3 0h1m1 0h5m3 0h2"/></svg>
+    </div>
+
+    <p class="cta">Escanea para ver el menú</p>
+    <p class="steps">Abre la cámara de tu celular<br />y apúntala al código</p>
+    <p class="url">panisse.netlify.app</p>
+  </div>
+</body>
+</html>
