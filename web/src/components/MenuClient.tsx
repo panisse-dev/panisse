@@ -222,10 +222,7 @@ export default function MenuClient({ menu }: { menu: Menu }) {
       </div>
 
       {/* ── Contenido ── */}
-      <main className="relative z-10 pb-[calc(env(safe-area-inset-bottom)+120px)]">
-        <p className="px-5 pt-4 text-center font-display text-[13.5px] italic text-ink-soft">
-          {menu.tagline}
-        </p>
+      <main className="relative z-10 pt-2 pb-[calc(env(safe-area-inset-bottom)+120px)]">
         {menu.sections.map((s) => (
           <SectionBlock key={s.id} section={s} onOpen={openProduct} />
         ))}
