@@ -46,10 +46,11 @@ function waPhone(raw: string): string {
 function waMessage(o: Order): string {
   const name = (o.customer.name || "").trim().split(" ")[0];
   const hola = name ? `¡Hola ${name}!` : "¡Hola!";
+  // Sin número de pedido: el cliente no debe verlo por WhatsApp.
   const msg: Record<OrderStatus, string> = {
-    recibido: `${hola} Recibimos tu pedido #${o.code} en PANISSE. ✅ Te avisamos cuando esté listo.`,
-    preparacion: `${hola} Tu pedido #${o.code} en PANISSE ya está en preparación. 👨‍🍳`,
-    listo: `${hola} Tu pedido #${o.code} en PANISSE ya está listo para recoger. 🎉 ¡Te esperamos!`,
+    recibido: `${hola} Recibimos tu pedido en PANISSE. ✅ Te avisamos cuando esté listo.`,
+    preparacion: `${hola} Tu pedido en PANISSE ya está en preparación. 👨‍🍳`,
+    listo: `${hola} Tu pedido en PANISSE ya está listo para recoger. 🎉 ¡Te esperamos!`,
     recogido: `¡Gracias por tu compra${name ? `, ${name}` : ""}! 🙌 Te esperamos pronto en PANISSE.`,
   };
   return msg[o.status];

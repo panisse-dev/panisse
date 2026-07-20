@@ -11,12 +11,19 @@ export interface CreatedOrder {
 }
 
 export interface CustomerInfo {
-  name: string;
-  phone: string;
+  email: string; // identifica al cliente; si ya existe, el servidor completa el resto
   note: string;
-  email?: string;
-  birthday?: string; // YYYY-MM-DD
+  name?: string;
+  phone?: string;
+  birthday?: string; // YYYY-MM-DD (obligatorio sólo para clientes nuevos)
 }
+
+/** ¿Ya conocemos este correo? Devuelve el nombre sólo para saludar. */
+export async function checkClient(email: string): Promise<{ known: boolean; name?: string }> {
+  return rpc<{ known: boolean; name?: string }>("check_client", { p_email: email });
+}
+
+export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 export async function createOrder(
   customer: CustomerInfo,

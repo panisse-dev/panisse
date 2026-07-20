@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
-import { createOrder, getOrderStatus, type CreatedOrder } from "@/lib/api";
+import { checkClient, createOrder, getOrderStatus, EMAIL_RE, type CreatedOrder } from "@/lib/api";
 import { type OrderStatus } from "@/lib/orders";
 import StatusTrack from "./StatusTrack";
 
@@ -20,7 +20,9 @@ export default function CartBar() {
   const [note, setNote] = useState("");
   const [email, setEmail] = useState("");
   const [birthday, setBirthday] = useState("");
-  const [moreOpen, setMoreOpen] = useState(false);
+  // null = aún no verificamos el correo; luego {known, name?} del servidor
+  const [known, setKnown] = useState<{ known: boolean; name?: string } | null>(null);
+  const [checking, setChecking] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [order, setOrder] = useState<CreatedOrder | null>(null);
@@ -55,21 +57,47 @@ export default function CartBar() {
     };
   }, [view, order]);
 
+  // Paso 1 del checkout: verificar el correo. Si el cliente ya existe,
+  // el servidor completa sus datos y no se le vuelven a pedir.
+  const checkEmail = async () => {
+    setError("");
+    const e = email.trim();
+    if (!EMAIL_RE.test(e)) {
+      setError("Escribe un correo válido");
+      return;
+    }
+    setChecking(true);
+    try {
+      setKnown(await checkClient(e));
+    } catch {
+      setError("No se pudo verificar el correo. Revisa tu internet.");
+    } finally {
+      setChecking(false);
+    }
+  };
+
   const submit = async () => {
     setError("");
-    if (!name.trim()) {
-      setError("Escribe tu nombre para el pedido");
-      return;
+    if (!known) return;
+    if (!known.known) {
+      if (!name.trim()) {
+        setError("Escribe tu nombre para el pedido");
+        return;
+      }
+      if (!birthday) {
+        setError("Cuéntanos tu cumpleaños para sorprenderte");
+        return;
+      }
     }
     setSending(true);
     try {
       const created = await createOrder(
         {
-          name: name.trim(),
-          phone: phone.trim(),
+          email: email.trim(),
           note: note.trim(),
-          email: email.trim() || undefined,
-          birthday: birthday || undefined,
+          name: known.known ? undefined : name.trim(),
+          phone: known.known ? undefined : phone.trim(),
+          birthday: known.known ? undefined : birthday,
         },
         cart.lines,
       );
@@ -92,7 +120,7 @@ export default function CartBar() {
     setNote("");
     setEmail("");
     setBirthday("");
-    setMoreOpen(false);
+    setKnown(null);
     setError("");
     setOrder(null);
   };
@@ -234,93 +262,121 @@ export default function CartBar() {
                 </div>
               )}
 
-              {/* ── Vista checkout ── */}
+              {/* ── Vista checkout: primero el correo; si ya es cliente,
+                     no se le vuelve a pedir nada ── */}
               {view === "checkout" && (
                 <div className="px-5 pt-4">
                   <label className="block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Nombre *</span>
+                    <span className="smallcaps text-[10px] text-gold-deep">Correo *</span>
                     <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Tu nombre"
-                      autoComplete="name"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        setKnown(null);
+                      }}
+                      onKeyDown={(e) => e.key === "Enter" && !known && checkEmail()}
+                      placeholder="tucorreo@ejemplo.com"
+                      inputMode="email"
+                      autoComplete="email"
+                      autoFocus
                       className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
-                    />
-                  </label>
-                  <label className="mt-3.5 block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Teléfono</span>
-                    <input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="Para avisarte cuando esté listo"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
-                    />
-                  </label>
-                  <label className="mt-3.5 block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Nota (opcional)</span>
-                    <textarea
-                      value={note}
-                      onChange={(e) => setNote(e.target.value)}
-                      placeholder="Ej. sin cebolla, término medio…"
-                      rows={2}
-                      className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-navy"
                     />
                   </label>
 
-                  {/* Datos opcionales: alimentan la base de clientes */}
-                  {!moreOpen ? (
-                    <button
-                      type="button"
-                      onClick={() => setMoreOpen(true)}
-                      className="mt-3 flex items-center gap-1.5 text-[12px] font-medium text-gold-deep"
-                    >
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                      Correo y cumpleaños (opcional) — recibe sorpresas
-                    </button>
+                  {!known ? (
+                    <>
+                      <p className="mt-2 text-[11.5px] text-ink-faint">
+                        Si ya has pedido antes, con tu correo recuperamos tus datos.
+                      </p>
+                      {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
+                      <button
+                        type="button"
+                        onClick={checkEmail}
+                        disabled={checking}
+                        className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft transition-transform active:scale-[0.98] disabled:opacity-60"
+                      >
+                        {checking ? "Verificando…" : "Continuar"}
+                      </button>
+                    </>
                   ) : (
                     <>
+                      {known.known ? (
+                        <div className="mt-3.5 border-l-2 border-verde bg-verde/10 px-3 py-2.5">
+                          <p className="text-[13.5px] font-medium text-ink">
+                            ¡Hola de nuevo{known.name ? `, ${known.name.trim().split(" ")[0]}` : ""}! 👋
+                          </p>
+                          <p className="mt-0.5 text-[11.5px] text-ink-soft">
+                            Ya tenemos tus datos guardados; no hace falta nada más.
+                          </p>
+                        </div>
+                      ) : (
+                        <>
+                          <label className="mt-3.5 block">
+                            <span className="smallcaps text-[10px] text-gold-deep">Nombre *</span>
+                            <input
+                              value={name}
+                              onChange={(e) => setName(e.target.value)}
+                              placeholder="Tu nombre"
+                              autoComplete="name"
+                              autoFocus
+                              className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                            />
+                          </label>
+                          <label className="mt-3.5 block">
+                            <span className="smallcaps text-[10px] text-gold-deep">Teléfono</span>
+                            <input
+                              value={phone}
+                              onChange={(e) => setPhone(e.target.value)}
+                              placeholder="Para avisarte por WhatsApp cuando esté listo"
+                              inputMode="tel"
+                              autoComplete="tel"
+                              className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                            />
+                          </label>
+                          <label className="mt-3.5 block">
+                            <span className="smallcaps text-[10px] text-gold-deep">Cumpleaños *</span>
+                            <input
+                              type="date"
+                              value={birthday}
+                              onChange={(e) => setBirthday(e.target.value)}
+                              max={new Date().toISOString().slice(0, 10)}
+                              className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                            />
+                            <span className="mt-1 block text-[11px] text-ink-faint">
+                              Para consentirte en tu día 🎂
+                            </span>
+                          </label>
+                        </>
+                      )}
+
                       <label className="mt-3.5 block">
-                        <span className="smallcaps text-[10px] text-gold-deep">Correo (opcional)</span>
-                        <input
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder="tucorreo@ejemplo.com"
-                          inputMode="email"
-                          autoComplete="email"
-                          className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                        <span className="smallcaps text-[10px] text-gold-deep">Nota (opcional)</span>
+                        <textarea
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          placeholder="Ej. sin cebolla, término medio…"
+                          rows={2}
+                          className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-navy"
                         />
                       </label>
-                      <label className="mt-3.5 block">
-                        <span className="smallcaps text-[10px] text-gold-deep">Cumpleaños (opcional)</span>
-                        <input
-                          type="date"
-                          value={birthday}
-                          onChange={(e) => setBirthday(e.target.value)}
-                          className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
-                        />
-                      </label>
+
+                      <div className="mt-4 flex items-baseline justify-between border-t border-gold-soft/40 pt-4">
+                        <span className="smallcaps text-[11px] text-ink-soft">Total a pagar en tienda</span>
+                        <span className="font-display text-[20px] font-semibold text-navy">{formatCOP(cart.total)}</span>
+                      </div>
+
+                      {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
+
+                      <button
+                        type="button"
+                        onClick={submit}
+                        disabled={sending}
+                        className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft transition-transform active:scale-[0.98] disabled:opacity-60"
+                      >
+                        {sending ? "Enviando…" : "Enviar pedido para recoger"}
+                      </button>
                     </>
                   )}
-
-                  <div className="mt-4 flex items-baseline justify-between border-t border-gold-soft/40 pt-4">
-                    <span className="smallcaps text-[11px] text-ink-soft">Total a pagar en tienda</span>
-                    <span className="font-display text-[20px] font-semibold text-navy">{formatCOP(cart.total)}</span>
-                  </div>
-
-                  {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
-
-                  <button
-                    type="button"
-                    onClick={submit}
-                    disabled={sending}
-                    className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft transition-transform active:scale-[0.98] disabled:opacity-60"
-                  >
-                    {sending ? "Enviando…" : "Enviar pedido para recoger"}
-                  </button>
                 </div>
               )}
 
