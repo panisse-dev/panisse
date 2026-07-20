@@ -19,3 +19,4 @@ dist/
 
 # Local Netlify folder
 .netlify
+.supabase-db-password

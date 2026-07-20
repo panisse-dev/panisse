@@ -1,10 +1,6 @@
 # La app Next.js vive en la subcarpeta web/ y se exporta como sitio estático.
+# El backend (menú, pedidos, clientes, analítica) vive en Supabase.
 [build]
   base = "web"
   command = "npm run build"
   publish = "out"
-
-# Funciones serverless (motor de pedidos), relativas a base = web/
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"

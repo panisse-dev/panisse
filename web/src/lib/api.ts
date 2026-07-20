@@ -1,5 +1,8 @@
+// Pedidos contra Supabase (RPCs create_order / get_order_public).
 import type { CartLine } from "./cart";
 import type { PublicOrder } from "./orders";
+import { rpc } from "./supabase";
+import { sessionId } from "./track";
 
 export interface CreatedOrder {
   id: string;
@@ -7,33 +10,34 @@ export interface CreatedOrder {
   status: string;
 }
 
+export interface CustomerInfo {
+  name: string;
+  phone: string;
+  note: string;
+  email?: string;
+  birthday?: string; // YYYY-MM-DD
+}
+
 export async function createOrder(
-  customer: { name: string; phone: string; note: string },
+  customer: CustomerInfo,
   lines: CartLine[],
 ): Promise<CreatedOrder> {
-  const res = await fetch("/api/orders", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
+  return rpc<CreatedOrder>("create_order", {
+    p: {
       customer,
       items: lines.map((l) => ({
         productId: l.productId,
-        name: l.name,
         variant: l.variant,
         note: l.note,
-        unitPrice: l.unitPrice,
         qty: l.qty,
       })),
-    }),
+      session_id: sessionId(),
+    },
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "No se pudo enviar el pedido");
-  return data as CreatedOrder;
 }
 
 export async function getOrderStatus(id: string): Promise<PublicOrder> {
-  const res = await fetch(`/api/order?id=${encodeURIComponent(id)}`);
-  const data = await res.json();
-  if (!res.ok) throw new Error(data?.error || "No se pudo consultar el pedido");
-  return data as PublicOrder;
+  const data = await rpc<PublicOrder | null>("get_order_public", { p_id: id });
+  if (!data) throw new Error("No se pudo consultar el pedido");
+  return data;
 }

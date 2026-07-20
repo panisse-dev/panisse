@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Layout, Menu, Product, Section } from "@/lib/menu";
+import { fetchMenuData, type Layout, type Menu, type Product, type Section } from "@/lib/menu";
+import { track } from "@/lib/track";
 import ProductRow from "./ProductRow";
 import ProductCard from "./ProductCard";
 import ProductSheet from "./ProductSheet";
@@ -89,8 +90,27 @@ function SectionBlock({
   );
 }
 
-export default function MenuClient({ menu }: { menu: Menu }) {
-  const [active, setActive] = useState(menu.sections[0]?.slug ?? "");
+export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
+  // El HTML llega con el menú del build (pinta al instante); al montar se
+  // reemplaza con el menú vivo de la base de datos (Supabase).
+  const [menu, setMenu] = useState(initialMenu);
+  const [active, setActive] = useState(initialMenu.sections[0]?.slug ?? "");
+
+  useEffect(() => {
+    track("menu_view", { menuSlug: initialMenu.slug });
+    let cancelled = false;
+    fetchMenuData()
+      .then((data) => {
+        const fresh = data.menus.find((m) => m.slug === initialMenu.slug);
+        if (fresh && !cancelled) setMenu(fresh);
+      })
+      .catch(() => {
+        /* sin conexión: se queda el menú del build */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialMenu.slug]);
   const [sheetProduct, setSheetProduct] = useState<Product | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const chipsRef = useRef<HTMLDivElement>(null);
@@ -162,7 +182,13 @@ export default function MenuClient({ menu }: { menu: Menu }) {
     }, 700);
   }, []);
 
-  const openProduct = useCallback((p: Product) => setSheetProduct(p), []);
+  const openProduct = useCallback(
+    (p: Product) => {
+      setSheetProduct(p);
+      track("product_view", { productId: p.id, menuSlug: initialMenu.slug });
+    },
+    [initialMenu.slug],
+  );
 
   return (
     <div className="page-col relative mx-auto min-h-dvh w-full max-w-md">

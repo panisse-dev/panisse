@@ -14,12 +14,24 @@ cd web && npm run build  # producción
 
 El contenido sale de `web/src/data/menu.json`, generado por `node scripts/build-web-data.mjs` a partir de los datos extraídos. Las imágenes viven en `web/public/images/`.
 
-### 🧾 Pedidos para recoger + panel de administración
+### 🗄️ Backend en Supabase
 
-- **Cliente**: agrega platos al carrito, hace el pedido (nombre, teléfono, nota) y ve el estado en vivo. Solo recoger en tienda; se paga al recoger.
-- **Empleado**: panel en `/admin` (protegido con clave). Ve los pedidos en tiempo real, con alerta sonora + destello al llegar uno nuevo, y botones grandes para avanzar el estado: **Recibido → En preparación → Listo para recoger → Recogido**.
-- **Motor**: funciones serverless de Netlify (`web/netlify/functions/`) + Netlify Blobs como almacén (sin base de datos externa ni cuentas nuevas).
-- **Clave del empleado**: variable de entorno `STAFF_ACCESS_CODE` en Netlify. Cambiar con `netlify env:set STAFF_ACCESS_CODE "nueva-clave"` y redesplegar.
+Todo el backend vive en **Supabase** (proyecto `panisse`, ref `vaefzheeuvpzmospjiee`, cuenta panisse-dev):
+
+- **Base de datos**: `menus` / `sections` / `products` (la carta), `clients` (nombre, celular, correo, cumpleaños), `orders` + `order_items` (pedidos), `events` (analítica) y `app_config` (clave del panel).
+- **La carta pública lee de la base en vivo** (`get_menu_data`): lo que se edita en el panel aparece al instante, sin redesplegar. El JSON del build (`web/src/data/menu.json`) queda solo como esqueleto de carga instantánea.
+- **Seguridad**: RLS bloquea clientes/pedidos para anónimos; todas las operaciones del panel pasan por funciones `staff_*` que verifican la clave (tabla `app_config`, llave `staff_code` — ahí se cambia).
+- **Fotos de productos**: bucket `product-images` (subida vía Edge Function `admin-upload`, protegida con la clave del panel).
+- **Migraciones**: `supabase/migrations/` (`supabase db push` para aplicar). El seed se regenera con `node scripts/gen-supabase-seed.mjs`.
+
+### 🧾 Pedidos + panel de administración (`/admin`)
+
+- **Cliente**: agrega platos al carrito, hace el pedido (nombre, teléfono, nota y opcionalmente correo/cumpleaños, que alimentan la base de clientes) y ve el estado en vivo. Solo recoger en tienda; se paga al recoger.
+- **Panel** (protegido con clave, réplica de menüpp):
+  - **Pedidos**: tiempo real con alerta sonora, avance de estado **Recibido → En preparación → Listo → Recogido**, aviso por WhatsApp, notas internas e historial por día.
+  - **Menú**: editar nombre, descripción, precios (con variantes y oferta), foto, etiquetas (Nuevo/Veg), esconder precio y mostrar/ocultar cada producto o editar categorías.
+  - **Clientes**: tabla con búsqueda, # pedidos y total gastado por cliente, agregar/editar/eliminar y exportar CSV.
+  - **Analítica**: visitas, sesiones, vistas de producto, pedidos, ingresos y conversión; gráficas por día/día de semana/hora, productos y categorías top, y dispositivos.
 
 ---
 

@@ -1,10 +1,12 @@
 "use client";
 
+// Pedidos: vista en vivo (con sonido para nuevos) + historial por día.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatCOP } from "@/lib/format";
 import { STATUS_LABEL, type Order, type OrderStatus } from "@/lib/orders";
+import { isAuthError, staffOrders, staffSetNote, staffSetStatus } from "@/lib/admin";
+import { useStaff } from "@/components/admin/AdminShell";
 
-const CODE_KEY = "panisse-staff-code";
 const POLL_MS = 8000;
 
 const NEXT: Record<OrderStatus, OrderStatus | null> = {
@@ -58,12 +60,14 @@ function waLink(o: Order): string | null {
   return `https://wa.me/${phone}?text=${encodeURIComponent(waMessage(o))}`;
 }
 
-export default function AdminPage() {
-  const [code, setCode] = useState("");
-  const [authed, setAuthed] = useState(false);
-  const [input, setInput] = useState("");
+function todayBogota(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
+}
+
+export default function PedidosPage() {
+  const { code, logout } = useStaff();
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loginError, setLoginError] = useState("");
+  const [day, setDay] = useState<string | null>(null); // null = en vivo
   const [connError, setConnError] = useState(false);
   const [flash, setFlash] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
@@ -73,33 +77,30 @@ export default function AdminPage() {
   const seenIds = useRef<Set<string>>(new Set());
   const audioCtx = useRef<AudioContext | null>(null);
   const firstLoad = useRef(true);
-
-  useEffect(() => {
-    document.title = "Panel de pedidos · PANISSE";
-    const saved = localStorage.getItem(CODE_KEY);
-    if (saved) {
-      setCode(saved);
-      setAuthed(true);
-    }
-  }, []);
+  const dayRef = useRef(day);
+  dayRef.current = day;
 
   const beep = useCallback(() => {
     if (!soundOn) return;
     try {
-      const ctx = audioCtx.current;
-      if (!ctx) return;
+      let ctx = audioCtx.current;
+      if (!ctx) {
+        ctx = new (window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        audioCtx.current = ctx;
+      }
       const play = (freq: number, start: number) => {
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
+        const o = ctx!.createOscillator();
+        const g = ctx!.createGain();
         o.connect(g);
-        g.connect(ctx.destination);
+        g.connect(ctx!.destination);
         o.frequency.value = freq;
         o.type = "sine";
-        g.gain.setValueAtTime(0.0001, ctx.currentTime + start);
-        g.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + start + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + start + 0.35);
-        o.start(ctx.currentTime + start);
-        o.stop(ctx.currentTime + start + 0.36);
+        g.gain.setValueAtTime(0.0001, ctx!.currentTime + start);
+        g.gain.exponentialRampToValueAtTime(0.35, ctx!.currentTime + start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx!.currentTime + start + 0.35);
+        o.start(ctx!.currentTime + start);
+        o.stop(ctx!.currentTime + start + 0.36);
       };
       play(880, 0);
       play(1174, 0.18);
@@ -108,23 +109,14 @@ export default function AdminPage() {
     }
   }, [soundOn]);
 
-  const poll = useCallback(async (staffCode: string) => {
+  const poll = useCallback(async () => {
     try {
-      const res = await fetch("/api/orders", { headers: { "x-staff-code": staffCode } });
-      if (res.status === 401) {
-        localStorage.removeItem(CODE_KEY);
-        setAuthed(false);
-        setCode("");
-        setLoginError("La clave ya no es válida. Ingresa de nuevo.");
-        return;
-      }
-      const data = await res.json();
+      const list = await staffOrders(code, dayRef.current);
       setConnError(false);
-      const list: Order[] = data.orders || [];
 
-      // Detecta pedidos nuevos (excepto en la primera carga)
+      // Detecta pedidos nuevos (sólo en vista en vivo, no en la primera carga)
       const currentIds = new Set(list.map((o) => o.id));
-      if (!firstLoad.current) {
+      if (!firstLoad.current && dayRef.current === null) {
         const hasNew = list.some((o) => !seenIds.current.has(o.id) && o.status === "recibido");
         if (hasNew) {
           beep();
@@ -135,88 +127,52 @@ export default function AdminPage() {
       seenIds.current = currentIds;
       firstLoad.current = false;
       setOrders(list);
-    } catch {
+    } catch (e) {
+      if (isAuthError(e)) {
+        logout();
+        return;
+      }
       setConnError(true);
     }
-  }, [beep]);
+  }, [code, beep, logout]);
 
-  // Polling — pausa cuando el panel no está visible (pantalla apagada / otra app)
-  // para no gastar cupo de Netlify haciendo chequeos innecesarios.
+  // Polling — pausa cuando el panel no está visible para no gastar recursos.
   useEffect(() => {
-    if (!authed || !code) return;
     firstLoad.current = true;
     seenIds.current = new Set();
-    poll(code);
+    poll();
     const iv = setInterval(() => {
-      if (!document.hidden) poll(code);
+      if (!document.hidden) poll();
     }, POLL_MS);
-    // Al volver a ver el panel, refresca de inmediato
     const onVisible = () => {
-      if (!document.hidden) poll(code);
+      if (!document.hidden) poll();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       clearInterval(iv);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [authed, code, poll]);
+  }, [poll, day]);
 
-  const login = async () => {
-    setLoginError("");
-    const c = input.trim();
-    if (!c) return;
-    // Verifica contra el servidor con una consulta real
+  const setStatus = async (order: Order, status: OrderStatus) => {
+    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status } : o)));
     try {
-      const res = await fetch("/api/orders", { headers: { "x-staff-code": c } });
-      if (res.status === 401) {
-        setLoginError("Clave incorrecta.");
-        return;
-      }
-      // Activa audio dentro del gesto del usuario
-      try {
-        audioCtx.current = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      } catch {
-        /* sin audio */
-      }
-      localStorage.setItem(CODE_KEY, c);
-      setCode(c);
-      setAuthed(true);
-    } catch {
-      setLoginError("No se pudo conectar. Revisa tu internet.");
+      await staffSetStatus(code, order.id, status);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else poll();
     }
   };
 
-  const advance = async (order: Order) => {
+  const advance = (order: Order) => {
     const next = NEXT[order.status];
-    if (!next) return;
-    // Optimista
-    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: next } : o)));
-    try {
-      await fetch("/api/orders/status", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-staff-code": code },
-        body: JSON.stringify({ id: order.id, status: next }),
-      });
-    } catch {
-      poll(code); // recarga si falla
-    }
+    if (next) setStatus(order, next);
   };
 
-  const revert = async (order: Order) => {
-    const order_flow: OrderStatus[] = ["recibido", "preparacion", "listo", "recogido"];
-    const idx = order_flow.indexOf(order.status);
-    if (idx <= 0) return;
-    const prevStatus = order_flow[idx - 1];
-    setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, status: prevStatus } : o)));
-    try {
-      await fetch("/api/orders/status", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-staff-code": code },
-        body: JSON.stringify({ id: order.id, status: prevStatus }),
-      });
-    } catch {
-      poll(code);
-    }
+  const revert = (order: Order) => {
+    const flow: OrderStatus[] = ["recibido", "preparacion", "listo", "recogido"];
+    const idx = flow.indexOf(order.status);
+    if (idx > 0) setStatus(order, flow[idx - 1]);
   };
 
   const startEditNote = (order: Order) => {
@@ -229,93 +185,102 @@ export default function AdminPage() {
     setNoteEditId(null);
     setOrders((prev) => prev.map((o) => (o.id === order.id ? { ...o, staffNote: note } : o)));
     try {
-      await fetch("/api/orders/note", {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-staff-code": code },
-        body: JSON.stringify({ id: order.id, note }),
-      });
-    } catch {
-      poll(code);
+      await staffSetNote(code, order.id, note);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else poll();
     }
   };
 
-  // ── Login ──
-  if (!authed) {
-    return (
-      <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-8">
-        <h1 className="text-center font-display text-[26px] text-navy">PANISSE</h1>
-        <p className="mt-1 text-center text-[13px] text-ink-faint">Panel de pedidos</p>
-        <input
-          type="password"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && login()}
-          placeholder="Clave de acceso"
-          className="mt-8 h-12 w-full border border-gold-soft/70 bg-card px-4 text-center text-[16px] tracking-wide text-ink outline-none focus:border-navy"
-          autoFocus
-        />
-        {loginError && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{loginError}</p>}
-        <button
-          type="button"
-          onClick={login}
-          className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft"
-        >
-          Entrar
-        </button>
-      </div>
-    );
-  }
-
+  const live = day === null;
   const active = orders.filter((o) => o.status !== "recogido");
   const done = orders.filter((o) => o.status === "recogido");
+  const dayTotal = orders.reduce((s, o) => s + o.total, 0);
 
   return (
-    <div className="mx-auto min-h-dvh max-w-2xl px-3 pb-16">
+    <div className="mx-auto max-w-2xl">
       {/* Destello de pedido nuevo */}
       {flash && (
         <div className="pointer-events-none fixed inset-0 z-50 animate-pulse border-[6px] border-[#b3261e]" aria-hidden />
       )}
 
-      {/* Encabezado */}
-      <header className="sticky top-0 z-20 -mx-3 flex items-center justify-between border-b border-gold-soft/50 bg-paper/95 px-4 py-3 backdrop-blur-md">
-        <div>
-          <h1 className="font-display text-[18px] leading-none text-navy">Pedidos</h1>
-          <p className="mt-0.5 text-[11px] text-ink-faint">
+      {/* Controles: en vivo / historial por día */}
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setDay(null)}
+            className={`smallcaps h-9 border px-3.5 text-[10.5px] font-medium ${
+              live ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 bg-card text-ink-soft"
+            }`}
+          >
+            En vivo
+          </button>
+          <input
+            type="date"
+            value={day ?? ""}
+            max={todayBogota()}
+            onChange={(e) => setDay(e.target.value || null)}
+            aria-label="Ver pedidos de un día"
+            className={`h-9 border bg-card px-2 text-[12.5px] text-ink-soft outline-none ${
+              live ? "border-gold-soft/60" : "border-navy"
+            }`}
+          />
+        </div>
+        {live ? (
+          <button
+            type="button"
+            onClick={() => setSoundOn((s) => !s)}
+            className={`flex h-9 items-center gap-1.5 rounded-full border px-3 text-[11px] font-medium ${
+              soundOn ? "border-verde/50 bg-verde/10 text-verde" : "border-ink-faint/40 text-ink-faint"
+            }`}
+            aria-pressed={soundOn}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              {soundOn ? (
+                <>
+                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                  <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" />
+                </>
+              ) : (
+                <>
+                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                  <path d="m23 9-6 6M17 9l6 6" />
+                </>
+              )}
+            </svg>
+            {soundOn ? "Sonido" : "Silencio"}
+          </button>
+        ) : (
+          <p className="text-[12px] text-ink-faint">
+            {orders.length} pedido{orders.length === 1 ? "" : "s"} · {formatCOP(dayTotal)}
+          </p>
+        )}
+      </div>
+
+      <p className="mt-2 text-[11px] text-ink-faint">
+        {live ? (
+          <>
             {active.length} activo{active.length === 1 ? "" : "s"}
             {connError && <span className="text-[#b3261e]"> · sin conexión</span>}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setSoundOn((s) => !s)}
-          className={`flex h-9 items-center gap-1.5 rounded-full border px-3 text-[11px] font-medium ${
-            soundOn ? "border-verde/50 bg-verde/10 text-verde" : "border-ink-faint/40 text-ink-faint"
-          }`}
-          aria-pressed={soundOn}
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            {soundOn ? (
-              <>
-                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
-                <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" />
-              </>
-            ) : (
-              <>
-                <path d="M11 5 6 9H2v6h4l5 4V5Z" />
-                <path d="m23 9-6 6M17 9l6 6" />
-              </>
-            )}
-          </svg>
-          {soundOn ? "Sonido" : "Silencio"}
-        </button>
-      </header>
+          </>
+        ) : (
+          <>Historial del {day}{connError && <span className="text-[#b3261e]"> · sin conexión</span>}</>
+        )}
+      </p>
 
       {/* Lista de pedidos activos */}
       {active.length === 0 ? (
         <p className="mt-16 text-center text-[13px] text-ink-faint">
-          No hay pedidos por ahora.
-          <br />
-          Los nuevos aparecerán aquí automáticamente.
+          {live ? (
+            <>
+              No hay pedidos por ahora.
+              <br />
+              Los nuevos aparecerán aquí automáticamente.
+            </>
+          ) : (
+            "Sin pedidos activos ese día."
+          )}
         </p>
       ) : (
         <ul className="mt-3 flex flex-col gap-3">
@@ -475,10 +440,12 @@ export default function AdminPage() {
         </ul>
       )}
 
-      {/* Recogidos recientes */}
+      {/* Recogidos */}
       {done.length > 0 && (
         <div className="mt-8">
-          <p className="smallcaps mb-2 text-[10px] text-ink-faint">Recogidos hoy</p>
+          <p className="smallcaps mb-2 text-[10px] text-ink-faint">
+            {live ? "Recogidos hoy" : "Recogidos"}
+          </p>
           <ul className="flex flex-col gap-1.5">
             {done
               .slice()
@@ -490,6 +457,7 @@ export default function AdminPage() {
                 >
                   <span>
                     <span className="font-semibold text-ink-soft">#{o.code}</span> {o.customer.name}
+                    <span className="ml-2 text-[11.5px]">{formatCOP(o.total)}</span>
                   </span>
                   <button type="button" onClick={() => revert(o)} className="text-[11px] underline">
                     Reabrir

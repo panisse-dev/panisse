@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
@@ -18,6 +18,9 @@ export default function CartBar() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
+  const [email, setEmail] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [moreOpen, setMoreOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [order, setOrder] = useState<CreatedOrder | null>(null);
@@ -61,7 +64,13 @@ export default function CartBar() {
     setSending(true);
     try {
       const created = await createOrder(
-        { name: name.trim(), phone: phone.trim(), note: note.trim() },
+        {
+          name: name.trim(),
+          phone: phone.trim(),
+          note: note.trim(),
+          email: email.trim() || undefined,
+          birthday: birthday || undefined,
+        },
         cart.lines,
       );
       setOrder(created);
@@ -81,6 +90,9 @@ export default function CartBar() {
     setName("");
     setPhone("");
     setNote("");
+    setEmail("");
+    setBirthday("");
+    setMoreOpen(false);
     setError("");
     setOrder(null);
   };
@@ -256,6 +268,43 @@ export default function CartBar() {
                       className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-navy"
                     />
                   </label>
+
+                  {/* Datos opcionales: alimentan la base de clientes */}
+                  {!moreOpen ? (
+                    <button
+                      type="button"
+                      onClick={() => setMoreOpen(true)}
+                      className="mt-3 flex items-center gap-1.5 text-[12px] font-medium text-gold-deep"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                        <path d="M12 5v14M5 12h14" />
+                      </svg>
+                      Correo y cumpleaños (opcional) — recibe sorpresas
+                    </button>
+                  ) : (
+                    <>
+                      <label className="mt-3.5 block">
+                        <span className="smallcaps text-[10px] text-gold-deep">Correo (opcional)</span>
+                        <input
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="tucorreo@ejemplo.com"
+                          inputMode="email"
+                          autoComplete="email"
+                          className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                        />
+                      </label>
+                      <label className="mt-3.5 block">
+                        <span className="smallcaps text-[10px] text-gold-deep">Cumpleaños (opcional)</span>
+                        <input
+                          type="date"
+                          value={birthday}
+                          onChange={(e) => setBirthday(e.target.value)}
+                          className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                        />
+                      </label>
+                    </>
+                  )}
 
                   <div className="mt-4 flex items-baseline justify-between border-t border-gold-soft/40 pt-4">
                     <span className="smallcaps text-[11px] text-ink-soft">Total a pagar en tienda</span>

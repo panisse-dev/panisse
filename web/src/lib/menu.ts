@@ -59,11 +59,24 @@ export interface Restaurant {
   currency: string;
 }
 
+// Copia estática generada en el build: sirve de esqueleto instantáneo.
+// La fuente de verdad vive en Supabase y se consulta al montar la página.
 export const restaurant: Restaurant = data.restaurant;
 export const menus: Menu[] = data.menus as Menu[];
 
 export function getMenu(slug: string): Menu | undefined {
   return menus.find((m) => m.slug === slug);
+}
+
+export interface MenuData {
+  restaurant: Restaurant;
+  menus: Menu[];
+}
+
+/** Menú fresco directamente desde la base de datos (Supabase). */
+export async function fetchMenuData(): Promise<MenuData> {
+  const { rpc } = await import("./supabase");
+  return rpc<MenuData>("get_menu_data");
 }
 
 export function formatCOP(value: number): string {
