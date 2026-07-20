@@ -21,6 +21,7 @@
      "name": "DESAYUNOS ESPECIALES",
      "description": "",
      "image": null,
+     "layout": "cards",
      "products": [],
      "subsections": [
       {
@@ -28,6 +29,7 @@
        "slug": "tostadas",
        "name": "TOSTADAS",
        "description": "Base de pan de hogaza.",
+       "layout": "cards",
        "products": [
         {
          "id": "UPwRyo0qqfiWqT5rdr8T",
@@ -87,6 +89,7 @@
        "slug": "panini",
        "name": "PANINI",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "A6MalQK1kyVnFJag5lM8",
@@ -129,6 +132,7 @@
        "slug": "especiales-de-la-casa",
        "name": "ESPECIALES DE LA CASA",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "Bmj4wvp6Xo506OCckXpx",
@@ -188,6 +192,7 @@
        "slug": "french-omelette",
        "name": "FRENCH OMELETTE",
        "description": "Omelette al mejor estilo francés.",
+       "layout": "cards",
        "products": [
         {
          "id": "VfR7aDyIExXNw7UyXR0t",
@@ -233,6 +238,7 @@
      "name": "DESAYUNOS CLÁSICOS",
      "description": "",
      "image": null,
+     "layout": "cards",
      "products": [],
      "subsections": [
       {
@@ -240,6 +246,7 @@
        "slug": "desayuno-toscana",
        "name": "DESAYUNO TOSCANA",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "6Bg3dW3NwjTVR82s6mff",
@@ -270,6 +277,7 @@
        "slug": "tradicionales",
        "name": "TRADICIONALES",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "vz6wy3qtlTDBrDdvKB4x",
@@ -317,6 +325,7 @@
        "slug": "favoritos",
        "name": "FAVORITOS",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "sMYoA2luBvkD6zsN3Tjp",
@@ -401,6 +410,7 @@
      "name": "BEBIDAS",
      "description": "CAFFÉ PANISSE",
      "image": null,
+     "layout": "list",
      "products": [],
      "subsections": [
       {
@@ -408,6 +418,7 @@
        "slug": "capuccino-latte",
        "name": "CAPUCCINO/LATTE",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "yLCi6w58sZ1g463K67hA",
@@ -489,6 +500,7 @@
        "slug": "espresso",
        "name": "ESPRESSO",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "U6TDjlKT6E4lv6noI49h",
@@ -548,6 +560,7 @@
        "slug": "preparaciones-con-cafe-frias",
        "name": "PREPARACIONES CON CAFÉ FRÍAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "pdZZkMpDPKEr3IDY8o34",
@@ -622,6 +635,7 @@
        "slug": "bebidas-calientes",
        "name": "BEBIDAS CALIENTES",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "vuZAFJST7PiYIHKytRP7",
@@ -720,6 +734,7 @@
        "slug": "bebidas-frias",
        "name": "BEBIDAS FRÍAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "Ztnw0EiqmEf8f4TSdP2j",
@@ -796,6 +811,7 @@
        "slug": "smoothies-jugos",
        "name": "SMOOTHIES & JUGOS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "yj8VhUHt1Msdb56QAy5m",
@@ -867,6 +883,7 @@
      "name": "ENTRADAS",
      "description": "",
      "image": null,
+     "layout": "cards",
      "products": [
       {
        "id": "R5pvzlRWSxHs8Zp8heEX",
@@ -1013,6 +1030,7 @@
      "name": "SOPAS",
      "description": "Acompañados con pan artesanal de masa madre.",
      "image": null,
+     "layout": "cards",
      "products": [
       {
        "id": "2aMiArOgilSSrCLm8Tnb",
@@ -1074,6 +1092,7 @@
      "name": "ENSALADAS",
      "description": "",
      "image": null,
+     "layout": "cards",
      "products": [
       {
        "id": "Q7Zzdzg7FcQz6vz89f0g",
@@ -1152,6 +1171,7 @@
      "name": "RISOTTOS & PASTAS",
      "description": "",
      "image": null,
+     "layout": "cards",
      "products": [],
      "subsections": [
       {
@@ -1159,6 +1179,7 @@
        "slug": "risottos",
        "name": "RISOTTOS",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "FN4TuW6g7IZ8HbtTOfUq",
@@ -1286,6 +1307,7 @@
        "slug": "pasta-tradizionale",
        "name": "PASTA TRADIZIONALE",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "t1HY2eChcTjtu2sOhzlC",
@@ -1328,6 +1350,7 @@
        "slug": "pasta-especiali",
        "name": "PASTA ESPECIALI",
        "description": "Pasta fettuccine acompañada de pan artesanal de masa madre.",
+       "layout": "cards",
        "products": [
         {
          "id": "LA2MJ03CPlbTRfMupNmI",
@@ -1387,6 +1410,7 @@
        "slug": "pasta-artigianale",
        "name": "PASTA ARTIGIANALE",
        "description": "Pasta artesanal hecha en casa acompañada con pan de masa madre.",
+       "layout": "cards",
        "products": [
         {
          "id": "0R0x5k3HUWT5WdKLbun9",
@@ -1463,6 +1487,7 @@
        "slug": "pollos-pescados",
        "name": "POLLOS & PESCADOS",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "nxuKGWLx7UiKrErcXk3Y",
@@ -1539,6 +1564,7 @@
        "slug": "cacerolas-panini",
        "name": "CACEROLAS & PANINI",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "3QlBxW0di8mNyUcf6D2a",
@@ -1598,6 +1624,7 @@
        "slug": "panini-italiano",
        "name": "PANINI ITALIANO",
        "description": "Acompañados con papas Chips .",
+       "layout": "cards",
        "products": [
         {
          "id": "gBUfD4QldUb4LMPordHc",
@@ -1660,6 +1687,7 @@
      "name": "PARRILLA",
      "description": "",
      "image": null,
+     "layout": "cards",
      "products": [],
      "subsections": [
       {
@@ -1667,6 +1695,7 @@
        "slug": "cortes-tradicionales",
        "name": "CORTES TRADICIONALES",
        "description": "Acompañados con ensalada y papas de la casa.",
+       "layout": "cards",
        "products": [
         {
          "id": "GM7wEYZ9BuJTTwhztLYj",
@@ -1743,6 +1772,7 @@
        "slug": "cortes-certified-angus-beef",
        "name": "CORTES CERTIFIED ANGUS BEEF",
        "description": "Los cortes de la marca CERTIFIED ANGUS BEEF son de la mas alta calidad con excelente marmoleo y sabor. Acompañados con ensalada y papas de la casa.",
+       "layout": "cards",
        "products": [
         {
          "id": "HBWAJw3mO7OWCwgSr5fR",
@@ -1805,6 +1835,7 @@
      "name": "PIZZAS",
      "description": "Para nuestras masas utilizamos Harina Italiana y fermentamos durante 24 horas para asegurarnos de brindar una pizza de alta calidad y con inigualable sabor.",
      "image": null,
+     "layout": "cards",
      "products": [
       {
        "id": "407QrV3DCzA2AfwQXRng",
@@ -2053,6 +2084,7 @@
      "name": "MENÚ BAMBINI",
      "description": "",
      "image": null,
+     "layout": "list",
      "products": [
       {
        "id": "LvntWy1O3ooJhDFBgq3l",
@@ -2114,6 +2146,7 @@
      "name": "PASTICCERIA",
      "description": "Información sobre alérgenos: si tienes alguna alergia alimentaria, restricción y/o intolerancia, te pedimos informarlo.",
      "image": null,
+     "layout": "cards",
      "products": [
       {
        "id": "0RjnNZTfX5yEqSjkNULE",
@@ -2224,6 +2257,7 @@
        "slug": "galleteria",
        "name": "GALLETERÍA",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "feYGPiocmxRu4ve4Ysnm",
@@ -2313,6 +2347,7 @@
        "slug": "tartaletas-pie",
        "name": "TARTALETAS/PIE",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "TfaKDYmJsYHPbiJqPz2d",
@@ -2372,6 +2407,7 @@
        "slug": "pasteles",
        "name": "PASTELES",
        "description": "",
+       "layout": "cards",
        "products": [
         {
          "id": "ClLljwjXD13MDv3wgyH4",
@@ -2451,6 +2487,7 @@
      "name": "PANETTERIA",
      "description": "VIENNOISERIE",
      "image": null,
+     "layout": "cards",
      "products": [
       {
        "id": "1elD07j8v4ADRmZ4n5ty",
@@ -2668,6 +2705,7 @@
      "name": "IL BAR",
      "description": "",
      "image": null,
+     "layout": "list",
      "products": [],
      "subsections": [
       {
@@ -2675,6 +2713,7 @@
        "slug": "d-autore",
        "name": "D'AUTORE",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "TPIsH0EfJTFHCtfivY43",
@@ -2734,6 +2773,7 @@
        "slug": "spritz-della-casa",
        "name": "SPRITZ DELLA CASA",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "yIdANzjGdLWvzodFizSU",
@@ -2810,6 +2850,7 @@
        "slug": "mocktail",
        "name": "MOCKTAIL",
        "description": "CÓCTELES SIN ALCOHOL",
+       "layout": "list",
        "products": [
         {
          "id": "MA22oIChaKuBQyzZlxmL",
@@ -2869,6 +2910,7 @@
        "slug": "classici",
        "name": "CLASSICI",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "YWpY8yPQ90EpAKHG3UUV",
@@ -3152,6 +3194,7 @@
      "name": "BEBIDAS",
      "description": "",
      "image": null,
+     "layout": "list",
      "products": [],
      "subsections": [
       {
@@ -3159,6 +3202,7 @@
        "slug": "limonata",
        "name": "LIMONATA",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "g2gtpVQOWzzktfGBYz5I",
@@ -3269,6 +3313,7 @@
        "slug": "jugos",
        "name": "JUGOS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "OZQEYmzGxKazGgsaDckc",
@@ -3338,6 +3383,7 @@
        "slug": "sodas-italianas",
        "name": "SODAS ITALIANAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "Mv129koKJU6eYl6EY3pk",
@@ -3431,6 +3477,7 @@
        "slug": "cervezas-otros",
        "name": "CERVEZAS & OTROS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "wqRi48d2hhz5S5nLGMka",
@@ -3558,6 +3605,7 @@
        "slug": "bebidas-frias",
        "name": "BEBIDAS FRÍAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "Ztnw0EiqmEf8f4TSdP2j",
@@ -3617,6 +3665,7 @@
        "slug": "preparaciones-especiales",
        "name": "PREPARACIONES ESPECIALES",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "WVOtBPJarBw2ooObBSfh",
@@ -3704,6 +3753,7 @@
      "name": "CAFFÉ PANISSE",
      "description": "",
      "image": null,
+     "layout": "list",
      "products": [],
      "subsections": [
       {
@@ -3711,6 +3761,7 @@
        "slug": "capuccino-latte",
        "name": "CAPUCCINO/LATTE",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "yLCi6w58sZ1g463K67hA",
@@ -3792,6 +3843,7 @@
        "slug": "espresso",
        "name": "ESPRESSO",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "U6TDjlKT6E4lv6noI49h",
@@ -3851,6 +3903,7 @@
        "slug": "preparaciones-con-cafe-frias",
        "name": "PREPARACIONES CON CAFÉ FRÍAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "pdZZkMpDPKEr3IDY8o34",
@@ -3925,6 +3978,7 @@
        "slug": "bebidas-calientes",
        "name": "BEBIDAS CALIENTES",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "vuZAFJST7PiYIHKytRP7",
@@ -4035,6 +4089,7 @@
      "name": "VINOS",
      "description": "",
      "image": null,
+     "layout": "list",
      "products": [],
      "subsections": [
       {
@@ -4042,6 +4097,7 @@
        "slug": "vinos-por-copa",
        "name": "VINOS POR COPA",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "cogca3ogAzSeZhbg1XCr",
@@ -4152,6 +4208,7 @@
        "slug": "della-casa",
        "name": "DELLA CASA",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "lGswL1ELTD6oefx0FdTZ",
@@ -4177,6 +4234,7 @@
        "slug": "generosos",
        "name": "GENEROSOS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "XWSczrzhu2u6XJ3kKOpA",
@@ -4219,6 +4277,7 @@
        "slug": "frizzante",
        "name": "FRIZZANTE",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "PleexbDNhnRv35DJ5lBq",
@@ -4334,6 +4393,7 @@
        "slug": "blanco",
        "name": "BLANCO",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "WrHz4BLYPnsLjGWHnmZN",
@@ -4512,6 +4572,7 @@
        "slug": "rose",
        "name": "ROSÉ",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "423nWe3vhlQstZihS127",
@@ -4656,6 +4717,7 @@
        "slug": "tinto",
        "name": "TINTO",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "packrMOBFFQpwhgHf6hn",
@@ -5089,6 +5151,7 @@
        "slug": "postres",
        "name": "POSTRES",
        "description": "Vinos de cosecha tardia",
+       "layout": "list",
        "products": [
         {
          "id": "w9gf5yWIMEDCYdecfuD1",
@@ -5114,6 +5177,7 @@
        "slug": "medias-botellas",
        "name": "MEDIAS BOTELLAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "nTElgy8J4KHLLkcC7kFb",
@@ -5190,6 +5254,7 @@
        "slug": "sangrias",
        "name": "SANGRÍAS",
        "description": "",
+       "layout": "list",
        "products": [
         {
          "id": "jfusDC8KAun5ZE0qQNw7",

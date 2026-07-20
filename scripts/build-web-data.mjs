@@ -141,11 +141,14 @@ for (const menu of full.menus) {
   for (const root of roots) {
     const subs = keptCats.filter(c => c.hierarchy === root._id).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     const direct = prodsByCat[root._id] || [];
+    // menupp usaba col-6 (hybrid) = tarjetas y col-12 (list) = lista de ancho completo
+    const layoutOf = (c) => (c.styles === 'col-6' || c.type === 'hybrid' ? 'cards' : 'list');
     const subsections = subs.map(sc => ({
       id: sc._id,
       slug: uniqueSlug(sc.name),
       name: sc.name,
       description: stripHtml(sc.description),
+      layout: layoutOf(sc),
       products: prodsByCat[sc._id] || [],
     })).filter(ss => ss.products.length > 0);
     if (direct.length === 0 && subsections.length === 0) continue; // drop empty section
@@ -155,6 +158,7 @@ for (const menu of full.menus) {
       name: root.name,
       description: stripHtml(root.description),
       image: localImage(root.image_url, 'categories'),
+      layout: layoutOf(root),
       products: direct,
       subsections,
     });

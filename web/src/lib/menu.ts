@@ -18,11 +18,14 @@ export interface Product {
   order: number;
 }
 
+export type Layout = "cards" | "list";
+
 export interface Subsection {
   id: string;
   slug: string;
   name: string;
   description: string;
+  layout: Layout;
   products: Product[];
 }
 
@@ -32,6 +35,7 @@ export interface Section {
   name: string;
   description: string;
   image: string | null;
+  layout: Layout;
   products: Product[];
   subsections: Subsection[];
 }

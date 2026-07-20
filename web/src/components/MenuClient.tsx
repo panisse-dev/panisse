@@ -2,14 +2,42 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { Menu, Product, Section } from "@/lib/menu";
+import type { Layout, Menu, Product, Section } from "@/lib/menu";
 import ProductRow from "./ProductRow";
+import ProductCard from "./ProductCard";
 import ProductSheet from "./ProductSheet";
 import SearchOverlay from "./SearchOverlay";
 import CartBar from "./CartBar";
 import MyOrders from "./MyOrders";
 
 const HEADER_OFFSET = 128; // alto aprox. del encabezado sticky (barra + chips)
+
+function ProductGroup({
+  products,
+  layout,
+  onOpen,
+}: {
+  products: Product[];
+  layout: Layout;
+  onOpen: (p: Product) => void;
+}) {
+  if (layout === "cards") {
+    return (
+      <div className="grid grid-cols-2 gap-2.5 pt-1">
+        {products.map((p) => (
+          <ProductCard key={p.id} product={p} onOpen={onOpen} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="divide-y divide-gold-soft/25">
+      {products.map((p) => (
+        <ProductRow key={p.id} product={p} onOpen={onOpen} />
+      ))}
+    </div>
+  );
+}
 
 function SectionBlock({
   section,
@@ -22,9 +50,9 @@ function SectionBlock({
     <section
       id={section.slug}
       aria-label={section.name}
-      className="mx-3 mt-7 scroll-mt-[124px] border border-gold-soft/35 bg-white/65 px-5 pb-4 pt-7 shadow-[0_1px_10px_rgba(4,27,49,0.05)]"
+      className="mx-3 mt-7 scroll-mt-[124px] border border-gold-soft/35 bg-white/65 px-4 pb-4 pt-7 shadow-[0_1px_10px_rgba(4,27,49,0.05)]"
     >
-      <header className="mb-2 text-center">
+      <header className="mb-3 px-1 text-center">
         <div className="ornament text-gold">
           <h2 className="font-display text-[22px] leading-tight text-navy">{section.name}</h2>
         </div>
@@ -36,16 +64,12 @@ function SectionBlock({
       </header>
 
       {section.products.length > 0 && (
-        <div className="divide-y divide-gold-soft/25">
-          {section.products.map((p) => (
-            <ProductRow key={p.id} product={p} onOpen={onOpen} />
-          ))}
-        </div>
+        <ProductGroup products={section.products} layout={section.layout} onOpen={onOpen} />
       )}
 
       {section.subsections.map((ss) => (
         <div key={ss.id} className="pt-5">
-          <header className="mb-1 text-center">
+          <header className="mb-2 px-1 text-center">
             <h3 className="smallcaps text-[12.5px] font-semibold text-gold-deep">{ss.name}</h3>
             {ss.description && (
               <p className="mt-1 font-display text-[13px] italic leading-snug text-ink-soft">
@@ -53,11 +77,7 @@ function SectionBlock({
               </p>
             )}
           </header>
-          <div className="divide-y divide-gold-soft/25">
-            {ss.products.map((p) => (
-              <ProductRow key={p.id} product={p} onOpen={onOpen} />
-            ))}
-          </div>
+          <ProductGroup products={ss.products} layout={ss.layout} onOpen={onOpen} />
         </div>
       ))}
     </section>
