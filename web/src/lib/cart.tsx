@@ -34,28 +34,62 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const atRef = useRef<number | null>(null); // cuándo se agregó el primer producto
 
-  // Cargar tras montar (evita desajuste servidor/cliente)
-  useEffect(() => {
+  // localStorage es la fuente de verdad compartida: al volver a esta
+  // pestaña (o si otra pestaña cambió el carrito, p. ej. lo vació al
+  // enviar un pedido) adoptamos lo que haya guardado.
+  const syncFromStorage = useCallback(() => {
     try {
       const raw = localStorage.getItem(KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (parsed && Array.isArray(parsed.lines)) {
-          const age = Date.now() - (parsed.at || 0);
-          if (parsed.lines.length > 0 && age <= MAX_AGE) {
-            // normaliza líneas viejas sin `note`
-            setLines((parsed.lines as CartLine[]).map((l) => ({ ...l, note: l.note || "" })));
-            atRef.current = parsed.at || Date.now();
-          } else {
-            localStorage.removeItem(KEY); // carrito viejo → se descarta
-          }
+      if (!raw) {
+        atRef.current = null;
+        setLines((prev) => (prev.length === 0 ? prev : []));
+        return;
+      }
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.lines)) {
+        const age = Date.now() - (parsed.at || 0);
+        if (parsed.lines.length > 0 && age <= MAX_AGE) {
+          atRef.current = parsed.at || Date.now();
+          // normaliza líneas viejas sin `note`
+          const next = (parsed.lines as CartLine[]).map((l) => ({ ...l, note: l.note || "" }));
+          setLines((prev) => (JSON.stringify(prev) === JSON.stringify(next) ? prev : next));
+        } else {
+          localStorage.removeItem(KEY); // carrito viejo → se descarta
+          atRef.current = null;
+          setLines((prev) => (prev.length === 0 ? prev : []));
         }
       }
     } catch {
       /* ignore */
     }
-    setReady(true);
   }, []);
+
+  // Cargar tras montar (evita desajuste servidor/cliente)
+  useEffect(() => {
+    syncFromStorage();
+    setReady(true);
+  }, [syncFromStorage]);
+
+  // Sincroniza entre pestañas y al volver a la app (Safari suspendida,
+  // pestaña restaurada, QR escaneado de nuevo…): así un pedido enviado
+  // en cualquier pestaña vacía el carrito en todas.
+  useEffect(() => {
+    if (!ready) return;
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY || e.key === null) syncFromStorage();
+    };
+    const onReturn = () => {
+      if (!document.hidden) syncFromStorage();
+    };
+    window.addEventListener("storage", onStorage);
+    window.addEventListener("pageshow", onReturn);
+    document.addEventListener("visibilitychange", onReturn);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener("pageshow", onReturn);
+      document.removeEventListener("visibilitychange", onReturn);
+    };
+  }, [ready, syncFromStorage]);
 
   useEffect(() => {
     if (!ready) return;
@@ -96,7 +130,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setLines((prev) => prev.filter((l) => keyOf(l) !== k));
   }, []);
 
-  const clear = useCallback(() => setLines([]), []);
+  const clear = useCallback(() => {
+    setLines([]);
+    atRef.current = null;
+    // Borra el guardado de inmediato (sin esperar al efecto) para que
+    // el carrito no reviva si la página se cierra justo tras el pedido.
+    try {
+      localStorage.removeItem(KEY);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const value = useMemo<CartAPI>(() => {
     const count = lines.reduce((s, l) => s + l.qty, 0);
