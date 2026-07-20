@@ -85,18 +85,22 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
         list.map(async (o) => {
           try {
             const s = await getOrderStatus(o.id);
-            return { id: o.id, status: s.status };
+            // null = el pedido ya no existe → se marca para quitarlo;
+            // string = estado nuevo.
+            return { id: o.id, status: s ? s.status : null };
           } catch {
-            return null;
+            // error de red: se deja igual y se reintenta luego
+            return { id: o.id, status: undefined };
           }
         }),
       );
       if (stop) return;
       setOrders((prev) =>
         prune(
-          prev.map((o) => {
-            const u = updates.find((x) => x && x.id === o.id);
-            return u ? { ...o, status: u.status } : o;
+          prev.flatMap((o) => {
+            const u = updates.find((x) => x.id === o.id);
+            if (u && u.status === null) return []; // pedido borrado → fuera del seguimiento
+            return [u && u.status ? { ...o, status: u.status } : o];
           }),
         ),
       );

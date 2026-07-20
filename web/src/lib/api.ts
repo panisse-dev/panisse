@@ -43,8 +43,8 @@ export async function createOrder(
   });
 }
 
-export async function getOrderStatus(id: string): Promise<PublicOrder> {
-  const data = await rpc<PublicOrder | null>("get_order_public", { p_id: id });
-  if (!data) throw new Error("No se pudo consultar el pedido");
-  return data;
+// Devuelve null cuando el pedido ya no existe en el servidor (borrado o
+// expirado). Un error de red se propaga como excepción para reintentar.
+export async function getOrderStatus(id: string): Promise<PublicOrder | null> {
+  return rpc<PublicOrder | null>("get_order_public", { p_id: id });
 }

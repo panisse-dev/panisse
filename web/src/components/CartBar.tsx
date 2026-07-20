@@ -44,7 +44,7 @@ export default function CartBar() {
       if (document.hidden) return; // no chequear con la pantalla apagada
       try {
         const s = await getOrderStatus(order.id);
-        if (!stop) setLiveStatus(s.status);
+        if (!stop && s) setLiveStatus(s.status);
       } catch {
         /* reintenta en el próximo ciclo */
       }
