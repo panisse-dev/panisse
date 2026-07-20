@@ -46,11 +46,16 @@ function SectionBlock({
   section: Section;
   onOpen: (p: Product) => void;
 }) {
+  const cards = section.layout === "cards";
   return (
     <section
       id={section.slug}
       aria-label={section.name}
-      className="mx-3 mt-7 scroll-mt-[124px] border border-gold-soft/35 bg-white/65 px-4 pb-4 pt-7 shadow-[0_1px_10px_rgba(4,27,49,0.05)]"
+      className={`mx-3 mt-7 scroll-mt-[124px] px-4 pb-4 pt-7 ${
+        cards
+          ? ""
+          : "border border-gold-soft/35 bg-white/65 shadow-[0_1px_10px_rgba(4,27,49,0.05)]"
+      }`}
     >
       <header className="mb-3 px-1 text-center">
         <div className="ornament text-gold">

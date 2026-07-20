@@ -25,10 +25,10 @@ export default function ProductCard({
     <button
       type="button"
       onClick={() => onOpen(product)}
-      className="group flex flex-col overflow-hidden border border-gold-soft/50 bg-card text-left shadow-[0_1px_6px_rgba(4,27,49,0.06)] transition-transform active:scale-[0.98]"
+      className="group flex flex-col overflow-hidden bg-white/45 text-left shadow-[0_2px_12px_rgba(4,27,49,0.08)] backdrop-blur-sm transition-transform active:scale-[0.98]"
     >
       {/* Imagen (o placeholder elegante) */}
-      <div className="relative aspect-square w-full overflow-hidden bg-paper-deep">
+      <div className="relative aspect-square w-full overflow-hidden bg-white/25">
         {product.image ? (
           <Image
             src={product.image}
@@ -38,7 +38,7 @@ export default function ProductCard({
             className="object-cover"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-paper to-paper-deep">
+          <div className="flex h-full w-full items-center justify-center">
             <svg viewBox="0 0 24 24" className="h-8 w-8 text-gold-soft/60" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M7 3v7M5 3v3.5A2 2 0 0 0 7 8.5 2 2 0 0 0 9 6.5V3M7 10v11M15 3c-1.7 1.2-2.5 3-2.5 5 0 1.7 1 3 2.5 3s2.5-1.3 2.5-3c0-2-.8-3.8-2.5-5ZM15 11v10" />
             </svg>
