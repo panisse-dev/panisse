@@ -1,6 +1,8 @@
 "use client";
 
 // Pedidos: vista en vivo (con sonido para nuevos) + historial por día.
+// En escritorio se muestra como tablero por estado (columnas); en móvil,
+// como una sola lista ordenada por hora.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatCOP } from "@/lib/format";
 import { STATUS_LABEL, type Order, type OrderStatus } from "@/lib/orders";
@@ -27,6 +29,13 @@ const STATUS_STYLE: Record<OrderStatus, string> = {
   listo: "bg-verde text-white",
   recogido: "bg-ink-faint/25 text-ink-soft",
 };
+
+// Columnas del tablero (escritorio), en orden del flujo de trabajo.
+const COLUMNS: { status: OrderStatus; title: string; dot: string }[] = [
+  { status: "recibido", title: "Nuevos", dot: "bg-[#b3261e]" },
+  { status: "preparacion", title: "En preparación", dot: "bg-gold-deep" },
+  { status: "listo", title: "Listos para recoger", dot: "bg-verde" },
+];
 
 function timeAgo(iso: string): string {
   const mins = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
@@ -197,17 +206,170 @@ export default function PedidosPage() {
   const active = orders.filter((o) => o.status !== "recogido");
   const done = orders.filter((o) => o.status === "recogido");
   const dayTotal = orders.reduce((s, o) => s + o.total, 0);
+  const byStatus = (s: OrderStatus) =>
+    active.filter((o) => o.status === s).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+
+  // Tarjeta de un pedido — la misma en el tablero (escritorio) y la lista (móvil).
+  const card = (o: Order) => (
+    <div
+      key={o.id}
+      className="border border-gold-soft/50 bg-card shadow-[0_1px_8px_rgba(4,27,49,0.06)]"
+    >
+      <div className="flex items-start justify-between gap-3 px-4 pt-3.5">
+        <div className="min-w-0">
+          <p className="font-display text-[22px] leading-none text-navy">#{o.code}</p>
+          <p className="mt-1 text-[13px] font-medium text-ink">{o.customer.name}</p>
+          {o.customer.phone && (
+            <a href={`tel:${o.customer.phone}`} className="text-[12px] text-gold-deep underline">
+              {o.customer.phone}
+            </a>
+          )}
+        </div>
+        <div className="text-right">
+          <span className={`smallcaps inline-block px-2 py-1 text-[10px] font-semibold ${STATUS_STYLE[o.status]}`}>
+            {STATUS_LABEL[o.status]}
+          </span>
+          <p className="mt-1 text-[11px] text-ink-faint">{timeAgo(o.createdAt)}</p>
+        </div>
+      </div>
+
+      <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
+        {o.items.map((it, i) => (
+          <li key={i} className="py-0.5">
+            <div className="flex justify-between gap-2">
+              <span>
+                <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
+                {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
+              </span>
+              <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
+            </div>
+            {it.note && (
+              <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">
+                ↳ {it.note}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      {o.customer.note && (
+        <p className="mx-4 mb-1 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
+          <span className="smallcaps mr-1 text-[9px] not-italic text-gold-deep">Cliente:</span>
+          “{o.customer.note}”
+        </p>
+      )}
+
+      {/* Nota interna del restaurante */}
+      <div className="border-t border-gold-soft/25 px-4 py-2">
+        {noteEditId === o.id ? (
+          <div>
+            <textarea
+              value={noteDraft}
+              onChange={(e) => setNoteDraft(e.target.value)}
+              rows={2}
+              autoFocus
+              placeholder="Nota interna (ej. pagó, mesa 5, cliente frecuente…)"
+              className="w-full resize-none border border-gold-soft/70 bg-paper px-2.5 py-2 text-[13px] text-ink outline-none focus:border-navy"
+            />
+            <div className="mt-1.5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => saveNote(o)}
+                className="h-9 flex-1 bg-navy text-[12.5px] font-semibold text-gold-soft"
+              >
+                Guardar nota
+              </button>
+              <button
+                type="button"
+                onClick={() => setNoteEditId(null)}
+                className="h-9 border border-gold-soft/60 px-4 text-[12.5px] text-ink-soft"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : o.staffNote ? (
+          <button
+            type="button"
+            onClick={() => startEditNote(o)}
+            className="flex w-full items-start gap-2 border-l-2 border-navy bg-navy/[0.03] px-2.5 py-1.5 text-left"
+          >
+            <svg viewBox="0 0 24 24" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-navy" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+            <span className="flex-1 text-[12.5px] text-navy">{o.staffNote}</span>
+            <span className="smallcaps shrink-0 text-[9px] text-gold-deep">Editar</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => startEditNote(o)}
+            className="flex items-center gap-1.5 text-[12px] font-medium text-gold-deep"
+          >
+            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Agregar nota interna
+          </button>
+        )}
+      </div>
+
+      <div className="flex items-center justify-between gap-3 border-t border-gold-soft/25 px-4 py-2">
+        <span className="text-[13px] font-semibold text-navy">Total {formatCOP(o.total)}</span>
+        {o.status !== "recibido" && (
+          <button
+            type="button"
+            onClick={() => revert(o)}
+            className="text-[11.5px] text-ink-faint underline"
+          >
+            Deshacer
+          </button>
+        )}
+      </div>
+
+      {waLink(o) ? (
+        <a
+          href={waLink(o)!}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex h-11 w-full items-center justify-center gap-2 border-t border-gold-soft/25 bg-verde/10 text-[13.5px] font-semibold text-verde hover:bg-verde/15"
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
+          </svg>
+          Avisar por WhatsApp
+        </a>
+      ) : (
+        o.customer.phone ? null : (
+          <p className="border-t border-gold-soft/25 px-4 py-1.5 text-center text-[11px] text-ink-faint">
+            Sin teléfono para avisar
+          </p>
+        )
+      )}
+
+      {NEXT[o.status] && (
+        <button
+          type="button"
+          onClick={() => advance(o)}
+          className="h-13 w-full bg-navy py-3.5 text-[15px] font-semibold text-gold-soft transition-transform hover:bg-navy/90 active:scale-[0.99]"
+        >
+          {NEXT_LABEL[o.status]}
+        </button>
+      )}
+    </div>
+  );
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div>
       {/* Destello de pedido nuevo */}
       {flash && (
         <div className="pointer-events-none fixed inset-0 z-50 animate-pulse border-[6px] border-[#b3261e]" aria-hidden />
       )}
 
       {/* Controles: en vivo / historial por día */}
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <div className="mt-3 flex items-center justify-between gap-2 lg:mt-0">
         <div className="flex items-center gap-1.5">
+          <h1 className="mr-2 hidden font-display text-[20px] text-navy lg:block">Pedidos</h1>
           <button
             type="button"
             onClick={() => setDay(null)}
@@ -270,7 +432,7 @@ export default function PedidosPage() {
         )}
       </p>
 
-      {/* Lista de pedidos activos */}
+      {/* Pedidos activos */}
       {active.length === 0 ? (
         <p className="mt-16 text-center text-[13px] text-ink-faint">
           {live ? (
@@ -284,161 +446,38 @@ export default function PedidosPage() {
           )}
         </p>
       ) : (
-        <ul className="mt-3 flex flex-col gap-3">
-          {active
-            .slice()
-            .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-            .map((o) => (
-              <li
-                key={o.id}
-                className="border border-gold-soft/50 bg-card shadow-[0_1px_8px_rgba(4,27,49,0.06)]"
-              >
-                <div className="flex items-start justify-between gap-3 px-4 pt-3.5">
-                  <div className="min-w-0">
-                    <p className="font-display text-[22px] leading-none text-navy">#{o.code}</p>
-                    <p className="mt-1 text-[13px] font-medium text-ink">{o.customer.name}</p>
-                    {o.customer.phone && (
-                      <a href={`tel:${o.customer.phone}`} className="text-[12px] text-gold-deep underline">
-                        {o.customer.phone}
-                      </a>
+        <>
+          {/* Tablero por estado — escritorio */}
+          <div className="mt-4 hidden gap-4 lg:grid lg:grid-cols-3 lg:items-start">
+            {COLUMNS.map((col) => {
+              const list = byStatus(col.status);
+              return (
+                <section key={col.status} className="rounded-lg bg-paper-deep/40 p-2.5">
+                  <header className="mb-2.5 flex items-center gap-2 px-1">
+                    <span className={`h-2.5 w-2.5 rounded-full ${col.dot}`} />
+                    <h2 className="smallcaps text-[11px] font-semibold text-navy">{col.title}</h2>
+                    <span className="ml-auto text-[11px] font-medium text-ink-faint">{list.length}</span>
+                  </header>
+                  <div className="flex flex-col gap-3">
+                    {list.length === 0 ? (
+                      <p className="px-1 py-6 text-center text-[11.5px] text-ink-faint/70">Sin pedidos</p>
+                    ) : (
+                      list.map(card)
                     )}
                   </div>
-                  <div className="text-right">
-                    <span className={`smallcaps inline-block px-2 py-1 text-[10px] font-semibold ${STATUS_STYLE[o.status]}`}>
-                      {STATUS_LABEL[o.status]}
-                    </span>
-                    <p className="mt-1 text-[11px] text-ink-faint">{timeAgo(o.createdAt)}</p>
-                  </div>
-                </div>
+                </section>
+              );
+            })}
+          </div>
 
-                <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
-                  {o.items.map((it, i) => (
-                    <li key={i} className="py-0.5">
-                      <div className="flex justify-between gap-2">
-                        <span>
-                          <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
-                          {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
-                        </span>
-                        <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
-                      </div>
-                      {it.note && (
-                        <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">
-                          ↳ {it.note}
-                        </p>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-
-                {o.customer.note && (
-                  <p className="mx-4 mb-1 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
-                    <span className="smallcaps mr-1 text-[9px] not-italic text-gold-deep">Cliente:</span>
-                    “{o.customer.note}”
-                  </p>
-                )}
-
-                {/* Nota interna del restaurante */}
-                <div className="border-t border-gold-soft/25 px-4 py-2">
-                  {noteEditId === o.id ? (
-                    <div>
-                      <textarea
-                        value={noteDraft}
-                        onChange={(e) => setNoteDraft(e.target.value)}
-                        rows={2}
-                        autoFocus
-                        placeholder="Nota interna (ej. pagó, mesa 5, cliente frecuente…)"
-                        className="w-full resize-none border border-gold-soft/70 bg-paper px-2.5 py-2 text-[13px] text-ink outline-none focus:border-navy"
-                      />
-                      <div className="mt-1.5 flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => saveNote(o)}
-                          className="h-9 flex-1 bg-navy text-[12.5px] font-semibold text-gold-soft"
-                        >
-                          Guardar nota
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setNoteEditId(null)}
-                          className="h-9 border border-gold-soft/60 px-4 text-[12.5px] text-ink-soft"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
-                    </div>
-                  ) : o.staffNote ? (
-                    <button
-                      type="button"
-                      onClick={() => startEditNote(o)}
-                      className="flex w-full items-start gap-2 border-l-2 border-navy bg-navy/[0.03] px-2.5 py-1.5 text-left"
-                    >
-                      <svg viewBox="0 0 24 24" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-navy" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-                      </svg>
-                      <span className="flex-1 text-[12.5px] text-navy">{o.staffNote}</span>
-                      <span className="smallcaps shrink-0 text-[9px] text-gold-deep">Editar</span>
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => startEditNote(o)}
-                      className="flex items-center gap-1.5 text-[12px] font-medium text-gold-deep"
-                    >
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                      Agregar nota interna
-                    </button>
-                  )}
-                </div>
-
-                <div className="flex items-center justify-between gap-3 border-t border-gold-soft/25 px-4 py-2">
-                  <span className="text-[13px] font-semibold text-navy">
-                    Total {formatCOP(o.total)}
-                  </span>
-                  {o.status !== "recibido" && (
-                    <button
-                      type="button"
-                      onClick={() => revert(o)}
-                      className="text-[11.5px] text-ink-faint underline"
-                    >
-                      Deshacer
-                    </button>
-                  )}
-                </div>
-
-                {waLink(o) ? (
-                  <a
-                    href={waLink(o)!}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-11 w-full items-center justify-center gap-2 border-t border-gold-soft/25 bg-verde/10 text-[13.5px] font-semibold text-verde"
-                  >
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
-                      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
-                    </svg>
-                    Avisar por WhatsApp
-                  </a>
-                ) : (
-                  o.customer.phone ? null : (
-                    <p className="border-t border-gold-soft/25 px-4 py-1.5 text-center text-[11px] text-ink-faint">
-                      Sin teléfono para avisar
-                    </p>
-                  )
-                )}
-
-                {NEXT[o.status] && (
-                  <button
-                    type="button"
-                    onClick={() => advance(o)}
-                    className="h-13 w-full bg-navy py-3.5 text-[15px] font-semibold text-gold-soft transition-transform active:scale-[0.99]"
-                  >
-                    {NEXT_LABEL[o.status]}
-                  </button>
-                )}
-              </li>
-            ))}
-        </ul>
+          {/* Lista única — móvil */}
+          <div className="mx-auto mt-3 flex max-w-2xl flex-col gap-3 lg:hidden">
+            {active
+              .slice()
+              .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+              .map(card)}
+          </div>
+        </>
       )}
 
       {/* Recogidos */}
@@ -447,12 +486,12 @@ export default function PedidosPage() {
           <p className="smallcaps mb-2 text-[10px] text-ink-faint">
             {live ? "Recogidos hoy" : "Recogidos"}
           </p>
-          <ul className="flex flex-col gap-1.5">
+          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
             {done
               .slice()
               .sort((a, b) => b.statusAt.localeCompare(a.statusAt))
               .map((o) => (
-                <li
+                <div
                   key={o.id}
                   className="flex items-center justify-between border border-gold-soft/30 bg-paper/60 px-4 py-2 text-[13px] text-ink-faint"
                 >
@@ -463,9 +502,9 @@ export default function PedidosPage() {
                   <button type="button" onClick={() => revert(o)} className="text-[11px] underline">
                     Reabrir
                   </button>
-                </li>
+                </div>
               ))}
-          </ul>
+          </div>
         </div>
       )}
     </div>

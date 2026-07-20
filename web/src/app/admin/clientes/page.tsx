@@ -156,7 +156,8 @@ export default function ClientesPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl">
+      <h1 className="mt-3 hidden font-display text-[20px] text-navy lg:block">Clientes</h1>
       <div className="mt-3 flex items-center gap-2">
         <div className="relative flex-1">
           <input
@@ -279,15 +280,15 @@ export default function ClientesPage() {
 
       {/* ── Formulario ── */}
       {form && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Datos del cliente">
+        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6" role="dialog" aria-modal="true" aria-label="Datos del cliente">
           <button
             type="button"
             aria-label="Cerrar"
             onClick={() => setForm(null)}
             className="anim-fade-in absolute inset-0 bg-navy/45 backdrop-blur-[2px]"
           />
-          <div className="anim-sheet-up absolute inset-x-0 bottom-0 mx-auto max-w-md">
-            <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 shadow-[0_-12px_40px_rgba(4,17,29,0.25)]">
+          <div className="anim-sheet-up relative mx-auto w-full max-w-md">
+            <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 shadow-[0_-12px_40px_rgba(4,17,29,0.25)] lg:max-h-[85vh] lg:rounded-2xl lg:pb-6">
               <h3 className="font-display text-[18px] text-navy">
                 {form.id ? "Editar cliente" : "Nuevo cliente"}
               </h3>

@@ -1,7 +1,8 @@
 "use client";
 
 // Marco del panel: puerta de acceso con clave del personal + navegación
-// entre Pedidos, Menú, Clientes y Analítica. Expone la clave por contexto.
+// entre Pedidos, Menú, Clientes y Analítica. En escritorio usa una barra
+// lateral fija (el trabajador lo abre en PC); en móvil, pestañas arriba.
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
@@ -20,12 +21,50 @@ export function useStaff(): StaffCtx {
   return ctx;
 }
 
-const TABS = [
-  { href: "/admin", label: "Pedidos" },
-  { href: "/admin/menu", label: "Menú" },
-  { href: "/admin/clientes", label: "Clientes" },
-  { href: "/admin/analitica", label: "Analítica" },
+type IconProps = { className?: string };
+const Icon = ({ d, className }: { d: string; className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    {d.split("|").map((p, i) => (
+      <path key={i} d={p} />
+    ))}
+  </svg>
+);
+
+const TABS: { href: string; label: string; icon: (p: IconProps) => React.ReactNode }[] = [
+  {
+    href: "/admin",
+    label: "Pedidos",
+    icon: (p) => <Icon {...p} d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9|M13.7 21a2 2 0 0 1-3.4 0" />,
+  },
+  {
+    href: "/admin/menu",
+    label: "Menú",
+    icon: (p) => <Icon {...p} d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />,
+  },
+  {
+    href: "/admin/clientes",
+    label: "Clientes",
+    icon: (p) => <Icon {...p} d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />,
+  },
+  {
+    href: "/admin/analitica",
+    label: "Analítica",
+    icon: (p) => <Icon {...p} d="M3 3v18h18M18 17V9M13 17V5M8 17v-3" />,
+  },
 ];
+
+function isActive(href: string, pathname: string): boolean {
+  return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+}
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -103,8 +142,44 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <Ctx.Provider value={{ code, logout }}>
-      <div className="mx-auto min-h-dvh w-full max-w-5xl px-3 pb-16">
-        <header className="sticky top-0 z-30 -mx-3 border-b border-gold-soft/50 bg-paper/95 px-3 backdrop-blur-md">
+      <div className="min-h-dvh lg:flex">
+        {/* ── Barra lateral (escritorio) ── */}
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-gold-soft/40 bg-navy px-4 py-6 lg:flex">
+          <div className="px-2">
+            <p className="smallcaps text-[10px] text-gold-soft/70">Panisse</p>
+            <h1 className="font-display text-[22px] leading-tight text-gold-soft">Panel</h1>
+          </div>
+          <nav aria-label="Secciones del panel" className="mt-8 flex flex-col gap-1.5">
+            {TABS.map((t) => {
+              const active = isActive(t.href, pathname);
+              return (
+                <Link
+                  key={t.href}
+                  href={t.href}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium transition-colors ${
+                    active
+                      ? "bg-gold-soft text-navy"
+                      : "text-gold-soft/70 hover:bg-white/5 hover:text-gold-soft"
+                  }`}
+                >
+                  {t.icon({ className: "h-5 w-5 shrink-0" })}
+                  {t.label}
+                </Link>
+              );
+            })}
+          </nav>
+          <button
+            type="button"
+            onClick={logout}
+            className="mt-auto flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium text-gold-soft/60 hover:bg-white/5 hover:text-gold-soft"
+          >
+            <Icon className="h-4.5 w-4.5" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+            Salir
+          </button>
+        </aside>
+
+        {/* ── Barra superior (móvil) ── */}
+        <header className="sticky top-0 z-30 border-b border-gold-soft/50 bg-paper/95 px-3 backdrop-blur-md lg:hidden">
           <div className="flex items-center justify-between pb-1 pt-[calc(env(safe-area-inset-top)+10px)]">
             <div className="px-1">
               <p className="smallcaps text-[9px] text-gold-deep">Panisse</p>
@@ -120,13 +195,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </div>
           <nav aria-label="Secciones del panel" className="chips-scroll -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-2.5 pt-1">
             {TABS.map((t) => {
-              const active =
-                t.href === "/admin" ? pathname === "/admin" : pathname.startsWith(t.href);
+              const active = isActive(t.href, pathname);
               return (
                 <Link
                   key={t.href}
                   href={t.href}
-                  className={`smallcaps flex h-9 shrink-0 items-center whitespace-nowrap border px-4 text-[10.5px] font-medium transition-colors ${
+                  className={`smallcaps flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap border px-4 text-[10.5px] font-medium transition-colors ${
                     active
                       ? "border-navy bg-navy text-gold-soft"
                       : "border-gold-soft/60 bg-card text-ink-soft"
@@ -138,7 +212,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             })}
           </nav>
         </header>
-        {children}
+
+        {/* ── Contenido ── */}
+        <main className="flex-1 lg:pl-60">
+          <div className="mx-auto w-full max-w-6xl px-3 pb-16 lg:px-8 lg:pt-6">{children}</div>
+        </main>
       </div>
     </Ctx.Provider>
   );

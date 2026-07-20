@@ -273,7 +273,7 @@ export default function MenuAdminPage() {
   };
 
   const ProductRow = ({ p }: { p: AdminProduct }) => (
-    <li className={`flex items-center gap-3 py-2 ${p.visible ? "" : "opacity-50"}`}>
+    <li className={`flex items-center gap-3 py-2 lg:border-b lg:border-gold-soft/20 ${p.visible ? "" : "opacity-50"}`}>
       <button
         type="button"
         onClick={() => openEditor(p)}
@@ -330,7 +330,7 @@ export default function MenuAdminPage() {
         </button>
       </header>
       {s.products.length > 0 && (
-        <ul className="mt-1 divide-y divide-gold-soft/20">
+        <ul className="mt-1 divide-y divide-gold-soft/20 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:divide-y-0">
           {s.products.map((p) => (
             <ProductRow key={p.id} p={p} />
           ))}
@@ -343,7 +343,8 @@ export default function MenuAdminPage() {
   );
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div className="mx-auto max-w-5xl">
+      <h1 className="mt-3 hidden font-display text-[20px] text-navy lg:block">Menú</h1>
       {error && <p className="mt-4 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
       {!tree && !error && (
         <p className="mt-16 text-center text-[13px] text-ink-faint">Cargando menú…</p>
@@ -377,15 +378,15 @@ export default function MenuAdminPage() {
 
       {/* ── Editor de producto ── */}
       {editing && draft && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={`Editar ${editing.name}`}>
+        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6" role="dialog" aria-modal="true" aria-label={`Editar ${editing.name}`}>
           <button
             type="button"
             aria-label="Cerrar"
             onClick={closeEditor}
             className="anim-fade-in absolute inset-0 bg-navy/45 backdrop-blur-[2px]"
           />
-          <div className="anim-sheet-up absolute inset-x-0 bottom-0 mx-auto max-w-md">
-            <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card pb-[calc(env(safe-area-inset-bottom)+20px)] shadow-[0_-12px_40px_rgba(4,17,29,0.25)]">
+          <div className="anim-sheet-up relative mx-auto w-full max-w-md lg:max-w-lg">
+            <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card pb-[calc(env(safe-area-inset-bottom)+20px)] shadow-[0_-12px_40px_rgba(4,17,29,0.25)] lg:max-h-[85vh] lg:rounded-2xl lg:pb-6">
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold-soft/40 bg-card px-5 pb-3 pt-4">
                 <h3 className="font-display text-[18px] text-navy">Editar producto</h3>
                 <button
@@ -594,15 +595,15 @@ export default function MenuAdminPage() {
 
       {/* ── Editor de categoría ── */}
       {editingSection && (
-        <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label={`Editar ${editingSection.name}`}>
+        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6" role="dialog" aria-modal="true" aria-label={`Editar ${editingSection.name}`}>
           <button
             type="button"
             aria-label="Cerrar"
             onClick={() => setEditingSection(null)}
             className="anim-fade-in absolute inset-0 bg-navy/45 backdrop-blur-[2px]"
           />
-          <div className="anim-sheet-up absolute inset-x-0 bottom-0 mx-auto max-w-md">
-            <div className="rounded-t-3xl bg-card px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 shadow-[0_-12px_40px_rgba(4,17,29,0.25)]">
+          <div className="anim-sheet-up relative mx-auto w-full max-w-md lg:max-w-lg">
+            <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 shadow-[0_-12px_40px_rgba(4,17,29,0.25)] lg:max-h-[85vh] lg:rounded-2xl lg:pb-6">
               <h3 className="font-display text-[18px] text-navy">Editar categoría</h3>
               <label className="mt-3 block">
                 <span className="smallcaps text-[10px] text-gold-deep">Nombre</span>

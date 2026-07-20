@@ -178,7 +178,8 @@ export default function AnaliticaPage() {
   const days = data?.visitsByDay ?? [];
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl">
+      <h1 className="mt-3 hidden font-display text-[20px] text-navy lg:block">Analítica</h1>
       <div className="chips-scroll -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1">
         {RANGES.map((r) => (
           <button
@@ -204,7 +205,7 @@ export default function AnaliticaPage() {
       {data && kpis && (
         <div className={loading ? "opacity-60" : ""}>
           {/* KPIs */}
-          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
             {[
               ["Visitas al menú", String(kpis.menuVisits)],
               ["Sesiones", String(kpis.sessions)],
