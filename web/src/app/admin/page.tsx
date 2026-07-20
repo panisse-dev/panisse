@@ -5,7 +5,7 @@
 // como una sola lista ordenada por hora.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatCOP } from "@/lib/format";
-import { STATUS_LABEL, type Order, type OrderStatus } from "@/lib/orders";
+import { DOC_TYPE_SHORT, STATUS_LABEL, type Billing, type Order, type OrderStatus } from "@/lib/orders";
 import { isAuthError, staffOrders, staffSetNote, staffSetStatus } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
 
@@ -70,6 +70,18 @@ function waLink(o: Order): string | null {
   return `https://wa.me/${phone}?text=${encodeURIComponent(waMessage(o))}`;
 }
 
+// Texto listo para pegar en el programa de facturación.
+function billingText(b: Billing): string {
+  const lines = [
+    `${DOC_TYPE_SHORT[b.docType] ?? b.docType} ${b.docNumber}`,
+    b.name,
+    b.email,
+    b.address,
+    b.phone,
+  ];
+  return lines.filter(Boolean).join("\n");
+}
+
 function todayBogota(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" });
 }
@@ -83,6 +95,7 @@ export default function PedidosPage() {
   const [soundOn, setSoundOn] = useState(true);
   const [noteEditId, setNoteEditId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
+  const [copiedBillId, setCopiedBillId] = useState<string | null>(null);
 
   const seenIds = useRef<Set<string>>(new Set());
   const audioCtx = useRef<AudioContext | null>(null);
@@ -209,6 +222,35 @@ export default function PedidosPage() {
   const byStatus = (s: OrderStatus) =>
     active.filter((o) => o.status === s).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
+  // Bloque con los datos fiscales, sólo cuando el cliente pidió factura.
+  const billingCard = (o: Order, b: Billing | null) =>
+    b && (
+      <div className="mx-4 mb-1 border border-gold-soft/60 bg-paper px-3 py-2">
+        <div className="flex items-start justify-between gap-2">
+          <p className="smallcaps text-[9.5px] text-gold-deep">Pidió factura electrónica</p>
+          <button
+            type="button"
+            onClick={() =>
+              navigator.clipboard?.writeText(billingText(b)).then(() => {
+                setCopiedBillId(o.id);
+                window.setTimeout(() => setCopiedBillId(null), 2500);
+              })
+            }
+            className="shrink-0 text-[11.5px] font-medium text-gold-deep underline underline-offset-2"
+          >
+            {copiedBillId === o.id ? "¡Copiado!" : "Copiar datos"}
+          </button>
+        </div>
+        <p className="mt-1 text-[12.5px] font-medium text-navy">{b.name}</p>
+        <p className="text-[12px] text-ink-soft">
+          {DOC_TYPE_SHORT[b.docType] ?? b.docType} {b.docNumber}
+        </p>
+        <p className="text-[12px] text-ink-soft">{b.email}</p>
+        {b.address && <p className="text-[12px] text-ink-soft">{b.address}</p>}
+        {b.phone && <p className="text-[12px] text-ink-soft">{b.phone}</p>}
+      </div>
+    );
+
   // Tarjeta de un pedido — la misma en el tablero (escritorio) y la lista (móvil).
   const card = (o: Order) => (
     <div
@@ -258,6 +300,9 @@ export default function PedidosPage() {
           “{o.customer.note}”
         </p>
       )}
+
+      {/* Datos para la factura electrónica (sólo si el cliente la pidió) */}
+      {billingCard(o, o.billing)}
 
       {/* Nota interna del restaurante */}
       <div className="border-t border-gold-soft/25 px-4 py-2">

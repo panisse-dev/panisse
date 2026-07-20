@@ -12,6 +12,32 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
   recogido: "Recogido",
 };
 
+// ── Facturación electrónica (opcional: sólo si el cliente la pide) ──
+export type DocType = "CC" | "NIT" | "CE" | "PP";
+
+export const DOC_TYPES: { value: DocType; label: string }[] = [
+  { value: "CC", label: "Cédula de ciudadanía" },
+  { value: "NIT", label: "NIT (empresa)" },
+  { value: "CE", label: "Cédula de extranjería" },
+  { value: "PP", label: "Pasaporte" },
+];
+
+export const DOC_TYPE_SHORT: Record<DocType, string> = {
+  CC: "C.C.",
+  NIT: "NIT",
+  CE: "C.E.",
+  PP: "Pasaporte",
+};
+
+export interface Billing {
+  docType: DocType;
+  docNumber: string;
+  name: string; // nombre o razón social
+  email: string;
+  address: string;
+  phone: string;
+}
+
 export interface OrderItem {
   productId: string;
   name: string;
@@ -28,6 +54,7 @@ export interface Order {
   status: OrderStatus;
   statusAt: string; // ISO
   customer: { name: string; phone: string; note: string };
+  billing: Billing | null; // null cuando el cliente no pidió factura
   items: OrderItem[];
   total: number;
   staffNote?: string; // nota interna que agrega el restaurante desde el panel

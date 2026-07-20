@@ -1,6 +1,6 @@
 // Pedidos contra Supabase (RPCs create_order / get_order_public).
 import type { CartLine } from "./cart";
-import type { PublicOrder } from "./orders";
+import type { Billing, PublicOrder } from "./orders";
 import { rpc } from "./supabase";
 import { sessionId } from "./track";
 
@@ -16,11 +16,19 @@ export interface CustomerInfo {
   name?: string;
   phone?: string;
   birthday?: string; // YYYY-MM-DD (obligatorio sólo para clientes nuevos)
+  wantsBilling?: boolean; // el cliente pidió factura electrónica
+  billing?: Billing; // se omite si ya tenemos los datos guardados del cliente
+}
+
+export interface ClientCheck {
+  known: boolean;
+  name?: string;
+  hasBilling?: boolean; // ya tiene datos de facturación guardados
 }
 
 /** ¿Ya conocemos este correo? Devuelve el nombre sólo para saludar. */
-export async function checkClient(email: string): Promise<{ known: boolean; name?: string }> {
-  return rpc<{ known: boolean; name?: string }>("check_client", { p_email: email });
+export async function checkClient(email: string): Promise<ClientCheck> {
+  return rpc<ClientCheck>("check_client", { p_email: email });
 }
 
 export const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;

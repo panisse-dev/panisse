@@ -19,4 +19,7 @@ dist/
 
 # Local Netlify folder
 .netlify
+
+# Ajustes locales de Claude Code (por máquina)
+.claude/settings.local.json
 .supabase-db-password

@@ -5,8 +5,15 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
-import { checkClient, createOrder, getOrderStatus, EMAIL_RE, type CreatedOrder } from "@/lib/api";
-import { type OrderStatus } from "@/lib/orders";
+import {
+  checkClient,
+  createOrder,
+  getOrderStatus,
+  EMAIL_RE,
+  type ClientCheck,
+  type CreatedOrder,
+} from "@/lib/api";
+import { DOC_TYPES, type DocType, type OrderStatus } from "@/lib/orders";
 import { DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
 import StatusTrack from "./StatusTrack";
 
@@ -21,8 +28,16 @@ export default function CartBar() {
   const [note, setNote] = useState("");
   const [email, setEmail] = useState("");
   const [birthday, setBirthday] = useState("");
-  // null = aún no verificamos el correo; luego {known, name?} del servidor
-  const [known, setKnown] = useState<{ known: boolean; name?: string } | null>(null);
+  // null = aún no verificamos el correo; luego la respuesta del servidor
+  const [known, setKnown] = useState<ClientCheck | null>(null);
+  // Factura electrónica (opcional)
+  const [wantsBilling, setWantsBilling] = useState(false);
+  const [editBilling, setEditBilling] = useState(false);
+  const [docType, setDocType] = useState<DocType>("CC");
+  const [docNumber, setDocNumber] = useState("");
+  const [billName, setBillName] = useState("");
+  const [billAddress, setBillAddress] = useState("");
+  const [billPhone, setBillPhone] = useState("");
   const [checking, setChecking] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -80,9 +95,23 @@ export default function CartBar() {
     }
   };
 
+  // Con datos de facturación ya guardados no se le vuelven a pedir al cliente,
+  // salvo que él pida cambiarlos.
+  const usesSavedBilling = Boolean(known?.hasBilling) && !editBilling;
+
   const submit = async () => {
     setError("");
     if (!known) return;
+    if (wantsBilling && !usesSavedBilling) {
+      if (!docNumber.trim()) {
+        setError("Escribe el número de documento para la factura");
+        return;
+      }
+      if (!billName.trim()) {
+        setError("Escribe el nombre o razón social para la factura");
+        return;
+      }
+    }
     if (!known.known) {
       if (!name.trim()) {
         setError("Escribe tu nombre para el pedido");
@@ -102,6 +131,18 @@ export default function CartBar() {
           name: known.known ? undefined : name.trim(),
           phone: known.known ? undefined : phone.trim(),
           birthday: known.known ? undefined : birthday,
+          wantsBilling,
+          billing:
+            wantsBilling && !usesSavedBilling
+              ? {
+                  docType,
+                  docNumber: docNumber.trim(),
+                  name: billName.trim(),
+                  email: email.trim(),
+                  address: billAddress.trim(),
+                  phone: billPhone.trim(),
+                }
+              : undefined,
         },
         cart.lines,
       );
@@ -159,6 +200,13 @@ export default function CartBar() {
     setEmail("");
     setBirthday("");
     setKnown(null);
+    setWantsBilling(false);
+    setEditBilling(false);
+    setDocType("CC");
+    setDocNumber("");
+    setBillName("");
+    setBillAddress("");
+    setBillPhone("");
     setError("");
     setOrder(null);
     setPaidTotal(0);
@@ -313,6 +361,7 @@ export default function CartBar() {
                       onChange={(e) => {
                         setEmail(e.target.value);
                         setKnown(null);
+                        setEditBilling(false);
                       }}
                       onKeyDown={(e) => e.key === "Enter" && !known && checkEmail()}
                       placeholder="tucorreo@ejemplo.com"
@@ -400,6 +449,108 @@ export default function CartBar() {
                         />
                       </label>
 
+                      {/* ── Factura electrónica (opcional) ── */}
+                      <div className="mt-4 border-t border-gold-soft/40 pt-4">
+                        <label className="flex items-start gap-2.5">
+                          <input
+                            type="checkbox"
+                            checked={wantsBilling}
+                            onChange={(e) => setWantsBilling(e.target.checked)}
+                            className="mt-0.5 h-[18px] w-[18px] shrink-0 accent-[#04111D]"
+                          />
+                          <span>
+                            <span className="text-[14px] font-medium text-navy">
+                              Quiero factura electrónica
+                            </span>
+                            <span className="mt-0.5 block text-[11.5px] text-ink-faint">
+                              Te la enviamos a tu correo.
+                            </span>
+                          </span>
+                        </label>
+
+                        {wantsBilling &&
+                          (usesSavedBilling ? (
+                            <div className="mt-3 flex items-center justify-between gap-3 border-l-2 border-verde bg-verde/10 px-3 py-2.5">
+                              <p className="text-[12px] text-ink-soft">
+                                Usaremos los datos de facturación que ya tenemos tuyos.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => setEditBilling(true)}
+                                className="shrink-0 text-[12px] font-medium text-gold-deep underline underline-offset-2"
+                              >
+                                Cambiar
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="mt-3 border border-gold-soft/50 bg-paper px-3.5 pb-3.5 pt-1">
+                              <label className="mt-2.5 block">
+                                <span className="smallcaps text-[10px] text-gold-deep">
+                                  Tipo de documento
+                                </span>
+                                <select
+                                  value={docType}
+                                  onChange={(e) => setDocType(e.target.value as DocType)}
+                                  className="mt-1 h-12 w-full border border-gold-soft/70 bg-card px-3 text-[15px] text-ink outline-none focus:border-navy"
+                                >
+                                  {DOC_TYPES.map((d) => (
+                                    <option key={d.value} value={d.value}>
+                                      {d.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </label>
+                              <label className="mt-3 block">
+                                <span className="smallcaps text-[10px] text-gold-deep">Número *</span>
+                                <input
+                                  value={docNumber}
+                                  onChange={(e) => setDocNumber(e.target.value)}
+                                  placeholder={docType === "NIT" ? "900123456-7" : "1088123456"}
+                                  inputMode={docType === "PP" ? "text" : "numeric"}
+                                  className="mt-1 h-12 w-full border border-gold-soft/70 bg-card px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                                />
+                              </label>
+                              <label className="mt-3 block">
+                                <span className="smallcaps text-[10px] text-gold-deep">
+                                  {docType === "NIT" ? "Razón social *" : "Nombre completo *"}
+                                </span>
+                                <input
+                                  value={billName}
+                                  onChange={(e) => setBillName(e.target.value)}
+                                  placeholder={
+                                    docType === "NIT" ? "Nombre de la empresa" : "Como aparece en tu documento"
+                                  }
+                                  className="mt-1 h-12 w-full border border-gold-soft/70 bg-card px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                                />
+                              </label>
+                              <label className="mt-3 block">
+                                <span className="smallcaps text-[10px] text-gold-deep">Dirección</span>
+                                <input
+                                  value={billAddress}
+                                  onChange={(e) => setBillAddress(e.target.value)}
+                                  placeholder="Calle 00 #00-00, ciudad"
+                                  className="mt-1 h-12 w-full border border-gold-soft/70 bg-card px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                                />
+                              </label>
+                              <label className="mt-3 block">
+                                <span className="smallcaps text-[10px] text-gold-deep">
+                                  Teléfono de facturación
+                                </span>
+                                <input
+                                  value={billPhone}
+                                  onChange={(e) => setBillPhone(e.target.value)}
+                                  placeholder="Opcional"
+                                  inputMode="tel"
+                                  className="mt-1 h-12 w-full border border-gold-soft/70 bg-card px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                                />
+                              </label>
+                              <p className="mt-2.5 text-[11px] leading-relaxed text-ink-faint">
+                                La factura llega a <b>{email.trim() || "tu correo"}</b>.
+                              </p>
+                            </div>
+                          ))}
+                      </div>
+
                       <div className="mt-4 flex items-baseline justify-between border-t border-gold-soft/40 pt-4">
                         <span className="smallcaps text-[11px] text-ink-soft">Total a pagar en tienda</span>
                         <span className="font-display text-[20px] font-semibold text-navy">{formatCOP(cart.total)}</span>
@@ -433,6 +584,11 @@ export default function CartBar() {
                   <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
                     Muéstralo en tienda para recoger. Te avisamos cuando esté listo.
                   </p>
+                  {wantsBilling && (
+                    <p className="mt-2 text-[12.5px] text-verde">
+                      Tu factura electrónica llegará a tu correo. 🧾
+                    </p>
+                  )}
 
                   <div className="mt-5 border border-gold-soft/50 bg-paper px-4 py-4">
                     <p className="smallcaps text-[10px] text-gold-deep">Estado</p>
