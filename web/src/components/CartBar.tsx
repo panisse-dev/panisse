@@ -7,6 +7,7 @@ import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
 import { checkClient, createOrder, getOrderStatus, EMAIL_RE, type CreatedOrder } from "@/lib/api";
 import { type OrderStatus } from "@/lib/orders";
+import { DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
 import StatusTrack from "./StatusTrack";
 
 type View = "hidden" | "cart" | "checkout" | "done";
@@ -27,6 +28,9 @@ export default function CartBar() {
   const [error, setError] = useState("");
   const [order, setOrder] = useState<CreatedOrder | null>(null);
   const [liveStatus, setLiveStatus] = useState<OrderStatus>("recibido");
+  // El total se guarda al enviar, porque después vaciamos el carrito (cart.total → 0)
+  const [paidTotal, setPaidTotal] = useState(0);
+  const [copied, setCopied] = useState(false);
 
   const open = view !== "hidden";
 
@@ -103,6 +107,7 @@ export default function CartBar() {
       );
       setOrder(created);
       setLiveStatus("recibido");
+      setPaidTotal(cart.total); // se conserva para el pago en línea, antes de vaciar
       addOrder({ id: created.id, code: created.code }); // queda guardado para que el cliente lo siga viendo
       cart.clear();
       setView("done");
@@ -110,6 +115,39 @@ export default function CartBar() {
       setError(e instanceof Error ? e.message : "No se pudo enviar el pedido");
     } finally {
       setSending(false);
+    }
+  };
+
+  // Copia el valor sin símbolos ni puntos (ej. "25000") para pegarlo tal cual
+  // en el campo "Total a pagar" del portal, que es numérico. Usa la Clipboard API
+  // y cae a execCommand para los webviews (Instagram/WhatsApp) que la bloquean.
+  const copyAmount = () => {
+    const text = String(paidTotal);
+    const done = (ok: boolean) => {
+      if (!ok) return; // si falla, el link igual abre el portal para escribirlo
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2500);
+    };
+    const fallback = () => {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        done(ok);
+      } catch {
+        done(false);
+      }
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => done(true), fallback);
+    } else {
+      fallback();
     }
   };
 
@@ -123,6 +161,8 @@ export default function CartBar() {
     setKnown(null);
     setError("");
     setOrder(null);
+    setPaidTotal(0);
+    setCopied(false);
   };
 
   return (
@@ -399,10 +439,44 @@ export default function CartBar() {
                     <StatusTrack status={liveStatus} />
                   </div>
 
+                  {/* Pago en línea opcional por el portal de Davivienda. No se puede
+                      autocompletar el monto, así que le copiamos el valor al cliente. */}
+                  <div className="mt-4 border border-gold-soft/50 bg-paper px-4 py-4 text-left">
+                    <p className="smallcaps text-[10px] text-gold-deep">¿Prefieres pagar en línea?</p>
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[11px] text-ink-faint">Total a pagar</p>
+                        <p className="font-display text-[22px] font-semibold leading-none text-navy">
+                          {formatCOP(paidTotal)}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={copyAmount}
+                        className="h-9 shrink-0 border border-gold-soft/70 px-3 text-[12.5px] font-medium text-ink-soft active:bg-gold-soft/20"
+                      >
+                        {copied ? "¡Copiado!" : "Copiar valor"}
+                      </button>
+                    </div>
+                    <a
+                      href={DAVIVIENDA_PAYMENT_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={copyAmount}
+                      className="mt-3 flex h-12 w-full items-center justify-center bg-navy text-[14px] font-semibold text-gold-soft transition-transform active:scale-[0.98]"
+                    >
+                      Pagar con Davivienda
+                    </a>
+                    <p className="mt-2 text-[11px] leading-relaxed text-ink-faint">
+                      Copiamos el valor: pégalo en “Total a pagar” y usa el <b>#{order.code}</b> como
+                      número de pedido. Si prefieres, también puedes pagar al recoger.
+                    </p>
+                  </div>
+
                   <button
                     type="button"
                     onClick={closeAll}
-                    className="mt-5 h-12 w-full border border-gold-soft/70 bg-card text-[14px] font-medium text-ink-soft"
+                    className="mt-4 h-12 w-full border border-gold-soft/70 bg-card text-[14px] font-medium text-ink-soft"
                   >
                     Seguir viendo el menú
                   </button>
