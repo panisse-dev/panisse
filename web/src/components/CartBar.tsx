@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
+import { restaurant } from "@/lib/menu";
 import {
   checkClient,
   createOrder,
@@ -44,8 +45,11 @@ export default function CartBar() {
   const [error, setError] = useState("");
   const [order, setOrder] = useState<CreatedOrder | null>(null);
   const [liveStatus, setLiveStatus] = useState<OrderStatus>("recibido");
+  const [livePaid, setLivePaid] = useState(false); // ¿el restaurante ya confirmó el pago?
   // El total se guarda al enviar, porque después vaciamos el carrito (cart.total → 0)
   const [paidTotal, setPaidTotal] = useState(0);
+  const [paidSummary, setPaidSummary] = useState(""); // resumen de platos para el WhatsApp
+  const [paidName, setPaidName] = useState(""); // nombre para que el restaurante cruce el pago
   const [copied, setCopied] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState(false);
 
@@ -63,7 +67,10 @@ export default function CartBar() {
       if (document.hidden) return; // no chequear con la pantalla apagada
       try {
         const s = await getOrderStatus(order.id);
-        if (!stop && s) setLiveStatus(s.status);
+        if (!stop && s) {
+          setLiveStatus(s.status);
+          setLivePaid(s.paid);
+        }
       } catch {
         /* reintenta en el próximo ciclo */
       }
@@ -148,8 +155,16 @@ export default function CartBar() {
       );
       setOrder(created);
       setLiveStatus("recibido");
+      setLivePaid(false); // nace pendiente de pago hasta que el restaurante lo confirme
       setPaidTotal(cart.total); // se conserva para el pago en línea, antes de vaciar
-      addOrder({ id: created.id, code: created.code }); // queda guardado para que el cliente lo siga viendo
+      // Resumen de platos y nombre, para el mensaje de WhatsApp del comprobante
+      setPaidSummary(
+        cart.lines
+          .map((l) => `• ${l.qty}× ${l.name}${l.variant ? ` (${l.variant})` : ""}`)
+          .join("\n"),
+      );
+      setPaidName(known?.known ? "" : name.trim());
+      addOrder({ id: created.id, code: created.code, paid: false }); // queda guardado para que el cliente lo siga viendo
       cart.clear();
       setView("done");
     } catch (e) {
@@ -211,7 +226,10 @@ export default function CartBar() {
     setBillPhone("");
     setError("");
     setOrder(null);
+    setLivePaid(false);
     setPaidTotal(0);
+    setPaidSummary("");
+    setPaidName("");
     setCopied(false);
     setCopiedAccount(false);
   };
@@ -596,11 +614,29 @@ export default function CartBar() {
 
                   <div className="mt-5 border border-gold-soft/50 bg-paper px-4 py-4">
                     <p className="smallcaps text-[10px] text-gold-deep">Estado</p>
-                    <StatusTrack status={liveStatus} />
+                    {livePaid ? (
+                      <StatusTrack status={liveStatus} />
+                    ) : (
+                      <p className="mt-2 text-[12.5px] leading-relaxed text-ink-soft">
+                        <b className="text-gold-deep">Esperando tu pago.</b> Paga abajo por
+                        transferencia o link; apenas confirmemos el pago, empezamos a prepararlo.
+                      </p>
+                    )}
                   </div>
 
                   {/* Pago en línea (único medio): el portal de recaudo de
-                      Davivienda o una transferencia directa a la cuenta. */}
+                      Davivienda o una transferencia directa a la cuenta. Se
+                      oculta cuando el restaurante ya confirmó el pago. */}
+                  {livePaid ? (
+                    <div className="mt-4 flex items-center gap-2 border border-verde/40 bg-verde/10 px-4 py-3 text-left">
+                      <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-verde" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      <p className="text-[13px] font-medium text-verde">
+                        ¡Pago confirmado! Ya estamos con tu pedido.
+                      </p>
+                    </div>
+                  ) : (
                   <div className="mt-4 border border-gold-soft/50 bg-paper px-4 py-4 text-left">
                     <p className="smallcaps text-[10px] text-gold-deep">Paga tu pedido</p>
                     <div className="mt-2 flex items-center justify-between gap-3">
@@ -681,7 +717,28 @@ export default function CartBar() {
                     <p className="mt-3 text-[11px] leading-relaxed text-ink-faint">
                       Pon tu nombre como referencia.
                     </p>
+
+                    {/* Aviso de pago: abre WhatsApp con el pedido ya escrito; el
+                        cliente sólo adjunta el comprobante y envía. */}
+                    <a
+                      href={`https://wa.me/${restaurant.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
+                        `¡Hola PANISSE! Ya pagué mi pedido 🧾${paidName ? `\n\nA nombre de: ${paidName}` : ""}\n\nMi pedido:\n${paidSummary}\n\nTotal: ${formatCOP(paidTotal)}\n\nAdjunto el comprobante de pago 👇`,
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-3 flex h-12 w-full items-center justify-center gap-2 bg-verde text-[14px] font-semibold text-white transition-transform active:scale-[0.98]"
+                    >
+                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+                        <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
+                      </svg>
+                      Ya pagué · Enviar comprobante
+                    </a>
+                    <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
+                      Te abre WhatsApp con tu pedido escrito: solo adjunta la foto del comprobante y
+                      envía. Así confirmamos tu pago más rápido.
+                    </p>
                   </div>
+                  )}
 
                   <button
                     type="button"

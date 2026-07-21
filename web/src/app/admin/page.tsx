@@ -6,7 +6,15 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatCOP } from "@/lib/format";
 import { DOC_TYPE_SHORT, STATUS_LABEL, type Billing, type Order, type OrderStatus } from "@/lib/orders";
-import { isAuthError, staffOrders, staffSetNote, staffSetStatus } from "@/lib/admin";
+import {
+  isAuthError,
+  staffConfirmPayment,
+  staffDiscardOrder,
+  staffOrders,
+  staffPendingOrders,
+  staffSetNote,
+  staffSetStatus,
+} from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
 
 const POLL_MS = 8000;
@@ -89,6 +97,7 @@ function todayBogota(): string {
 export default function PedidosPage() {
   const { code, logout } = useStaff();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pending, setPending] = useState<Order[]>([]); // por confirmar pago
   const [day, setDay] = useState<string | null>(null); // null = en vivo
   const [connError, setConnError] = useState(false);
   const [flash, setFlash] = useState(false);
@@ -98,6 +107,7 @@ export default function PedidosPage() {
   const [copiedBillId, setCopiedBillId] = useState<string | null>(null);
 
   const seenIds = useRef<Set<string>>(new Set());
+  const seenPendingIds = useRef<Set<string>>(new Set());
   const audioCtx = useRef<AudioContext | null>(null);
   const firstLoad = useRef(true);
   const dayRef = useRef(day);
@@ -134,22 +144,31 @@ export default function PedidosPage() {
 
   const poll = useCallback(async () => {
     try {
-      const list = await staffOrders(code, dayRef.current);
+      const live = dayRef.current === null;
+      const [list, pend] = await Promise.all([
+        staffOrders(code, dayRef.current),
+        live ? staffPendingOrders(code) : Promise.resolve([] as Order[]),
+      ]);
       setConnError(false);
 
-      // Detecta pedidos nuevos (sólo en vista en vivo, no en la primera carga)
+      // Detecta llegadas nuevas (sólo en vivo, no en la primera carga): un
+      // pago recién confirmado que entra a la cocina, o un pendiente nuevo.
       const currentIds = new Set(list.map((o) => o.id));
-      if (!firstLoad.current && dayRef.current === null) {
-        const hasNew = list.some((o) => !seenIds.current.has(o.id) && o.status === "recibido");
-        if (hasNew) {
+      const currentPendingIds = new Set(pend.map((o) => o.id));
+      if (!firstLoad.current && live) {
+        const newPaid = list.some((o) => !seenIds.current.has(o.id) && o.status === "recibido");
+        const newPending = pend.some((o) => !seenPendingIds.current.has(o.id));
+        if (newPaid || newPending) {
           beep();
           setFlash(true);
           setTimeout(() => setFlash(false), 2500);
         }
       }
       seenIds.current = currentIds;
+      seenPendingIds.current = currentPendingIds;
       firstLoad.current = false;
       setOrders(list);
+      setPending(live ? pend : []);
     } catch (e) {
       if (isAuthError(e)) {
         logout();
@@ -190,6 +209,35 @@ export default function PedidosPage() {
   const advance = (order: Order) => {
     const next = NEXT[order.status];
     if (next) setStatus(order, next);
+  };
+
+  // Confirmar el pago: el pedido sale de "por confirmar" y entra a la cocina.
+  const confirmPayment = async (order: Order) => {
+    setPending((prev) => prev.filter((o) => o.id !== order.id));
+    setOrders((prev) => [
+      { ...order, paid: true, status: "recibido", statusAt: new Date().toISOString() },
+      ...prev.filter((o) => o.id !== order.id),
+    ]);
+    seenIds.current.add(order.id); // ya lo mostramos: que no vuelva a sonar
+    try {
+      await staffConfirmPayment(code, order.id);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else poll();
+    }
+  };
+
+  // Descartar un pendiente que nunca pagó (lo borra).
+  const discardOrder = async (order: Order) => {
+    if (!window.confirm(`¿Descartar el pedido de ${order.customer.name || "este cliente"}? No se puede deshacer.`))
+      return;
+    setPending((prev) => prev.filter((o) => o.id !== order.id));
+    try {
+      await staffDiscardOrder(code, order.id);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else poll();
+    }
   };
 
   const revert = (order: Order) => {
@@ -250,6 +298,86 @@ export default function PedidosPage() {
         {b.phone && <p className="text-[12px] text-ink-soft">{b.phone}</p>}
       </div>
     );
+
+  // Lista de platos de un pedido (misma en cocina y en pendientes).
+  const itemsList = (o: Order) => (
+    <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
+      {o.items.map((it, i) => (
+        <li key={i} className="py-0.5">
+          <div className="flex justify-between gap-2">
+            <span>
+              <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
+              {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
+            </span>
+            <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
+          </div>
+          {it.note && (
+            <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">↳ {it.note}</p>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+
+  // Tarjeta de un pedido PENDIENTE DE PAGO: aún no entra a la cocina.
+  const pendingCard = (o: Order) => (
+    <div
+      key={o.id}
+      className="border-2 border-gold/60 bg-card shadow-[0_1px_8px_rgba(4,27,49,0.06)]"
+    >
+      <div className="flex items-start justify-between gap-3 px-4 pt-3.5">
+        <div className="min-w-0">
+          <p className="font-display text-[22px] leading-none text-navy">#{o.code}</p>
+          <p className="mt-1 text-[13px] font-medium text-ink">{o.customer.name}</p>
+          {o.customer.phone && (
+            <a href={`tel:${o.customer.phone}`} className="text-[12px] text-gold-deep underline">
+              {o.customer.phone}
+            </a>
+          )}
+        </div>
+        <div className="text-right">
+          <span className="smallcaps inline-block bg-gold px-2 py-1 text-[10px] font-semibold text-navy">
+            Pendiente de pago
+          </span>
+          <p className="mt-1 text-[11px] text-ink-faint">{timeAgo(o.createdAt)}</p>
+        </div>
+      </div>
+
+      {itemsList(o)}
+
+      {o.customer.note && (
+        <p className="mx-4 mb-1 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
+          <span className="smallcaps mr-1 text-[9px] not-italic text-gold-deep">Cliente:</span>
+          “{o.customer.note}”
+        </p>
+      )}
+
+      {billingCard(o, o.billing)}
+
+      <div className="border-t border-gold-soft/25 px-4 py-2">
+        <span className="text-[13px] font-semibold text-navy">
+          Debe pagar {formatCOP(o.total)}
+        </span>
+      </div>
+
+      <div className="flex border-t border-gold-soft/25">
+        <button
+          type="button"
+          onClick={() => discardOrder(o)}
+          className="h-13 w-2/5 py-3.5 text-[13px] font-medium text-ink-faint hover:bg-paper-deep"
+        >
+          Descartar
+        </button>
+        <button
+          type="button"
+          onClick={() => confirmPayment(o)}
+          className="h-13 w-3/5 border-l border-gold-soft/25 bg-verde py-3.5 text-[14.5px] font-semibold text-white transition-transform hover:bg-verde/90 active:scale-[0.99]"
+        >
+          Confirmar pago
+        </button>
+      </div>
+    </div>
+  );
 
   // Tarjeta de un pedido — la misma en el tablero (escritorio) y la lista (móvil).
   const card = (o: Order) => (
@@ -476,6 +604,24 @@ export default function PedidosPage() {
           <>Historial del {day}{connError && <span className="text-[#b3261e]"> · sin conexión</span>}</>
         )}
       </p>
+
+      {/* Por confirmar pago — aparte de la cocina; al confirmar, entra a la cola */}
+      {live && pending.length > 0 && (
+        <section className="mt-4 rounded-lg border border-gold/50 bg-gold-soft/10 p-2.5 sm:p-3">
+          <header className="mb-2.5 flex items-center gap-2 px-1">
+            <span className="h-2.5 w-2.5 rounded-full bg-gold" />
+            <h2 className="smallcaps text-[11px] font-semibold text-navy">Por confirmar pago</h2>
+            <span className="ml-auto text-[11px] font-medium text-ink-faint">{pending.length}</span>
+          </header>
+          <p className="mb-3 px-1 text-[11.5px] leading-relaxed text-ink-soft">
+            Estos pedidos aún no entran a la cocina. Cuando veas la plata en la cuenta o el
+            comprobante, dale <b>Confirmar pago</b> y pasan a prepararse.
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {pending.map(pendingCard)}
+          </div>
+        </section>
+      )}
 
       {/* Pedidos activos */}
       {active.length === 0 ? (

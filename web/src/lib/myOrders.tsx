@@ -9,6 +9,7 @@ export interface TrackedOrder {
   code: string;
   createdAt: string;
   status: OrderStatus;
+  paid: boolean; // false = esperando que el restaurante confirme el pago
 }
 
 const KEY = "panisse-my-orders";
@@ -22,7 +23,7 @@ function prune(list: TrackedOrder[]): TrackedOrder[] {
 
 interface OrdersAPI {
   orders: TrackedOrder[];
-  addOrder: (o: { id: string; code: string; createdAt?: string; status?: OrderStatus }) => void;
+  addOrder: (o: { id: string; code: string; createdAt?: string; status?: OrderStatus; paid?: boolean }) => void;
   dismiss: (id: string) => void;
 }
 
@@ -55,13 +56,14 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
     }
   }, [orders, ready]);
 
-  const addOrder = useCallback((o: { id: string; code: string; createdAt?: string; status?: OrderStatus }) => {
+  const addOrder = useCallback((o: { id: string; code: string; createdAt?: string; status?: OrderStatus; paid?: boolean }) => {
     setOrders((prev) => {
       const t: TrackedOrder = {
         id: o.id,
         code: o.code,
         createdAt: o.createdAt ?? new Date().toISOString(),
         status: o.status ?? "recibido",
+        paid: o.paid ?? false,
       };
       return prune([t, ...prev.filter((x) => x.id !== o.id)]).slice(0, 6);
     });
@@ -86,11 +88,11 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
           try {
             const s = await getOrderStatus(o.id);
             // null = el pedido ya no existe → se marca para quitarlo;
-            // string = estado nuevo.
-            return { id: o.id, status: s ? s.status : null };
+            // objeto = estado y pago al día.
+            return { id: o.id, order: s };
           } catch {
             // error de red: se deja igual y se reintenta luego
-            return { id: o.id, status: undefined };
+            return { id: o.id, order: undefined };
           }
         }),
       );
@@ -99,8 +101,8 @@ export function OrdersProvider({ children }: { children: React.ReactNode }) {
         prune(
           prev.flatMap((o) => {
             const u = updates.find((x) => x.id === o.id);
-            if (u && u.status === null) return []; // pedido borrado → fuera del seguimiento
-            return [u && u.status ? { ...o, status: u.status } : o];
+            if (u && u.order === null) return []; // pedido borrado → fuera del seguimiento
+            return [u && u.order ? { ...o, status: u.order.status, paid: u.order.paid } : o];
           }),
         ),
       );

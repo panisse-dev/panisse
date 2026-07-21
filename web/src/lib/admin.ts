@@ -76,6 +76,16 @@ export const staffVerify = (code: string) =>
 export const staffOrders = (code: string, day?: string | null) =>
   rpc<Order[]>("staff_orders", { p_code: code, p_day: day ?? null });
 
+// Pedidos pendientes de confirmar pago (no entran a la cocina hasta confirmar)
+export const staffPendingOrders = (code: string) =>
+  rpc<Order[]>("staff_pending_orders", { p_code: code });
+
+export const staffConfirmPayment = (code: string, id: string) =>
+  rpc<void>("staff_confirm_payment", { p_code: code, p_id: id });
+
+export const staffDiscardOrder = (code: string, id: string) =>
+  rpc<void>("staff_discard_order", { p_code: code, p_id: id });
+
 export const staffSetStatus = (code: string, id: string, status: string) =>
   rpc<void>("staff_set_status", { p_code: code, p_id: id, p_status: status });
 

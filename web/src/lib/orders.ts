@@ -55,6 +55,7 @@ export interface Order {
   statusAt: string; // ISO
   customer: { name: string; phone: string; note: string };
   billing: Billing | null; // null cuando el cliente no pidió factura
+  paid: boolean; // false = pendiente de confirmar pago (no entra a la cocina)
   items: OrderItem[];
   total: number;
   staffNote?: string; // nota interna que agrega el restaurante desde el panel
@@ -65,6 +66,7 @@ export interface PublicOrder {
   code: string;
   status: OrderStatus;
   createdAt: string;
+  paid: boolean; // false mientras el restaurante no confirme el pago
 }
 
 export function itemsSummary(items: OrderItem[]): string {

@@ -81,7 +81,9 @@ export default function MyOrders() {
                       Recogido
                     </span>
                   ) : (
-                    <span className="smallcaps text-[10px] text-gold-deep">{STATUS_LABEL[o.status]}</span>
+                    <span className="smallcaps text-[10px] text-gold-deep">
+                      {o.paid ? STATUS_LABEL[o.status] : "Esperando pago"}
+                    </span>
                   )}
                 </div>
 
@@ -92,6 +94,10 @@ export default function MyOrders() {
                       Quitar
                     </button>
                   </div>
+                ) : !o.paid ? (
+                  <p className="mt-3 border-l-2 border-gold bg-gold-soft/12 px-3 py-2 text-[12.5px] text-ink-soft">
+                    Estamos confirmando tu pago. Apenas lo verifiquemos, empezamos a prepararlo.
+                  </p>
                 ) : (
                   <>
                     <StatusTrack status={o.status} />
@@ -127,7 +133,7 @@ export default function MyOrders() {
         </span>
         <span className="min-w-0 flex-1 truncate text-[12.5px] text-navy">
           <span className="font-semibold">Tu pedido</span>
-          <span className="text-ink-soft"> · {STATUS_LABEL[latest.status]}</span>
+          <span className="text-ink-soft"> · {latest.paid ? STATUS_LABEL[latest.status] : "Esperando pago"}</span>
           {active.length > 1 && <span className="text-ink-faint"> · +{active.length - 1} más</span>}
         </span>
         <span className="smallcaps shrink-0 text-[9.5px] text-gold-deep">Ver</span>
