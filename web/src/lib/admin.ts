@@ -125,8 +125,11 @@ export const staffUpsertClient = (
 export const staffDeleteClient = (code: string, id: string) =>
   rpc<void>("staff_delete_client", { p_code: code, p_id: id });
 
+// Nombre neutro ("resumen") a propósito: los bloqueadores de anuncios
+// bloquean las URLs que contienen "analytics", y eso tumbaba esta pantalla
+// en equipos con bloqueador. Por dentro es la misma consulta.
 export const staffAnalytics = (code: string, from: string, to: string) =>
-  rpc<Analytics>("staff_analytics", { p_code: code, p_from: from, p_to: to });
+  rpc<Analytics>("staff_resumen", { p_code: code, p_from: from, p_to: to });
 
 /** Sube una foto de producto vía Edge Function y devuelve la URL pública. */
 export async function uploadImage(code: string, file: File): Promise<string> {
