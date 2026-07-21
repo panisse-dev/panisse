@@ -72,7 +72,7 @@ export default function MyOrders() {
             {orders.map((o) => (
               <div key={o.id} className="border border-gold-soft/50 bg-paper px-4 py-4">
                 <div className="flex items-center justify-between">
-                  <p className="font-display text-[22px] leading-none text-navy">#{o.code}</p>
+                  <p className="font-display text-[18px] leading-none text-navy">Tu pedido</p>
                   {o.status === "recogido" ? (
                     <span className="smallcaps flex items-center gap-1 text-[10px] text-verde">
                       <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -105,7 +105,7 @@ export default function MyOrders() {
               </div>
             ))}
             <p className="pb-1 text-center text-[11px] text-ink-faint">
-              El estado se actualiza solo. Muestra tu número en tienda para recoger.
+              El estado se actualiza solo. Da tu nombre en tienda para recoger.
             </p>
           </div>
         </div>
@@ -126,7 +126,7 @@ export default function MyOrders() {
           <span className={`relative inline-flex h-2.5 w-2.5 rounded-full ${DOT[latest.status]}`} />
         </span>
         <span className="min-w-0 flex-1 truncate text-[12.5px] text-navy">
-          <span className="font-semibold">Tu pedido #{latest.code}</span>
+          <span className="font-semibold">Tu pedido</span>
           <span className="text-ink-soft"> · {STATUS_LABEL[latest.status]}</span>
           {active.length > 1 && <span className="text-ink-faint"> · +{active.length - 1} más</span>}
         </span>

@@ -14,7 +14,7 @@ import {
   type CreatedOrder,
 } from "@/lib/api";
 import { DOC_TYPES, type DocType, type OrderStatus } from "@/lib/orders";
-import { DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
+import { BANK_TRANSFER, DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
 import { useScrollLock } from "@/lib/scrollLock";
 import StatusTrack from "./StatusTrack";
 
@@ -47,6 +47,7 @@ export default function CartBar() {
   // El total se guarda al enviar, porque después vaciamos el carrito (cart.total → 0)
   const [paidTotal, setPaidTotal] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [copiedAccount, setCopiedAccount] = useState(false);
 
   const open = view !== "hidden";
 
@@ -158,16 +159,9 @@ export default function CartBar() {
     }
   };
 
-  // Copia el valor sin símbolos ni puntos (ej. "25000") para pegarlo tal cual
-  // en el campo "Total a pagar" del portal, que es numérico. Usa la Clipboard API
-  // y cae a execCommand para los webviews (Instagram/WhatsApp) que la bloquean.
-  const copyAmount = () => {
-    const text = String(paidTotal);
-    const done = (ok: boolean) => {
-      if (!ok) return; // si falla, el link igual abre el portal para escribirlo
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2500);
-    };
+  // Copia texto al portapapeles. Usa la Clipboard API y cae a execCommand para
+  // los webviews (Instagram/WhatsApp) que la bloquean. `flash` marca el "¡Copiado!".
+  const copyToClipboard = (text: string, flash: () => void) => {
     const fallback = () => {
       try {
         const ta = document.createElement("textarea");
@@ -177,19 +171,28 @@ export default function CartBar() {
         document.body.appendChild(ta);
         ta.focus();
         ta.select();
-        const ok = document.execCommand("copy");
+        if (document.execCommand("copy")) flash();
         document.body.removeChild(ta);
-        done(ok);
       } catch {
-        done(false);
+        /* si falla, el cliente puede escribir el dato a mano */
       }
     };
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(() => done(true), fallback);
+      navigator.clipboard.writeText(text).then(flash, fallback);
     } else {
       fallback();
     }
   };
+
+  const flashFor = (set: (v: boolean) => void) => () => {
+    set(true);
+    window.setTimeout(() => set(false), 2500);
+  };
+
+  // El valor va sin símbolos ni puntos (ej. "25000") para pegarlo tal cual en el
+  // campo "Total a pagar" del portal, que es numérico.
+  const copyAmount = () => copyToClipboard(String(paidTotal), flashFor(setCopied));
+  const copyAccount = () => copyToClipboard(BANK_TRANSFER.number, flashFor(setCopiedAccount));
 
   const closeAll = () => {
     setView("hidden");
@@ -210,6 +213,7 @@ export default function CartBar() {
     setOrder(null);
     setPaidTotal(0);
     setCopied(false);
+    setCopiedAccount(false);
   };
 
   return (
@@ -342,7 +346,7 @@ export default function CartBar() {
                         Continuar
                       </button>
                       <p className="mt-3 text-center text-[11px] text-ink-faint">
-                        Pedido para recoger en tienda · pagas al recoger
+                        Pedido para recoger en tienda · pagas por transferencia o link
                       </p>
                     </>
                   )}
@@ -551,7 +555,7 @@ export default function CartBar() {
                       </div>
 
                       <div className="mt-4 flex items-baseline justify-between border-t border-gold-soft/40 pt-4">
-                        <span className="smallcaps text-[11px] text-ink-soft">Total a pagar en tienda</span>
+                        <span className="smallcaps text-[11px] text-ink-soft">Total a pagar</span>
                         <span className="font-display text-[20px] font-semibold text-navy">{formatCOP(cart.total)}</span>
                       </div>
 
@@ -578,10 +582,11 @@ export default function CartBar() {
                       <path d="M20 6 9 17l-5-5" />
                     </svg>
                   </div>
-                  <p className="mt-4 text-[13px] text-ink-soft">Tu número de pedido</p>
-                  <p className="font-display text-[44px] font-semibold leading-none text-navy">#{order.code}</p>
-                  <p className="mt-3 text-[13px] leading-relaxed text-ink-soft">
-                    Muéstralo en tienda para recoger. Te avisamos cuando esté listo.
+                  <p className="mt-4 font-display text-[28px] font-semibold leading-tight text-navy">
+                    ¡Gracias{name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}!
+                  </p>
+                  <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
+                    Da tu nombre en tienda para recoger. Te avisamos cuando esté listo.
                   </p>
                   {wantsBilling && (
                     <p className="mt-2 text-[12.5px] text-verde">
@@ -594,10 +599,10 @@ export default function CartBar() {
                     <StatusTrack status={liveStatus} />
                   </div>
 
-                  {/* Pago en línea opcional por el portal de Davivienda. No se puede
-                      autocompletar el monto, así que le copiamos el valor al cliente. */}
+                  {/* Pago en línea (único medio): el portal de recaudo de
+                      Davivienda o una transferencia directa a la cuenta. */}
                   <div className="mt-4 border border-gold-soft/50 bg-paper px-4 py-4 text-left">
-                    <p className="smallcaps text-[10px] text-gold-deep">¿Prefieres pagar en línea?</p>
+                    <p className="smallcaps text-[10px] text-gold-deep">Paga tu pedido</p>
                     <div className="mt-2 flex items-center justify-between gap-3">
                       <div>
                         <p className="text-[11px] text-ink-faint">Total a pagar</p>
@@ -613,6 +618,8 @@ export default function CartBar() {
                         {copied ? "¡Copiado!" : "Copiar valor"}
                       </button>
                     </div>
+
+                    {/* Opción 1: portal de Davivienda */}
                     <a
                       href={DAVIVIENDA_PAYMENT_URL}
                       target="_blank"
@@ -622,9 +629,57 @@ export default function CartBar() {
                     >
                       Pagar con Davivienda
                     </a>
-                    <p className="mt-2 text-[11px] leading-relaxed text-ink-faint">
-                      Copiamos el valor: pégalo en “Total a pagar” y usa el <b>#{order.code}</b> como
-                      número de pedido. Si prefieres, también puedes pagar al recoger.
+
+                    {/* Separador */}
+                    <div className="my-3 flex items-center gap-2 text-[10px] text-ink-faint">
+                      <span className="h-px flex-1 bg-gold-soft/40" />
+                      <span className="smallcaps">o por transferencia</span>
+                      <span className="h-px flex-1 bg-gold-soft/40" />
+                    </div>
+
+                    {/* Opción 2: transferencia directa a la cuenta */}
+                    <div className="border border-gold-soft/50 bg-card px-3.5 py-3">
+                      <p className="text-[12px] text-ink-soft">
+                        {BANK_TRANSFER.bank} · {BANK_TRANSFER.type}
+                      </p>
+                      <div className="mt-1 flex items-center justify-between gap-3">
+                        <p className="font-display text-[19px] font-semibold leading-none tracking-wide text-navy">
+                          {BANK_TRANSFER.number}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={copyAccount}
+                          className="h-9 shrink-0 border border-gold-soft/70 px-3 text-[12.5px] font-medium text-ink-soft active:bg-gold-soft/20"
+                        >
+                          {copiedAccount ? "¡Copiado!" : "Copiar número"}
+                        </button>
+                      </div>
+                      <p className="mt-1.5 text-[11px] text-ink-faint">
+                        A nombre de <b>{BANK_TRANSFER.holder}</b>
+                      </p>
+
+                      {/* Código QR: se escanea con la app de cualquier banco o
+                          billetera (Nequi, Daviplata, Bancolombia…) para pagar. */}
+                      <div className="mt-3 border-t border-gold-soft/30 pt-3">
+                        <p className="text-center text-[11.5px] text-ink-soft">
+                          O escanéalo con la app de tu banco o billetera
+                        </p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src="/pago-qr.svg"
+                          alt="Código QR para pagar a PANISSE con cualquier banco o billetera"
+                          width={200}
+                          height={200}
+                          className="mx-auto mt-2 h-44 w-44 bg-white p-2"
+                        />
+                        <p className="mt-1.5 text-center text-[10.5px] text-ink-faint">
+                          Nequi · Daviplata · Bancolombia · BBVA y más
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="mt-3 text-[11px] leading-relaxed text-ink-faint">
+                      Pon tu nombre como referencia.
                     </p>
                   </div>
 
