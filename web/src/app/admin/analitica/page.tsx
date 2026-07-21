@@ -167,12 +167,14 @@ export default function AnaliticaPage() {
   const conversion =
     kpis && kpis.menuVisits > 0 ? Math.round((kpis.orders / kpis.menuVisits) * 100) : null;
 
+  // Todo con respaldo a lista vacía: si algún dato llegara incompleto, la
+  // pantalla se ve vacía en vez de congelarse.
   const dow = Array.from({ length: 7 }, (_, i) => {
-    const found = data?.visitsByDow.find((d) => d.dow === i + 1);
+    const found = (data?.visitsByDow ?? []).find((d) => d.dow === i + 1);
     return found?.visits ?? 0;
   });
   const hours = Array.from({ length: 24 }, (_, h) => {
-    const found = data?.visitsByHour.find((d) => d.hour === h);
+    const found = (data?.visitsByHour ?? []).find((d) => d.hour === h);
     return found?.visits ?? 0;
   });
   const days = data?.visitsByDay ?? [];
@@ -256,7 +258,7 @@ export default function AnaliticaPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <Card title="Productos más pedidos">
                 <HBarList
-                  items={data.topProductsOrders.map((p) => ({
+                  items={(data.topProductsOrders ?? []).map((p) => ({
                     name: p.name,
                     value: p.qty,
                     extra: formatCOP(p.revenue),
@@ -265,7 +267,7 @@ export default function AnaliticaPage() {
               </Card>
               <Card title="Productos más vistos">
                 <HBarList
-                  items={data.topProductsViews.map((p) => ({ name: p.name, value: p.views }))}
+                  items={(data.topProductsViews ?? []).map((p) => ({ name: p.name, value: p.views }))}
                 />
               </Card>
             </div>
@@ -273,18 +275,18 @@ export default function AnaliticaPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               <Card title="Categorías más vistas">
                 <HBarList
-                  items={data.topCategories.map((c) => ({ name: c.name, value: c.views }))}
+                  items={(data.topCategories ?? []).map((c) => ({ name: c.name, value: c.views }))}
                 />
               </Card>
               <div className="flex flex-col gap-3">
                 <Card title="Visitas por carta">
                   <HBarList
-                    items={data.menuVisits.map((m) => ({ name: m.menu, value: m.visits }))}
+                    items={(data.menuVisits ?? []).map((m) => ({ name: m.menu, value: m.visits }))}
                   />
                 </Card>
                 <Card title="Dispositivos (sesiones)">
                   <HBarList
-                    items={data.devices.map((d) => ({
+                    items={(data.devices ?? []).map((d) => ({
                       name: d.device === "movil" ? "Móvil" : d.device === "escritorio" ? "Escritorio" : "Otro",
                       value: d.sessions,
                     }))}

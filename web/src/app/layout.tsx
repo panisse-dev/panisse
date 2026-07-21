@@ -3,6 +3,7 @@ import { Playfair_Display, Outfit } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
 import { OrdersProvider } from "@/lib/myOrders";
+import SwCleanup from "@/components/SwCleanup";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -43,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${playfair.variable} ${outfit.variable}`}>
       <body className="antialiased">
+        <SwCleanup />
         <OrdersProvider>
           <CartProvider>{children}</CartProvider>
         </OrdersProvider>
