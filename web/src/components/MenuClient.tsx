@@ -11,6 +11,7 @@ import ProductSheet from "./ProductSheet";
 import SearchOverlay from "./SearchOverlay";
 import CartBar from "./CartBar";
 import MyOrders from "./MyOrders";
+import AppInstall from "./AppInstall";
 
 const HEADER_OFFSET = 128; // alto aprox. del encabezado sticky (barra + chips)
 
@@ -269,6 +270,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
       />
       <ProductSheet product={sheetProduct} onClose={() => setSheetProduct(null)} />
       <CartBar />
+      <AppInstall />
     </div>
   );
 }
