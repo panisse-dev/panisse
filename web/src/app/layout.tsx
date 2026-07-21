@@ -30,6 +30,9 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  // Al abrir el teclado, la zona visible se encoge para que la hoja quede
+  // encima y no tapada (soportado en navegadores modernos; inofensivo si no).
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({

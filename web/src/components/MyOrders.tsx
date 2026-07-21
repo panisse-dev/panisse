@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useMyOrders } from "@/lib/myOrders";
 import { STATUS_LABEL, type OrderStatus } from "@/lib/orders";
+import { useScrollLock } from "@/lib/scrollLock";
 import StatusTrack from "./StatusTrack";
 
 const DOT: Record<OrderStatus, string> = {
@@ -27,11 +28,8 @@ export default function MyOrders() {
     if (orders.length === 0) setOpen(false);
   }, [orders.length]);
 
-  // Bloquea el scroll del fondo mientras la hoja está abierta
-  useEffect(() => {
-    document.documentElement.classList.toggle("scroll-locked", open);
-    return () => document.documentElement.classList.remove("scroll-locked");
-  }, [open]);
+  // Congela el fondo mientras la hoja está abierta
+  useScrollLock(open);
 
   useEffect(() => {
     if (!open) return;

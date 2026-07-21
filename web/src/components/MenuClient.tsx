@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchMenuData, type Layout, type Menu, type Product, type Section } from "@/lib/menu";
 import { track } from "@/lib/track";
+import { useScrollLock } from "@/lib/scrollLock";
 import ProductRow from "./ProductRow";
 import ProductCard from "./ProductCard";
 import ProductSheet from "./ProductSheet";
@@ -155,12 +156,8 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
     }
   }, [active]);
 
-  // ── Bloquea el scroll del fondo cuando hay un overlay abierto ──
-  useEffect(() => {
-    const locked = !!sheetProduct || searchOpen;
-    document.documentElement.classList.toggle("scroll-locked", locked);
-    return () => document.documentElement.classList.remove("scroll-locked");
-  }, [sheetProduct, searchOpen]);
+  // ── Congela el fondo cuando hay un overlay abierto ──
+  useScrollLock(!!sheetProduct || searchOpen);
 
   const goTo = useCallback((slug: string) => {
     setActive(slug);

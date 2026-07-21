@@ -15,6 +15,7 @@ import {
 } from "@/lib/api";
 import { DOC_TYPES, type DocType, type OrderStatus } from "@/lib/orders";
 import { DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
+import { useScrollLock } from "@/lib/scrollLock";
 import StatusTrack from "./StatusTrack";
 
 type View = "hidden" | "cart" | "checkout" | "done";
@@ -49,11 +50,9 @@ export default function CartBar() {
 
   const open = view !== "hidden";
 
-  // Bloquea el scroll del fondo cuando el panel está abierto
-  useEffect(() => {
-    document.documentElement.classList.toggle("scroll-locked", open);
-    return () => document.documentElement.classList.remove("scroll-locked");
-  }, [open]);
+  // Congela el fondo cuando el panel está abierto (evita que iOS lo mueva de
+  // lado al aparecer el teclado)
+  useScrollLock(open);
 
   // Seguimiento en vivo del pedido tras enviarlo
   useEffect(() => {
