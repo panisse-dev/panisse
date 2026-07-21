@@ -23,15 +23,6 @@ export const metadata: Metadata = {
   },
   description:
     "Carta de PANISSE — cocina italiana en Pereira. Brunch, lunch y dinner, vinos y bebidas.",
-  applicationName: "PANISSE",
-  appleWebApp: {
-    capable: true,
-    title: "PANISSE",
-    statusBarStyle: "default",
-  },
-  icons: {
-    apple: "/icons/apple-touch-icon.png",
-  },
 };
 
 export const viewport: Viewport = {
