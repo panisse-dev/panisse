@@ -24,11 +24,25 @@ export default function AppInstall() {
   useEffect(() => {
     setMounted(true);
 
-    // Registrar el service worker.
+    const ios = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+
+    // Service worker: SÓLO en Android/escritorio. En iPhone es inestable en
+    // modo app (dejaba la app instalada en blanco), así que ahí NO lo usamos y
+    // además limpiamos cualquiera que haya quedado registrado antes.
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {
-        /* si falla, la web sigue funcionando igual */
-      });
+      if (ios) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then((regs) => regs.forEach((r) => r.unregister()))
+          .catch(() => {});
+        if (typeof caches !== "undefined") {
+          caches.keys().then((keys) => keys.forEach((k) => caches.delete(k))).catch(() => {});
+        }
+      } else {
+        navigator.serviceWorker.register("/sw.js").catch(() => {
+          /* si falla, la web sigue funcionando igual */
+        });
+      }
     }
 
     // ¿Ya está instalada? (abierta como app) → no molestar.
@@ -41,7 +55,6 @@ export default function AppInstall() {
     // ¿Ya lo cerró antes?
     if (localStorage.getItem(DISMISS_KEY) === "1") return;
 
-    const ios = /iphone|ipad|ipod/i.test(window.navigator.userAgent);
     setIsIOS(ios);
     if (ios) setDismissed(false); // en iOS mostramos la ayudita de una vez
 
