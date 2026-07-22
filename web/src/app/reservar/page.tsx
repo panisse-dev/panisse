@@ -281,27 +281,58 @@ export default function ReservarPage() {
     ]
       .filter((l) => l !== null)
       .join("\n");
+    const firstName = clientName.split(" ")[0] || "";
+    const shortDate = new Date(`${date}T12:00:00`).toLocaleDateString("es-CO", {
+      day: "numeric",
+      month: "long",
+    });
+    const contact = (sede?.whatsapp || restaurant.whatsapp).trim();
     return (
       <Shell>
-        <div className="px-2 pt-6 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-verde/12 text-verde">
-            <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <div className="px-1 pt-4 text-center">
+          {/* Sello de confirmación */}
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-verde text-white shadow-[0_8px_22px_rgba(17,87,46,0.28)]">
+            <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M20 6 9 17l-5-5" />
             </svg>
           </div>
-          <p className="mt-4 font-display text-[26px] font-semibold leading-tight text-navy">
-            ¡Reserva recibida!
+          <p className="smallcaps mt-4 text-[10px] text-gold-deep">Panisse</p>
+          <h1 className="mt-1 font-display text-[27px] font-semibold leading-tight text-verde">
+            ¡Reserva recibida{firstName ? `, ${firstName}` : ""}!
+          </h1>
+          <p className="mx-auto mt-2 max-w-[19rem] text-[13.5px] leading-relaxed text-ink-soft">
+            Tu reserva quedó registrada. Para dejarla <b className="text-navy">confirmada</b>, envíala por
+            WhatsApp con el botón de abajo.
           </p>
-          <div className="mt-5 border border-gold-soft/50 bg-paper px-5 py-5 text-left">
-            <Row k="Personas" v={`${party}`} />
-            <Row k="Día" v={formatDateLabel(date)} />
-            <Row k="Hora" v={formatTime(time)} />
-            {tableName && <Row k="Mesa" v={`${tableName}${zoneName ? ` · ${zoneName}` : ""}`} />}
-            <Row k="A nombre de" v={done ? name.trim() || known?.name || "ti" : ""} />
+
+          {/* Información de la reserva, en fila de íconos */}
+          <p className="smallcaps mt-6 text-[10px] text-gold-deep">Información de tu reserva</p>
+          <div className="mt-2 grid grid-cols-4 divide-x divide-gold-soft/40 border border-gold-soft/50 bg-paper">
+            <InfoCell
+              d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2|M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
+              value={`${party}`}
+              label={party === 1 ? "Persona" : "Personas"}
+            />
+            <InfoCell
+              d="M8 2v4M16 2v4M3 10h18|M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z"
+              value={shortDate}
+              label="Día"
+            />
+            <InfoCell
+              d="M12 7v5l3 2|M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              value={formatTime(time)}
+              label="Hora"
+            />
+            <InfoCell
+              d="M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"
+              dashed
+              value={tableName || "—"}
+              label={tableName ? zoneName || "Mesa" : "Por asignar"}
+            />
           </div>
-          <p className="mt-4 text-[13px] leading-relaxed text-ink-soft">
-            Para dejarla <b>confirmada</b>, envíanos tu reserva por WhatsApp con el botón de abajo: te
-            llegan todos los datos ya escritos, solo pulsa enviar.
+
+          <p className="mx-auto mt-5 max-w-[19rem] text-[13px] leading-relaxed text-ink-soft">
+            Al confirmar te llegan todos los datos ya escritos, solo pulsa enviar. ¡Te esperamos!
           </p>
           {deposit > 0 && (
             <p className="mt-2 text-[12.5px] leading-relaxed text-gold-deep">
@@ -316,6 +347,14 @@ export default function ReservarPage() {
           >
             Volver al inicio
           </Link>
+          {contact && (
+            <p className="mt-5 text-[11px] text-ink-faint">
+              ¿Dudas? Escríbenos al{" "}
+              <a href={`https://wa.me/${contact.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-gold-deep underline">
+                {contact}
+              </a>
+            </p>
+          )}
         </div>
       </Shell>
     );
@@ -724,11 +763,27 @@ function Shell({
   );
 }
 
-function Row({ k, v }: { k: string; v: string }) {
+// Celda de la fila de información de la confirmación (ícono + valor + etiqueta).
+function InfoCell({ d, value, label, dashed }: { d: string; value: string; label: string; dashed?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between border-b border-gold-soft/25 py-2 last:border-0">
-      <span className="smallcaps text-[10px] text-gold-deep">{k}</span>
-      <span className="font-display text-[16px] text-navy">{v}</span>
+    <div className="flex flex-col items-center gap-1 px-1 py-3.5 text-center">
+      <svg
+        viewBox="0 0 24 24"
+        className="h-5 w-5 text-gold-deep"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeDasharray={dashed ? "2.5 2.5" : undefined}
+        aria-hidden
+      >
+        {d.split("|").map((p, i) => (
+          <path key={i} d={p} />
+        ))}
+      </svg>
+      <span className="font-display text-[14px] font-medium leading-tight text-navy">{value}</span>
+      <span className="smallcaps text-[7.5px] text-ink-faint">{label}</span>
     </div>
   );
 }
