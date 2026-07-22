@@ -79,6 +79,19 @@ export async function fetchMenuData(): Promise<MenuData> {
   return rpc<MenuData>("get_menu_data");
 }
 
+// Solo los títulos y frases de cada carta (ligero), en vivo desde la base.
+export interface MenuTitle {
+  slug: string;
+  label: string;
+  tagline: string;
+  name: string;
+}
+
+export async function fetchMenuTitles(): Promise<MenuTitle[]> {
+  const { rpc } = await import("./supabase");
+  return rpc<MenuTitle[]>("public_menu_titles");
+}
+
 export function formatCOP(value: number): string {
   return "$" + value.toLocaleString("es-CO");
 }

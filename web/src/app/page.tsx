@@ -3,13 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { menus, restaurant } from "@/lib/menu";
+import { fetchMenuTitles, menus, restaurant, type MenuTitle } from "@/lib/menu";
 import { useLocation } from "@/lib/location";
 import { DEFAULT_HOME_THEME, fontStack, publicHomeTheme, type HomeTheme } from "@/lib/theme";
 
 export default function Home() {
   const { sedes, sede, sedeId, setSede, clearSede, ready } = useLocation();
   const [theme, setTheme] = useState<HomeTheme>(DEFAULT_HOME_THEME);
+  // Títulos y frases de las cartas, en vivo desde el panel.
+  const [titles, setTitles] = useState<Record<string, MenuTitle>>({});
 
   // Apariencia editable desde el panel (se aplica en vivo).
   useEffect(() => {
@@ -17,6 +19,11 @@ export default function Home() {
       .then((t) => t && setTheme(t))
       .catch(() => {
         /* si falla, se queda con el aspecto por defecto */
+      });
+    fetchMenuTitles()
+      .then((list) => setTitles(Object.fromEntries(list.map((m) => [m.slug, m]))))
+      .catch(() => {
+        /* si falla, se quedan los títulos por defecto */
       });
   }, []);
 
@@ -125,9 +132,11 @@ export default function Home() {
                   style={{ animationDelay: `${0.12 + i * 0.09}s` }}
                 >
                   <span className="smallcaps block font-display text-[19px] font-medium leading-tight tracking-[0.12em] text-navy">
-                    {menu.label}
+                    {titles[menu.slug]?.label || menu.label}
                   </span>
-                  <span className="mt-1 block text-[12px] text-gold-deep">{menu.tagline}</span>
+                  <span className="mt-1 block text-[12px] text-gold-deep">
+                    {titles[menu.slug]?.tagline || menu.tagline}
+                  </span>
                 </Link>
               ))}
             </nav>
