@@ -59,6 +59,18 @@ const STATUS_STYLE: Record<ReservationStatusAdmin, string> = {
   no_show: "bg-[#b3261e] text-white",
 };
 
+// Comidas por hora: desayuno < 11:00, almuerzo 11:00–16:00, cena ≥ 16:00.
+type Meal = "desayuno" | "almuerzo" | "cena";
+const MEALS: { key: Meal; label: string; icon: string }[] = [
+  { key: "desayuno", label: "Desayuno", icon: "M18 8h1a4 4 0 0 1 0 8h-1|M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z|M6 1v3M10 1v3M14 1v3" },
+  { key: "almuerzo", label: "Almuerzo", icon: "M3 2v7c0 1.1.9 2 2 2h0c1.1 0 2-.9 2-2V2M5 11v11M21 15V2a5 5 0 0 0-5 5v6h5zm0 0v7" },
+  { key: "cena", label: "Cena", icon: "M17.6 6.5a9 9 0 1 1-12.1 12 9 9 0 0 0 12.1-12z" },
+];
+function mealOf(hhmm: string): Meal {
+  const h = Number(hhmm.split(":")[0]);
+  return h < 11 ? "desayuno" : h < 16 ? "almuerzo" : "cena";
+}
+
 const DOW = [
   { iso: 1, label: "Lun" },
   { iso: 2, label: "Mar" },
@@ -113,6 +125,7 @@ export default function ReservasPage() {
   const [walkinTable, setWalkinTable] = useState<string | null>(null);
   const [nuevaOpen, setNuevaOpen] = useState(false);
   const [soundOn, setSoundOn] = useState(true);
+  const [mealFilter, setMealFilter] = useState<Meal | "todos">("todos");
 
   // Timbre para reservas nuevas (tono distinto al de la cocina).
   const audioCtx = useRef<AudioContext | null>(null);
@@ -268,6 +281,17 @@ export default function ReservasPage() {
     });
   }, [list]);
 
+  // Conteo por comida (sin canceladas) y lista filtrada por la pestaña activa.
+  const mealCounts = useMemo(() => {
+    const c: Record<Meal, number> = { desayuno: 0, almuerzo: 0, cena: 0 };
+    for (const r of list) if (r.status !== "cancelada") c[mealOf(r.time)]++;
+    return c;
+  }, [list]);
+  const displayList = useMemo(
+    () => (mealFilter === "todos" ? sortedList : sortedList.filter((r) => mealOf(r.time) === mealFilter)),
+    [sortedList, mealFilter],
+  );
+
   return (
     <div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 lg:mt-0">
@@ -336,11 +360,11 @@ export default function ReservasPage() {
               setShowStats(false);
               setShowSettings(false);
             }}
-            className={`smallcaps flex h-9 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-[10.5px] font-medium ${
+            className={`smallcaps flex h-9 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-[10.5px] font-medium lg:hidden ${
               showFloor ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 text-ink-soft"
             }`}
           >
-            Plano
+            {showFloor ? "Ver lista" : "Ver mapa"}
           </button>
           <button
             type="button"
@@ -370,20 +394,6 @@ export default function ReservasPage() {
           </button>
         </div>
       </div>
-
-      {showFloor && (
-        <FloorPanel
-          floor={floor}
-          code={code}
-          onChanged={poll}
-          onAuth={logout}
-          onPickTable={(tableId) => {
-            setWalkinTable(tableId);
-            setWalkinOpen(true);
-          }}
-        />
-      )}
-      {showStats && <StatsPanel code={code} onAuth={logout} />}
 
       {walkinOpen && (
         <WalkinModal
@@ -443,21 +453,49 @@ export default function ReservasPage() {
         </div>
       )}
 
-      <p className="mt-3 text-[11px] text-ink-faint">
-        {fmtDay(day)} · {active.length} reserva{active.length === 1 ? "" : "s"} · {totalPeople} personas
-        {connError && <span className="text-[#b3261e]"> · sin conexión</span>}
-      </p>
-
-      {showSettings && <SettingsPanel code={code} onSaved={poll} />}
-
-      {/* Lista de reservas */}
-      {list.length === 0 ? (
-        <p className="mt-16 text-center text-[13px] text-ink-faint">
-          No hay reservas para este día.
-        </p>
+      {showStats ? (
+        <StatsPanel code={code} onAuth={logout} />
+      ) : showSettings ? (
+        <SettingsPanel code={code} onSaved={poll} />
       ) : (
-        <div className="mx-auto mt-4 flex max-w-2xl flex-col gap-3">
-          {sortedList.map((r) => {
+        <div className="mt-3 gap-4 lg:flex lg:items-start">
+          {/* ── Columna izquierda: reservas del día ── */}
+          <div className={`lg:w-[400px] lg:shrink-0 ${showFloor ? "hidden lg:block" : ""}`}>
+            <p className="text-[11px] text-ink-faint">
+              {fmtDay(day)} · {active.length} reserva{active.length === 1 ? "" : "s"} · {totalPeople} personas
+              {connError && <span className="text-[#b3261e]"> · sin conexión</span>}
+            </p>
+
+            {/* Pestañas por comida (desayuno / almuerzo / cena) */}
+            <div className="chips-scroll -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1">
+              {(["todos", ...MEALS.map((m) => m.key)] as (Meal | "todos")[]).map((k) => {
+                const on = mealFilter === k;
+                const label = k === "todos" ? "Todas" : MEALS.find((m) => m.key === k)!.label;
+                const n = k === "todos" ? active.length : mealCounts[k as Meal];
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => setMealFilter(k)}
+                    className={`smallcaps flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[10.5px] font-medium ${on ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 bg-card text-ink-soft"}`}
+                  >
+                    {label}
+                    <span className={`rounded-full px-1.5 text-[9.5px] font-semibold ${on ? "bg-gold-soft text-navy" : "bg-navy/10 text-navy"}`}>
+                      {n}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Lista de reservas */}
+            {displayList.length === 0 ? (
+              <p className="mt-16 text-center text-[13px] text-ink-faint">
+                {list.length === 0 ? "No hay reservas para este día." : "No hay reservas en esta comida."}
+              </p>
+            ) : (
+              <div className="mt-3 flex flex-col gap-3">
+                {displayList.map((r) => {
             const wa = waLink(
               r.customer.phone,
               `¡Hola ${r.customer.name.split(" ")[0] || ""}! Sobre tu reserva en PANISSE para ${r.party} el ${fmtDay(r.date)} a las ${fmtTime(r.time)}.`,
@@ -603,7 +641,24 @@ export default function ReservasPage() {
                 </div>
               </div>
             );
-          })}
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* ── Columna derecha: mapa de mesas ── */}
+          <div className={`mt-4 lg:mt-0 lg:flex-1 ${showFloor ? "" : "hidden lg:block"}`}>
+            <FloorPanel
+              floor={floor}
+              code={code}
+              onChanged={poll}
+              onAuth={logout}
+              onPickTable={(tableId) => {
+                setWalkinTable(tableId);
+                setWalkinOpen(true);
+              }}
+            />
+          </div>
         </div>
       )}
     </div>
