@@ -29,6 +29,13 @@ export default function Home() {
 
   // Debe elegir sede si hay más de una y aún no ha escogido.
   const needsSede = ready && sedes.length > 1 && !sedeId;
+
+  // Cartas que se muestran en la sede elegida. Una carta sin `locations`
+  // (o vacío) sale en todas las sedes; Roka solo sale en Pilares. Mientras
+  // no haya sede elegida, solo se muestran las cartas de todas las sedes.
+  const visibleMenus = menus.filter(
+    (m) => !m.locations || m.locations.length === 0 || (!!sedeId && m.locations.includes(sedeId)),
+  );
   const address = sede?.address || `${restaurant.address} · ${restaurant.city}`;
   const whatsapp = (sede?.whatsapp || restaurant.whatsapp).replace(/\D/g, "");
 
@@ -124,7 +131,7 @@ export default function Home() {
 
             {/* Botones de menú */}
             <nav aria-label="Menús" className={`flex flex-col gap-5 ${sede && sedes.length > 1 ? "mt-6" : "mt-12"}`}>
-              {menus.map((menu, i) => (
+              {visibleMenus.map((menu, i) => (
                 <Link
                   key={menu.slug}
                   href={`/menu/${menu.slug}`}

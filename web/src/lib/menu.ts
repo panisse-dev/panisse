@@ -45,6 +45,9 @@ export interface Menu {
   label: string;
   tagline: string;
   name: string;
+  // Sedes donde aparece esta carta. null/vacío = todas las sedes.
+  // (Roka solo en "pilares"; las cartas de Panisse en todas.)
+  locations?: string[] | null;
   sections: Section[];
   totalProducts: number;
 }
