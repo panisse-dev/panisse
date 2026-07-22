@@ -112,6 +112,42 @@ export default function ReservasPage() {
   const [walkinOpen, setWalkinOpen] = useState(false);
   const [walkinTable, setWalkinTable] = useState<string | null>(null);
   const [nuevaOpen, setNuevaOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
+
+  // Timbre para reservas nuevas (tono distinto al de la cocina).
+  const audioCtx = useRef<AudioContext | null>(null);
+  const resFirst = useRef(true);
+  const prevTotal = useRef(0);
+
+  const beep = useCallback(() => {
+    if (!soundOn) return;
+    try {
+      let ctx = audioCtx.current;
+      if (!ctx) {
+        ctx = new (window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        audioCtx.current = ctx;
+      }
+      const play = (freq: number, start: number) => {
+        const o = ctx!.createOscillator();
+        const g = ctx!.createGain();
+        o.connect(g);
+        g.connect(ctx!.destination);
+        o.frequency.value = freq;
+        o.type = "sine";
+        g.gain.setValueAtTime(0.0001, ctx!.currentTime + start);
+        g.gain.exponentialRampToValueAtTime(0.3, ctx!.currentTime + start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx!.currentTime + start + 0.4);
+        o.start(ctx!.currentTime + start);
+        o.stop(ctx!.currentTime + start + 0.42);
+      };
+      // Campanita cálida "din-don" (distinta al beep agudo de los pedidos).
+      play(587, 0);
+      play(784, 0.22);
+    } catch {
+      /* ignore */
+    }
+  }, [soundOn]);
 
   const poll = useCallback(async () => {
     try {
@@ -121,6 +157,14 @@ export default function ReservasPage() {
         staffFloor(code, day),
       ]);
       setConnError(false);
+
+      // Suena cuando llega una reserva nueva (aumenta el total de próximas,
+      // sin importar qué día se esté viendo). No suena en la primera carga.
+      const total = u.reduce((s, d) => s + d.total, 0);
+      if (!resFirst.current && total > prevTotal.current) beep();
+      prevTotal.current = total;
+      resFirst.current = false;
+
       setList(l);
       setUpcoming(u);
       setFloor(f);
@@ -128,7 +172,7 @@ export default function ReservasPage() {
       if (isAuthError(e)) logout();
       else setConnError(true);
     }
-  }, [code, day, logout]);
+  }, [code, day, logout, beep]);
 
   // Lista plana de mesas (con su zona) para los selectores de asignación.
   const tables = useMemo(
@@ -234,6 +278,30 @@ export default function ReservasPage() {
             aria-label="Ver reservas de un día"
             className="h-9 border border-gold-soft/60 bg-card px-2 text-[12.5px] text-ink-soft outline-none"
           />
+          <button
+            type="button"
+            onClick={() => setSoundOn((s) => !s)}
+            aria-pressed={soundOn}
+            title={soundOn ? "Sonido activado" : "Sonido apagado"}
+            className={`flex h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[11px] font-medium ${
+              soundOn ? "border-verde/50 bg-verde/10 text-verde" : "border-ink-faint/40 text-ink-faint"
+            }`}
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              {soundOn ? (
+                <>
+                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                  <path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a9 9 0 0 1 0 14" />
+                </>
+              ) : (
+                <>
+                  <path d="M11 5 6 9H2v6h4l5 4V5Z" />
+                  <path d="m23 9-6 6M17 9l6 6" />
+                </>
+              )}
+            </svg>
+            {soundOn ? "Sonido" : "Silencio"}
+          </button>
         </div>
         <div className="chips-scroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:justify-end lg:px-0 lg:pb-0">
           <button
