@@ -257,6 +257,17 @@ export default function ReservasPage() {
     .filter((r) => r.status !== "no_show")
     .reduce((s, r) => s + r.party, 0);
 
+  // Orden de la lista: las reservas más recientes arriba; las ya
+  // atendidas/despachadas (cumplida, no llegó, cancelada) bajan al final.
+  const sortedList = useMemo(() => {
+    const done = (s: ReservationStatusAdmin) =>
+      s === "cumplida" || s === "no_show" || s === "cancelada";
+    return [...list].sort((a, b) => {
+      const g = (done(a.status) ? 1 : 0) - (done(b.status) ? 1 : 0);
+      return g !== 0 ? g : b.createdAt.localeCompare(a.createdAt);
+    });
+  }, [list]);
+
   return (
     <div>
       <div className="mt-3 flex flex-wrap items-center justify-between gap-2 lg:mt-0">
@@ -446,7 +457,7 @@ export default function ReservasPage() {
         </p>
       ) : (
         <div className="mx-auto mt-4 flex max-w-2xl flex-col gap-3">
-          {list.map((r) => {
+          {sortedList.map((r) => {
             const wa = waLink(
               r.customer.phone,
               `¡Hola ${r.customer.name.split(" ")[0] || ""}! Sobre tu reserva en PANISSE para ${r.party} el ${fmtDay(r.date)} a las ${fmtTime(r.time)}.`,
