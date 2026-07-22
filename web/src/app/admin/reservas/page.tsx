@@ -1128,7 +1128,9 @@ function StatsPanel({ code, onAuth }: { code: string; onAuth: () => void }) {
                       <li key={o.source}>
                         <div className="flex items-baseline justify-between gap-2 text-[12px]">
                           <span className="text-ink">{SOURCE_LABEL[o.source] ?? o.source}</span>
-                          <span className="font-medium text-navy">{o.count}</span>
+                          <span className="font-medium text-navy">
+                            {o.count} <span className="text-ink-faint">· {o.people} pers.</span>
+                          </span>
                         </div>
                         <div className="mt-0.5 h-1.5 bg-paper-deep">
                           <div className="h-full bg-gold-deep/80" style={{ width: `${(o.count / originMax) * 100}%` }} />

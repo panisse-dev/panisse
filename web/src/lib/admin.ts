@@ -416,7 +416,7 @@ export interface ReservationStats {
   byMonth: { month: string; count: number; people: number }[];
   byHour: { hour: number; count: number }[];
   byMeal: { desayuno: number; almuerzo: number; cena: number };
-  byOrigin: { source: string; count: number }[];
+  byOrigin: { source: string; count: number; people: number }[];
   byStatus: Record<ReservationStatusAdmin, number>;
   byLocation: { id: string; name: string; count: number }[];
 }
