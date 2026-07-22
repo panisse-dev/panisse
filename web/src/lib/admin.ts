@@ -331,6 +331,57 @@ export const staffSetReservationSource = (code: string, id: string, source: Rese
 export const staffSetReservationStatus = (code: string, id: string, status: string) =>
   rpc<void>("staff_set_reservation_status", { p_code: code, p_id: id, p_status: status });
 
+// ── Ficha completa de una reserva (ver + editar) ──
+export interface ReservationDetail {
+  id: string;
+  code: string;
+  date: string;
+  time: string;
+  party: number;
+  status: ReservationStatusAdmin;
+  createdAt: string;
+  source: string;
+  isWalkIn: boolean;
+  petFriendly: boolean;
+  reducedMobility: boolean;
+  note: string;
+  staffNote: string;
+  depositRequired: number;
+  depositPaid: boolean;
+  customer: { name: string; phone: string; email: string };
+  tables: { id: string; name: string; zone: string }[];
+  client: {
+    id: string;
+    name: string;
+    phone: string;
+    email: string | null;
+    birthday: string | null;
+    vip: boolean;
+    blacklisted: boolean;
+  } | null;
+  clientStats: { total: number; arrived: number; noShow: number; cancelled: number };
+}
+
+export const staffReservationDetail = (code: string, id: string) =>
+  rpc<ReservationDetail>("staff_reservation_detail", { p_code: code, p_id: id });
+
+export const staffUpdateReservation = (
+  code: string,
+  id: string,
+  patch: {
+    party?: number;
+    date?: string;
+    time?: string;
+    petFriendly?: boolean;
+    reducedMobility?: boolean;
+    staffNote?: string;
+    name?: string;
+    phone?: string;
+    email?: string;
+    birthday?: string | null;
+  },
+) => rpc<void>("staff_update_reservation", { p_code: code, p_id: id, p: patch });
+
 export const staffSetReservationNote = (code: string, id: string, note: string) =>
   rpc<void>("staff_set_reservation_note", { p_code: code, p_id: id, p_note: note });
 

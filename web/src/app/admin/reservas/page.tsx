@@ -20,6 +20,8 @@ import {
   staffSaveZone,
   staffReservationBlocks,
   staffReservations,
+  staffReservationDetail,
+  staffUpdateReservation,
   staffReservationSettings,
   staffReservationStats,
   staffReservationsUpcoming,
@@ -34,6 +36,7 @@ import {
   type FloorTable,
   type FloorZone,
   type Reservation,
+  type ReservationDetail,
   type ReservationBlock,
   type ReservationDay,
   type ReservationSettings,
@@ -122,6 +125,8 @@ export default function ReservasPage() {
   const [noteDraft, setNoteDraft] = useState("");
   // Reserva cuya asignación de mesas se está editando (abre el selector).
   const [tablesEditId, setTablesEditId] = useState<string | null>(null);
+  // Reserva cuya ficha completa está abierta.
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showFloor, setShowFloor] = useState(false);
@@ -436,6 +441,20 @@ export default function ReservasPage() {
         />
       )}
 
+      {detailId && (
+        <ReservationDetailModal
+          code={code}
+          id={detailId}
+          zones={floor?.zones ?? []}
+          onClose={() => setDetailId(null)}
+          onSaved={() => {
+            setDetailId(null);
+            poll();
+          }}
+          onAuth={logout}
+        />
+      )}
+
       {/* Próximos días con reservas */}
       {upcoming.length > 0 && (
         <div className="chips-scroll -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
@@ -513,10 +532,17 @@ export default function ReservasPage() {
               <div key={r.id} className="border border-gold-soft/50 bg-card shadow-[0_1px_8px_rgba(4,27,49,0.06)]">
                 <div className="flex items-start justify-between gap-3 px-4 pt-3.5">
                   <div className="min-w-0">
-                    <p className="font-display text-[22px] leading-none text-navy">{fmtTime(r.time)}</p>
-                    <p className="mt-1 text-[13px] font-medium text-ink">
-                      {r.customer.name} · {r.party} {r.party === 1 ? "persona" : "personas"}
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setDetailId(r.id)}
+                      className="block text-left"
+                      title="Ver ficha de la reserva"
+                    >
+                      <p className="font-display text-[22px] leading-none text-navy">{fmtTime(r.time)}</p>
+                      <p className="mt-1 text-[13px] font-medium text-ink underline decoration-gold-soft/70 decoration-1 underline-offset-2">
+                        {r.customer.name} · {r.party} {r.party === 1 ? "persona" : "personas"}
+                      </p>
+                    </button>
                     {r.customer.phone && (
                       <a href={`tel:${r.customer.phone}`} className="text-[12px] text-gold-deep underline">
                         {r.customer.phone}
@@ -2178,6 +2204,316 @@ function NuevaReservaModal({
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// ══ Ficha completa de una reserva (ver + editar), estilo Precompro ══
+function StatBubble({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex flex-col items-center justify-center border border-gold-soft/50 bg-paper px-2 py-2.5 text-center">
+      <span className="font-display text-[20px] leading-none text-navy">{value}</span>
+      <span className="smallcaps mt-1 text-[8.5px] text-ink-faint">{label}</span>
+    </div>
+  );
+}
+
+function Toggle({
+  label,
+  icon,
+  on,
+  onChange,
+}: {
+  label: string;
+  icon: string;
+  on: boolean;
+  onChange: (v: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-2 border border-gold-soft/50 bg-paper px-3 py-2.5">
+      <span className="flex items-center gap-2 text-[12.5px] text-ink-soft">
+        <span aria-hidden>{icon}</span>
+        {label}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(!on)}
+        className={`smallcaps h-7 w-16 border px-2 text-[10px] font-semibold ${
+          on ? "border-verde bg-verde text-white" : "border-gold-soft/70 bg-card text-ink-faint"
+        }`}
+      >
+        {on ? "Sí" : "No"}
+      </button>
+    </div>
+  );
+}
+
+function ReservationDetailModal({
+  code,
+  id,
+  zones,
+  onClose,
+  onSaved,
+  onAuth,
+}: {
+  code: string;
+  id: string;
+  zones: FloorZone[];
+  onClose: () => void;
+  onSaved: () => void;
+  onAuth: () => void;
+}) {
+  const [d, setD] = useState<ReservationDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [pickTables, setPickTables] = useState(false);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [birthday, setBirthday] = useState("");
+  const [party, setParty] = useState(2);
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [pet, setPet] = useState(false);
+  const [mobility, setMobility] = useState(false);
+  const [comment, setComment] = useState("");
+  const [tableIds, setTableIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    let cancel = false;
+    staffReservationDetail(code, id)
+      .then((r) => {
+        if (cancel) return;
+        setD(r);
+        setName(r.customer.name || r.client?.name || "");
+        setEmail(r.customer.email || r.client?.email || "");
+        setPhone(r.customer.phone || r.client?.phone || "");
+        setBirthday(r.client?.birthday ?? "");
+        setParty(r.party);
+        setDate(r.date);
+        setTime(r.time);
+        setPet(r.petFriendly);
+        setMobility(r.reducedMobility);
+        setComment(r.staffNote);
+        setTableIds(r.tables.map((t) => t.id));
+      })
+      .catch((e) => {
+        if (isAuthError(e)) onAuth();
+        else setError(e instanceof Error ? e.message : "No se pudo cargar la ficha.");
+      })
+      .finally(() => {
+        if (!cancel) setLoading(false);
+      });
+    return () => {
+      cancel = true;
+    };
+  }, [code, id, onAuth]);
+
+  const allTables = useMemo(() => zones.flatMap((z) => z.tables), [zones]);
+  const tableChips = tableIds
+    .map((tid) => {
+      const t = allTables.find((x) => x.id === tid);
+      const zone = zones.find((z) => z.tables.some((x) => x.id === tid));
+      return t ? { name: t.name, zone: zone?.name ?? "" } : null;
+    })
+    .filter((x): x is { name: string; zone: string } => Boolean(x));
+
+  const save = async () => {
+    if (saving) return;
+    setSaving(true);
+    setError("");
+    try {
+      await staffUpdateReservation(code, id, {
+        party,
+        date,
+        time,
+        petFriendly: pet,
+        reducedMobility: mobility,
+        staffNote: comment.trim(),
+        name: name.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        birthday: birthday || null,
+      });
+      await staffSetReservationTables(code, id, tableIds);
+      onSaved();
+    } catch (e) {
+      if (isAuthError(e)) onAuth();
+      else setError(e instanceof Error ? e.message : "No se pudo guardar.");
+      setSaving(false);
+    }
+  };
+
+  const wa = waLink(phone, `¡Hola ${name.split(" ")[0] || ""}! Sobre tu reserva en PANISSE.`);
+  const inputCls =
+    "mt-1 h-10 w-full border border-gold-soft/70 bg-paper px-3 text-[14px] text-ink outline-none focus:border-navy";
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Ficha de la reserva"
+    >
+      <button type="button" aria-label="Cerrar" onClick={onClose} className="anim-fade-in absolute inset-0 bg-navy/45 backdrop-blur-[2px]" />
+      <div className="anim-sheet-up relative mx-auto w-full max-w-lg">
+        <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 shadow-[0_-12px_40px_rgba(4,17,29,0.25)] lg:max-h-[88vh] lg:rounded-2xl lg:pb-6">
+          {loading ? (
+            <p className="py-16 text-center text-[13px] text-ink-faint">Cargando ficha…</p>
+          ) : !d ? (
+            <p className="py-16 text-center text-[13px] text-[#b3261e]">{error || "No se pudo cargar."}</p>
+          ) : (
+            <>
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-display text-[19px] text-navy">Ficha de la reserva</h3>
+                  <span className={`smallcaps inline-block px-2 py-0.5 text-[9px] font-semibold ${STATUS_STYLE[d.status]}`}>
+                    {STATUS_LABEL[d.status]}
+                  </span>
+                  {d.client?.vip && (
+                    <span className="smallcaps inline-block bg-gold px-2 py-0.5 text-[9px] font-semibold text-navy">VIP</span>
+                  )}
+                  {d.client?.blacklisted && (
+                    <span className="smallcaps inline-block bg-[#b3261e] px-2 py-0.5 text-[9px] font-semibold text-white">Lista negra</span>
+                  )}
+                </div>
+                <button type="button" onClick={onClose} className="text-[12px] text-ink-faint underline">Cerrar</button>
+              </div>
+              <p className="mt-0.5 text-[11px] text-ink-faint">
+                Código {d.code} · {SOURCE_LABEL[d.source] ?? d.source}
+                {d.isWalkIn ? " · Walk-In" : ""}
+              </p>
+
+              {/* ── Datos del cliente ── */}
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <label className="block sm:col-span-2">
+                  <span className="smallcaps text-[9px] text-gold-deep">Nombre</span>
+                  <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+                </label>
+                <label className="block">
+                  <span className="smallcaps text-[9px] text-gold-deep">Correo</span>
+                  <input value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" className={inputCls} />
+                </label>
+                <label className="block">
+                  <span className="smallcaps text-[9px] text-gold-deep">Celular</span>
+                  <div className="flex items-center gap-1.5">
+                    <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className={inputCls} />
+                    {phone && (
+                      <a href={`tel:${phone}`} aria-label="Llamar" className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center border border-gold-soft/70 text-gold-deep">☎</a>
+                    )}
+                    {wa && (
+                      <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center border border-verde/50 text-verde">✆</a>
+                    )}
+                  </div>
+                </label>
+                <label className="block">
+                  <span className="smallcaps text-[9px] text-gold-deep">Cumpleaños</span>
+                  <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className={inputCls} />
+                </label>
+              </div>
+
+              {/* ── Actividad del comensal ── */}
+              <p className="smallcaps mt-4 text-[10px] text-gold-deep">Actividad del comensal</p>
+              <div className="mt-1.5 grid grid-cols-4 gap-1.5">
+                <StatBubble label="Reservas" value={d.clientStats.total} />
+                <StatBubble label="Llegó" value={d.clientStats.arrived} />
+                <StatBubble label="No llegó" value={d.clientStats.noShow} />
+                <StatBubble label="Canceló" value={d.clientStats.cancelled} />
+              </div>
+
+              {/* ── Datos de la reserva ── */}
+              <p className="smallcaps mt-4 text-[10px] text-gold-deep">Datos de la reserva</p>
+              <div className="mt-1.5 grid grid-cols-2 gap-2">
+                <label className="block">
+                  <span className="smallcaps text-[9px] text-gold-deep">Fecha</span>
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+                </label>
+                <label className="block">
+                  <span className="smallcaps text-[9px] text-gold-deep">Hora</span>
+                  <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={inputCls} />
+                </label>
+              </div>
+              <div className="mt-2 flex items-center justify-between border border-gold-soft/50 bg-paper px-3 py-2">
+                <span className="smallcaps text-[10px] text-gold-deep">Personas</span>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setParty((p) => Math.max(1, p - 1))} className="h-9 w-9 border border-gold-soft/70 bg-card text-[18px] text-navy">−</button>
+                  <span className="min-w-[2ch] text-center font-display text-[20px] text-navy">{party}</span>
+                  <button type="button" onClick={() => setParty((p) => Math.min(50, p + 1))} className="h-9 w-9 border border-gold-soft/70 bg-card text-[18px] text-navy">+</button>
+                </div>
+              </div>
+
+              {/* Zona y mesa */}
+              <div className="mt-2 border border-gold-soft/50 bg-paper px-3 py-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="smallcaps text-[10px] text-gold-deep">Zona y mesa</span>
+                  <button type="button" onClick={() => setPickTables(true)} className="border border-gold-soft/70 px-2.5 py-1 text-[11px] font-medium text-gold-deep">
+                    {tableChips.length > 0 ? "Cambiar" : "Asignar"}
+                  </button>
+                </div>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {tableChips.length > 0 ? (
+                    tableChips.map((t, i) => (
+                      <span key={i} className="smallcaps inline-block border border-navy/40 bg-navy/[0.05] px-2 py-1 text-[11px] font-semibold text-navy">
+                        {t.zone ? `${t.zone} · ` : ""}{t.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[11.5px] text-ink-faint">Sin asignar</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Perro / movilidad reducida */}
+              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <Toggle label="Viene con perro" icon="🐾" on={pet} onChange={setPet} />
+                <Toggle label="Movilidad reducida" icon="♿" on={mobility} onChange={setMobility} />
+              </div>
+
+              {/* Nota del cliente (solo lectura) */}
+              {d.note && (
+                <p className="mt-3 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
+                  <span className="smallcaps mr-1 text-[9px] not-italic text-gold-deep">Cliente:</span>“{d.note}”
+                </p>
+              )}
+
+              {/* Comentario de reserva (interno) */}
+              <label className="mt-3 block">
+                <span className="smallcaps text-[10px] text-gold-deep">Comentario de la reserva</span>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={2}
+                  placeholder="Ej. mesa junto a la ventana, aniversario, alergias…"
+                  className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3 py-2 text-[13.5px] text-ink outline-none focus:border-navy"
+                />
+              </label>
+
+              {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
+              <div className="mt-4 flex gap-2">
+                <button type="button" onClick={save} disabled={saving} className="h-12 flex-1 bg-navy text-[14px] font-semibold text-gold-soft disabled:opacity-60">
+                  {saving ? "Guardando…" : "Guardar cambios"}
+                </button>
+                <button type="button" onClick={onClose} className="h-12 border border-gold-soft/70 px-5 text-[13px] text-ink-soft">Cerrar</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {pickTables && (
+        <TablePicker
+          zones={zones}
+          selected={tableIds}
+          party={party}
+          onCancel={() => setPickTables(false)}
+          onSave={(ids) => {
+            setTableIds(ids);
+            setPickTables(false);
+          }}
+        />
+      )}
     </div>
   );
 }
