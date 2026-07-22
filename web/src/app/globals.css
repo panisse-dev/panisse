@@ -132,6 +132,45 @@ body {
   text-transform: uppercase;
 }
 
+/* ══ Tema ROKA — crema y café, inspirado en su carta (el PDF) ══
+   Reescribe la paleta por variables: como las utilidades (text-navy,
+   bg-card, border-gold-soft…) apuntan a estas variables, todo lo que esté
+   dentro de .theme-roka se repinta solo, sin tocar cada componente. */
+.theme-roka {
+  --color-paper: #f2ecdd;
+  --color-paper-deep: #e7dfca;
+  --color-card: #f8f3e6;
+  --color-ink: #352c1e;
+  --color-ink-soft: #6f6248;
+  --color-ink-faint: #9a8d72;
+  --color-navy: #2f2415; /* café espresso: títulos y pestaña activa */
+  --color-gold: #a3894f;
+  --color-gold-deep: #856a37;
+  --color-gold-soft: #c9b483;
+  --color-gold-faint: #e6dcc0;
+}
+.theme-roka.page-col {
+  box-shadow: 0 0 40px rgba(53, 44, 30, 0.14);
+}
+/* Sin mármol: fondo crema liso */
+.theme-roka .marble-fixed {
+  background-image: none;
+  background-color: var(--color-paper);
+}
+/* Títulos de sección estilo carta Roka: recuadro fino en mayúsculas espaciadas */
+.theme-roka .ornament::before,
+.theme-roka .ornament::after {
+  display: none;
+}
+.theme-roka .ornament h2 {
+  display: inline-block;
+  border: 1px solid var(--color-gold-soft);
+  padding: 0.42rem 1.15rem;
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
 /* ── iOS: evita el auto-zoom al enfocar un campo ──
    Safari en móvil hace zoom si la letra del input es < 16px. Forzamos 16px
    en táctiles y pantallas pequeñas para que no se descuadre nada al escribir. */

@@ -870,7 +870,8 @@
         }
       ],
       "totalProducts": 39,
-      "locations": null
+      "locations": null,
+      "brand": "panisse"
     },
     {
       "slug": "lunch-y-dinner",
@@ -4077,7 +4078,8 @@
         }
       ],
       "totalProducts": 160,
-      "locations": null
+      "locations": null,
+      "brand": "panisse"
     },
     {
       "slug": "vinos-y-bebidas",
@@ -5298,7 +5300,8 @@
         }
       ],
       "totalProducts": 65,
-      "locations": null
+      "locations": null,
+      "brand": "panisse"
     },
     {
       "slug": "roka-carta",
@@ -6239,7 +6242,8 @@
           ]
         }
       ],
-      "totalProducts": 43
+      "totalProducts": 43,
+      "brand": "roka"
     },
     {
       "slug": "roka-bebidas",
@@ -8249,7 +8253,8 @@
           "subsections": []
         }
       ],
-      "totalProducts": 103
+      "totalProducts": 103,
+      "brand": "roka"
     }
   ]
 }

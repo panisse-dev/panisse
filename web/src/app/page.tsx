@@ -7,6 +7,12 @@ import { fetchMenuTitles, menus, restaurant, type MenuTitle } from "@/lib/menu";
 import { useLocation } from "@/lib/location";
 import { DEFAULT_HOME_THEME, fontStack, publicHomeTheme, type HomeTheme } from "@/lib/theme";
 
+// Marcas que pueden convivir en una sede (Pilares).
+const BRANDS: Record<string, { label: string; tagline: string }> = {
+  panisse: { label: "Carta Panisse", tagline: "Nuestra cocina de siempre" },
+  roka: { label: "Carta Roka", tagline: "Nikkei, peruana y parrilla" },
+};
+
 export default function Home() {
   const { sedes, sede, sedeId, setSede, clearSede, ready } = useLocation();
   const [theme, setTheme] = useState<HomeTheme>(DEFAULT_HOME_THEME);
@@ -36,6 +42,19 @@ export default function Home() {
   const visibleMenus = menus.filter(
     (m) => !m.locations || m.locations.length === 0 || (!!sedeId && m.locations.includes(sedeId)),
   );
+
+  // Si en la sede conviven varias marcas (Pilares: Panisse + Roka), el
+  // cliente elige primero la marca; luego ve las cartas de esa marca.
+  const [brand, setBrand] = useState<string | null>(null);
+  useEffect(() => setBrand(null), [sedeId]); // al cambiar de sede, se reinicia
+  const brandsHere = Array.from(new Set(visibleMenus.map((m) => m.brand ?? "panisse")));
+  const multiBrand = brandsHere.length > 1;
+  const shownBrands = ["panisse", "roka"].filter((b) => brandsHere.includes(b));
+  const shownMenus = !multiBrand
+    ? visibleMenus
+    : brand
+      ? visibleMenus.filter((m) => (m.brand ?? "panisse") === brand)
+      : [];
   const address = sede?.address || `${restaurant.address} · ${restaurant.city}`;
   const whatsapp = (sede?.whatsapp || restaurant.whatsapp).replace(/\D/g, "");
 
@@ -129,28 +148,67 @@ export default function Home() {
               </button>
             )}
 
-            {/* Botones de menú */}
-            <nav aria-label="Menús" className={`flex flex-col gap-5 ${sede && sedes.length > 1 ? "mt-6" : "mt-12"}`}>
-              {visibleMenus.map((menu, i) => (
-                <Link
-                  key={menu.slug}
-                  href={`/menu/${menu.slug}`}
-                  className="anim-fade-up group relative block border border-gold-soft bg-card px-6 py-5 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985]"
-                  style={{ animationDelay: `${0.12 + i * 0.09}s` }}
-                >
-                  <span className="smallcaps block font-display text-[19px] font-medium leading-tight tracking-[0.12em] text-navy">
-                    {titles[menu.slug]?.label || menu.label}
-                  </span>
-                  {/* La frase respeta lo del panel: si la dejas vacía, no se
-                      muestra. Sólo cae a la frase por defecto mientras carga. */}
-                  {(titles[menu.slug] ? titles[menu.slug].tagline : menu.tagline) && (
-                    <span className="mt-1 block text-[12px] text-gold-deep">
-                      {titles[menu.slug] ? titles[menu.slug].tagline : menu.tagline}
+            {multiBrand && !brand ? (
+              /* ── Elegir marca (Pilares: Panisse o Roka) ── */
+              <div className={`flex flex-col gap-5 ${sede && sedes.length > 1 ? "mt-6" : "mt-12"}`}>
+                {shownBrands.map((b, i) => (
+                  <button
+                    key={b}
+                    type="button"
+                    onClick={() => setBrand(b)}
+                    className={`anim-fade-up group relative block border border-gold-soft bg-card px-6 py-6 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985] ${b === "roka" ? "theme-roka" : ""}`}
+                    style={{ animationDelay: `${0.12 + i * 0.09}s` }}
+                  >
+                    <span className="smallcaps block font-display text-[22px] font-medium leading-tight tracking-[0.14em] text-navy">
+                      {BRANDS[b].label}
                     </span>
-                  )}
-                </Link>
-              ))}
-            </nav>
+                    <span className="mt-1 block text-[12px] text-gold-deep">{BRANDS[b].tagline}</span>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <>
+                {/* Volver a elegir marca */}
+                {multiBrand && brand && (
+                  <button
+                    type="button"
+                    onClick={() => setBrand(null)}
+                    className="anim-fade-up mt-6 flex items-center justify-center gap-1.5 text-[12px] text-ink-soft"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5 text-gold-deep" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M15 5l-7 7 7 7" />
+                    </svg>
+                    <span className="text-gold-deep underline underline-offset-2">Ver las dos cartas</span>
+                  </button>
+                )}
+
+                {/* Botones de carta */}
+                <nav
+                  aria-label="Menús"
+                  className={`flex flex-col gap-5 ${multiBrand ? "mt-5" : sede && sedes.length > 1 ? "mt-6" : "mt-12"}`}
+                >
+                  {shownMenus.map((menu, i) => (
+                    <Link
+                      key={menu.slug}
+                      href={`/menu/${menu.slug}`}
+                      className="anim-fade-up group relative block border border-gold-soft bg-card px-6 py-5 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985]"
+                      style={{ animationDelay: `${0.12 + i * 0.09}s` }}
+                    >
+                      <span className="smallcaps block font-display text-[19px] font-medium leading-tight tracking-[0.12em] text-navy">
+                        {titles[menu.slug]?.label || menu.label}
+                      </span>
+                      {/* La frase respeta lo del panel: si la dejas vacía, no se
+                          muestra. Sólo cae a la frase por defecto mientras carga. */}
+                      {(titles[menu.slug] ? titles[menu.slug].tagline : menu.tagline) && (
+                        <span className="mt-1 block text-[12px] text-gold-deep">
+                          {titles[menu.slug] ? titles[menu.slug].tagline : menu.tagline}
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+                </nav>
+              </>
+            )}
 
             {/* Reservar mesa */}
             <Link

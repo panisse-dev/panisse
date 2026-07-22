@@ -48,6 +48,8 @@ export interface Menu {
   // Sedes donde aparece esta carta. null/vacío = todas las sedes.
   // (Roka solo en "pilares"; las cartas de Panisse en todas.)
   locations?: string[] | null;
+  // Marca de la carta: "panisse" (por defecto) o "roka". Define el estilo.
+  brand?: string;
   sections: Section[];
   totalProducts: number;
 }

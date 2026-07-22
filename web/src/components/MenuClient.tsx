@@ -103,7 +103,8 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
     fetchMenuData()
       .then((data) => {
         const fresh = data.menus.find((m) => m.slug === initialMenu.slug);
-        if (fresh && !cancelled) setMenu(fresh);
+        // La marca no cambia; se conserva la del build por si la base aún no la trae.
+        if (fresh && !cancelled) setMenu({ ...fresh, brand: initialMenu.brand });
       })
       .catch(() => {
         /* sin conexión: se queda el menú del build */
@@ -187,9 +188,11 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
     [initialMenu.slug],
   );
 
+  const isRoka = menu.brand === "roka";
+
   return (
-    <div className="page-col relative mx-auto min-h-dvh w-full max-w-md">
-      {/* Mármol fijo: no scrollea, igual que en menupp */}
+    <div className={`page-col relative mx-auto min-h-dvh w-full max-w-md ${isRoka ? "theme-roka" : ""}`}>
+      {/* Fondo fijo: mármol en Panisse, crema liso en Roka */}
       <div className="marble-fixed" aria-hidden />
       {/* ── Encabezado sticky: barra + pestañas de secciones ── */}
       <div className="sticky top-0 z-30 border-b border-gold-soft/60 bg-card/92 backdrop-blur-md">
@@ -204,7 +207,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
             </svg>
           </Link>
           <div className="text-center">
-            <p className="smallcaps text-[9px] text-gold-deep">Panisse</p>
+            <p className="smallcaps text-[9px] text-gold-deep">{isRoka ? "Roka" : "Panisse"}</p>
             <h1 className="font-display text-[19px] leading-tight text-navy">{menu.label}</h1>
           </div>
           <button
