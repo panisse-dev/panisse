@@ -18,7 +18,27 @@ export interface CustomerInfo {
   birthday?: string; // YYYY-MM-DD (obligatorio sólo para clientes nuevos)
   wantsBilling?: boolean; // el cliente pidió factura electrónica
   billing?: Billing; // se omite si ya tenemos los datos guardados del cliente
+  location?: string; // sede elegida (id); el servidor cae a la de siempre si falta
+  orderType?: "pickup" | "delivery"; // recoger (por defecto) o domicilio
+  deliveryAddress?: string; // dirección de entrega (sólo domicilio)
+  scheduledAt?: string; // ISO; hora programada del domicilio (vacío = para ya)
 }
+
+// Config de domicilios de una sede (para el flujo del cliente).
+export interface DeliveryConfig {
+  enabled: boolean;
+  fee: number;
+  minOrder: number;
+  scheduling: boolean;
+  leadMinutes: number;
+  daysAhead: number;
+  startTime: string; // "HH:MM"
+  endTime: string; // "HH:MM"
+  note: string;
+}
+
+export const publicDeliveryConfig = (location: string) =>
+  rpc<DeliveryConfig>("public_delivery_config", { p_location: location });
 
 export interface ClientCheck {
   known: boolean;

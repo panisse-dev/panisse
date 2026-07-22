@@ -7,6 +7,7 @@ import {
   isAuthError,
   staffClients,
   staffDeleteClient,
+  staffSetClientFlag,
   staffUpsertClient,
   type ClientRow,
 } from "@/lib/admin";
@@ -20,9 +21,32 @@ interface ClientForm {
   email: string;
   birthday: string;
   notes: string;
+  vip: boolean;
+  blacklisted: boolean;
 }
 
-const EMPTY: ClientForm = { name: "", phone: "", email: "", birthday: "", notes: "" };
+const EMPTY: ClientForm = {
+  name: "",
+  phone: "",
+  email: "",
+  birthday: "",
+  notes: "",
+  vip: false,
+  blacklisted: false,
+};
+
+type Filter = "todos" | "vip" | "recurrentes" | "lista_negra";
+
+// Total de visitas de un cliente = pedidos + reservas efectivas.
+const visits = (c: ClientRow) => c.ordersCount + c.reservationsCount;
+const isRecurrente = (c: ClientRow) => visits(c) >= 2;
+
+const FILTERS: { key: Filter; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "vip", label: "VIP" },
+  { key: "recurrentes", label: "Recurrentes" },
+  { key: "lista_negra", label: "Lista negra" },
+];
 
 function fmtDate(iso: string | null): string {
   if (!iso) return "—";
@@ -45,6 +69,7 @@ export default function ClientesPage() {
   const { code, logout } = useStaff();
   const [clients, setClients] = useState<ClientRow[] | null>(null);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState<Filter>("todos");
   const [error, setError] = useState("");
   const [form, setForm] = useState<ClientForm | null>(null);
   const [saving, setSaving] = useState(false);
@@ -67,11 +92,40 @@ export default function ClientesPage() {
   const filtered = useMemo(() => {
     if (!clients) return [];
     const q = normalize(query.trim());
-    if (!q) return clients;
-    return clients.filter((c) =>
-      normalize(`${c.name} ${c.phone} ${c.email ?? ""}`).includes(q),
+    return clients.filter((c) => {
+      if (filter === "vip" && !c.vip) return false;
+      if (filter === "lista_negra" && !c.blacklisted) return false;
+      if (filter === "recurrentes" && !isRecurrente(c)) return false;
+      if (q && !normalize(`${c.name} ${c.phone} ${c.email ?? ""}`).includes(q)) return false;
+      return true;
+    });
+  }, [clients, query, filter]);
+
+  const counts = useMemo(() => {
+    const list = clients ?? [];
+    return {
+      vip: list.filter((c) => c.vip).length,
+      recurrentes: list.filter(isRecurrente).length,
+      lista_negra: list.filter((c) => c.blacklisted).length,
+    };
+  }, [clients]);
+
+  // Cambia una marca (VIP / lista negra) al instante y avisa al servidor.
+  const toggleFlag = async (c: ClientRow, flag: "vip" | "blacklisted") => {
+    const value = !c[flag];
+    setClients((prev) =>
+      prev ? prev.map((x) => (x.id === c.id ? { ...x, [flag]: value } : x)) : prev,
     );
-  }, [clients, query]);
+    try {
+      await staffSetClientFlag(code, c.id, flag, value);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else {
+        setError("No se pudo guardar el cambio.");
+        load();
+      }
+    }
+  };
 
   const openNew = () => {
     setForm(EMPTY);
@@ -86,6 +140,8 @@ export default function ClientesPage() {
       email: c.email ?? "",
       birthday: c.birthday ?? "",
       notes: c.notes,
+      vip: c.vip,
+      blacklisted: c.blacklisted,
     });
     setFormError("");
   };
@@ -105,6 +161,8 @@ export default function ClientesPage() {
         email: form.email.trim(),
         birthday: form.birthday || undefined,
         notes: form.notes.trim(),
+        vip: form.vip,
+        blacklisted: form.blacklisted,
       });
       setForm(null);
       await load();
@@ -129,14 +187,18 @@ export default function ClientesPage() {
 
   const exportCsv = () => {
     if (!clients) return;
-    const head = "Nombre,Celular,Email,Cumpleaños,Pedidos,Total,Registro,Última actividad,Notas";
+    const head =
+      "Nombre,Celular,Email,Cumpleaños,VIP,Lista negra,Pedidos,Reservas,Total,Registro,Última actividad,Notas";
     const rows = clients.map((c) =>
       [
         c.name,
         c.phone,
         c.email ?? "",
         c.birthday ?? "",
+        c.vip ? "Sí" : "",
+        c.blacklisted ? "Sí" : "",
         c.ordersCount,
+        c.reservationsCount,
         c.totalSpent,
         fmtDate(c.createdAt),
         fmtDate(c.lastActivityAt),
@@ -193,11 +255,40 @@ export default function ClientesPage() {
         </button>
       </div>
 
+      {/* Filtros rápidos */}
+      <div className="chips-scroll -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1">
+        {FILTERS.map((f) => {
+          const n =
+            f.key === "todos" ? (clients?.length ?? 0) : counts[f.key as keyof typeof counts];
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => setFilter(f.key)}
+              className={`smallcaps flex h-9 shrink-0 items-center gap-1.5 border px-3.5 text-[10.5px] font-medium ${
+                filter === f.key
+                  ? "border-navy bg-navy text-gold-soft"
+                  : "border-gold-soft/60 bg-card text-ink-soft"
+              }`}
+            >
+              {f.label}
+              <span
+                className={`rounded-full px-1.5 text-[9.5px] font-semibold ${
+                  filter === f.key ? "bg-gold-soft text-navy" : "bg-navy/10 text-navy"
+                }`}
+              >
+                {n}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       <p className="mt-2 text-[11px] text-ink-faint">
         {clients ? (
           <>
             {filtered.length} de {clients.length} cliente{clients.length === 1 ? "" : "s"} · los
-            pedidos con teléfono crean o actualizan clientes automáticamente
+            pedidos y reservas con teléfono crean o actualizan clientes automáticamente
           </>
         ) : (
           "Cargando…"
@@ -215,7 +306,8 @@ export default function ClientesPage() {
                 <th className="px-3 py-2.5 font-medium">Celular</th>
                 <th className="px-3 py-2.5 font-medium">Email</th>
                 <th className="px-3 py-2.5 font-medium">Cumpleaños</th>
-                <th className="px-3 py-2.5 text-right font-medium"># Pedidos</th>
+                <th className="px-3 py-2.5 text-right font-medium">Pedidos</th>
+                <th className="px-3 py-2.5 text-right font-medium">Reservas</th>
                 <th className="px-3 py-2.5 text-right font-medium">Total</th>
                 <th className="px-3 py-2.5 font-medium">Últ. actividad</th>
                 <th className="px-3 py-2.5 font-medium" aria-label="Acciones" />
@@ -223,8 +315,27 @@ export default function ClientesPage() {
             </thead>
             <tbody className="divide-y divide-gold-soft/20">
               {filtered.map((c) => (
-                <tr key={c.id} className="text-ink">
-                  <td className="px-3 py-2.5 font-medium">{c.name}</td>
+                <tr key={c.id} className={`text-ink ${c.blacklisted ? "bg-[#b3261e]/[0.04]" : ""}`}>
+                  <td className="px-3 py-2.5 font-medium">
+                    <div className="flex items-center gap-1.5">
+                      <span className={c.blacklisted ? "text-ink-soft line-through" : ""}>{c.name}</span>
+                      {c.vip && (
+                        <span className="smallcaps rounded-full bg-gold px-1.5 py-0.5 text-[8.5px] font-semibold text-navy">
+                          VIP
+                        </span>
+                      )}
+                      {isRecurrente(c) && !c.blacklisted && (
+                        <span className="smallcaps rounded-full bg-verde/15 px-1.5 py-0.5 text-[8.5px] font-semibold text-verde">
+                          Repite
+                        </span>
+                      )}
+                      {c.blacklisted && (
+                        <span className="smallcaps rounded-full bg-[#b3261e]/15 px-1.5 py-0.5 text-[8.5px] font-semibold text-[#b3261e]">
+                          Lista negra
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-3 py-2.5">
                     {c.phone ? (
                       <a href={`tel:${c.phone}`} className="text-gold-deep underline">
@@ -237,12 +348,36 @@ export default function ClientesPage() {
                   <td className="max-w-[180px] truncate px-3 py-2.5">{c.email || "—"}</td>
                   <td className="px-3 py-2.5">{fmtBirthday(c.birthday)}</td>
                   <td className="px-3 py-2.5 text-right">{c.ordersCount}</td>
+                  <td className="px-3 py-2.5 text-right">{c.reservationsCount}</td>
                   <td className="px-3 py-2.5 text-right">
                     {c.totalSpent > 0 ? formatCOP(c.totalSpent) : "—"}
                   </td>
                   <td className="px-3 py-2.5 text-ink-faint">{fmtDate(c.lastActivityAt)}</td>
                   <td className="px-3 py-2.5">
                     <div className="flex justify-end gap-1">
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag(c, "vip")}
+                        aria-label={c.vip ? `Quitar VIP a ${c.name}` : `Marcar VIP a ${c.name}`}
+                        title={c.vip ? "Quitar VIP" : "Marcar VIP"}
+                        className={`flex h-8 w-8 items-center justify-center active:bg-paper-deep ${c.vip ? "text-gold-deep" : "text-ink-faint/50"}`}
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill={c.vip ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleFlag(c, "blacklisted")}
+                        aria-label={c.blacklisted ? `Sacar de lista negra a ${c.name}` : `Poner en lista negra a ${c.name}`}
+                        title={c.blacklisted ? "Sacar de lista negra" : "Poner en lista negra"}
+                        className={`flex h-8 w-8 items-center justify-center active:bg-paper-deep ${c.blacklisted ? "text-[#b3261e]" : "text-ink-faint/50"}`}
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <circle cx="12" cy="12" r="9" />
+                          <path d="M5.6 5.6l12.8 12.8" />
+                        </svg>
+                      </button>
                       <button
                         type="button"
                         onClick={() => openEdit(c)}
@@ -340,6 +475,33 @@ export default function ClientesPage() {
                   className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3 py-2.5 text-[14px] text-ink outline-none focus:border-navy"
                 />
               </label>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => (f ? { ...f, vip: !f.vip } : f))}
+                  className={`smallcaps flex h-10 flex-1 items-center justify-center gap-1.5 border px-3 text-[11px] font-semibold ${
+                    form.vip ? "border-gold-deep bg-gold text-navy" : "border-gold-soft/70 bg-paper text-ink-soft"
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill={form.vip ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                  </svg>
+                  Cliente VIP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForm((f) => (f ? { ...f, blacklisted: !f.blacklisted } : f))}
+                  className={`smallcaps flex h-10 flex-1 items-center justify-center gap-1.5 border px-3 text-[11px] font-semibold ${
+                    form.blacklisted ? "border-[#b3261e] bg-[#b3261e]/10 text-[#b3261e]" : "border-gold-soft/70 bg-paper text-ink-soft"
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M5.6 5.6l12.8 12.8" />
+                  </svg>
+                  Lista negra
+                </button>
+              </div>
               {formError && (
                 <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{formError}</p>
               )}

@@ -6,13 +6,16 @@ import { useCart } from "@/lib/cart";
 import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
 import { restaurant } from "@/lib/menu";
+import { useLocation } from "@/lib/location";
 import {
   checkClient,
   createOrder,
   getOrderStatus,
+  publicDeliveryConfig,
   EMAIL_RE,
   type ClientCheck,
   type CreatedOrder,
+  type DeliveryConfig,
 } from "@/lib/api";
 import { DOC_TYPES, type DocType, type OrderStatus } from "@/lib/orders";
 import { BANK_TRANSFER, DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
@@ -24,7 +27,15 @@ type View = "hidden" | "cart" | "checkout" | "done";
 export default function CartBar() {
   const cart = useCart();
   const { addOrder } = useMyOrders();
+  const { sedeId } = useLocation();
   const [view, setView] = useState<View>("hidden");
+  // Domicilios (config de la sede; recoger por defecto)
+  const [delivery, setDelivery] = useState<DeliveryConfig | null>(null);
+  const [orderType, setOrderType] = useState<"pickup" | "delivery">("pickup");
+  const [address, setAddress] = useState("");
+  const [schedMode, setSchedMode] = useState<"asap" | "scheduled">("asap");
+  const [schedDate, setSchedDate] = useState("");
+  const [schedTime, setSchedTime] = useState("");
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
@@ -54,6 +65,30 @@ export default function CartBar() {
   const [copiedAccount, setCopiedAccount] = useState(false);
 
   const open = view !== "hidden";
+
+  // Config de domicilios de la sede elegida (para saber si ofrecer domicilio)
+  useEffect(() => {
+    let stop = false;
+    const loc = sedeId ?? "pilares";
+    publicDeliveryConfig(loc)
+      .then((d) => {
+        if (!stop) {
+          setDelivery(d);
+          if (!d?.enabled) setOrderType("pickup");
+        }
+      })
+      .catch(() => {
+        if (!stop) setDelivery(null);
+      });
+    return () => {
+      stop = true;
+    };
+  }, [sedeId]);
+
+  const deliveryOffered = Boolean(delivery?.enabled);
+  const isDelivery = orderType === "delivery" && deliveryOffered;
+  const deliveryFee = isDelivery ? delivery?.fee ?? 0 : 0;
+  const grandTotal = cart.total + deliveryFee;
 
   // Congela el fondo cuando el panel está abierto (evita que iOS lo mueva de
   // lado al aparecer el teclado)
@@ -129,6 +164,26 @@ export default function CartBar() {
         return;
       }
     }
+    // Validaciones de domicilio
+    let scheduledAt: string | undefined;
+    if (isDelivery) {
+      if (!address.trim()) {
+        setError("Escribe la dirección de entrega");
+        return;
+      }
+      if (delivery && delivery.minOrder > 0 && cart.total < delivery.minOrder) {
+        setError(`El pedido mínimo para domicilio es ${formatCOP(delivery.minOrder)}`);
+        return;
+      }
+      if (schedMode === "scheduled") {
+        if (!schedDate || !schedTime) {
+          setError("Elige la fecha y la hora del domicilio");
+          return;
+        }
+        // Colombia es siempre -05:00 (sin horario de verano)
+        scheduledAt = `${schedDate}T${schedTime}:00-05:00`;
+      }
+    }
     setSending(true);
     try {
       const created = await createOrder(
@@ -138,6 +193,10 @@ export default function CartBar() {
           name: known.known ? undefined : name.trim(),
           phone: known.known ? undefined : phone.trim(),
           birthday: known.known ? undefined : birthday,
+          location: sedeId ?? undefined,
+          orderType,
+          deliveryAddress: isDelivery ? address.trim() : undefined,
+          scheduledAt,
           wantsBilling,
           billing:
             wantsBilling && !usesSavedBilling
@@ -156,7 +215,7 @@ export default function CartBar() {
       setOrder(created);
       setLiveStatus("recibido");
       setLivePaid(false); // nace pendiente de pago hasta que el restaurante lo confirme
-      setPaidTotal(cart.total); // se conserva para el pago en línea, antes de vaciar
+      setPaidTotal(grandTotal); // total con domicilio; se conserva antes de vaciar
       // Resumen de platos y nombre, para el mensaje de WhatsApp del comprobante
       setPaidSummary(
         cart.lines
@@ -217,6 +276,11 @@ export default function CartBar() {
     setEmail("");
     setBirthday("");
     setKnown(null);
+    setOrderType("pickup");
+    setAddress("");
+    setSchedMode("asap");
+    setSchedDate("");
+    setSchedTime("");
     setWantsBilling(false);
     setEditBilling(false);
     setDocType("CC");
@@ -364,7 +428,9 @@ export default function CartBar() {
                         Continuar
                       </button>
                       <p className="mt-3 text-center text-[11px] text-ink-faint">
-                        Pedido para recoger en tienda · pagas por transferencia o link
+                        {deliveryOffered
+                          ? "Recoger o domicilio en el siguiente paso · pagas por transferencia o link"
+                          : "Pedido para recoger en tienda · pagas por transferencia o link"}
                       </p>
                     </>
                   )}
@@ -375,6 +441,92 @@ export default function CartBar() {
                      no se le vuelve a pedir nada ── */}
               {view === "checkout" && (
                 <div className="px-5 pt-4">
+                  {/* ── Recoger o domicilio (si la sede acepta domicilios) ── */}
+                  {deliveryOffered && (
+                    <div className="mb-4">
+                      <span className="smallcaps text-[10px] text-gold-deep">¿Cómo lo quieres?</span>
+                      <div className="mt-1.5 flex gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setOrderType("pickup")}
+                          className={`h-11 flex-1 border text-[13px] font-medium ${orderType === "pickup" ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/70 bg-paper text-ink-soft"}`}
+                        >
+                          Recoger en tienda
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setOrderType("delivery")}
+                          className={`h-11 flex-1 border text-[13px] font-medium ${orderType === "delivery" ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/70 bg-paper text-ink-soft"}`}
+                        >
+                          Domicilio
+                        </button>
+                      </div>
+
+                      {isDelivery && (
+                        <div className="mt-3 border border-gold-soft/50 bg-paper p-3.5">
+                          <label className="block">
+                            <span className="smallcaps text-[10px] text-gold-deep">Dirección de entrega *</span>
+                            <textarea
+                              value={address}
+                              onChange={(e) => setAddress(e.target.value)}
+                              rows={2}
+                              placeholder="Calle, número, barrio, apto, indicaciones…"
+                              className="mt-1 w-full resize-none border border-gold-soft/70 bg-card px-3 py-2.5 text-[15px] text-ink outline-none focus:border-navy"
+                            />
+                          </label>
+
+                          {delivery?.scheduling && (
+                            <div className="mt-3">
+                              <span className="smallcaps text-[10px] text-gold-deep">¿Para cuándo?</span>
+                              <div className="mt-1.5 flex gap-1.5">
+                                <button
+                                  type="button"
+                                  onClick={() => setSchedMode("asap")}
+                                  className={`h-10 flex-1 border text-[12.5px] font-medium ${schedMode === "asap" ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/70 bg-card text-ink-soft"}`}
+                                >
+                                  Lo antes posible
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setSchedMode("scheduled")}
+                                  className={`h-10 flex-1 border text-[12.5px] font-medium ${schedMode === "scheduled" ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/70 bg-card text-ink-soft"}`}
+                                >
+                                  Programar
+                                </button>
+                              </div>
+                              {schedMode === "scheduled" && (
+                                <div className="mt-2 grid grid-cols-2 gap-2">
+                                  <input
+                                    type="date"
+                                    value={schedDate}
+                                    min={new Date().toLocaleDateString("en-CA", { timeZone: "America/Bogota" })}
+                                    onChange={(e) => setSchedDate(e.target.value)}
+                                    className="h-11 w-full border border-gold-soft/70 bg-card px-2.5 text-[14px] text-ink outline-none focus:border-navy"
+                                  />
+                                  <input
+                                    type="time"
+                                    value={schedTime}
+                                    min={delivery.startTime}
+                                    max={delivery.endTime}
+                                    onChange={(e) => setSchedTime(e.target.value)}
+                                    className="h-11 w-full border border-gold-soft/70 bg-card px-2.5 text-[14px] text-ink outline-none focus:border-navy"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <p className="mt-2.5 text-[11px] leading-relaxed text-ink-faint">
+                            Entregas de {delivery?.startTime} a {delivery?.endTime}
+                            {delivery && delivery.fee > 0 ? ` · domicilio ${formatCOP(delivery.fee)}` : " · domicilio gratis"}
+                            {delivery && delivery.minOrder > 0 ? ` · mínimo ${formatCOP(delivery.minOrder)}` : ""}
+                            {delivery?.note ? ` · ${delivery.note}` : ""}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <label className="block">
                     <span className="smallcaps text-[10px] text-gold-deep">Correo *</span>
                     <input
@@ -572,9 +724,23 @@ export default function CartBar() {
                           ))}
                       </div>
 
-                      <div className="mt-4 flex items-baseline justify-between border-t border-gold-soft/40 pt-4">
-                        <span className="smallcaps text-[11px] text-ink-soft">Total a pagar</span>
-                        <span className="font-display text-[20px] font-semibold text-navy">{formatCOP(cart.total)}</span>
+                      <div className="mt-4 border-t border-gold-soft/40 pt-4">
+                        {isDelivery && (
+                          <>
+                            <div className="flex items-baseline justify-between text-[13px] text-ink-soft">
+                              <span>Platos</span>
+                              <span>{formatCOP(cart.total)}</span>
+                            </div>
+                            <div className="mt-1 flex items-baseline justify-between text-[13px] text-ink-soft">
+                              <span>Domicilio</span>
+                              <span>{deliveryFee > 0 ? formatCOP(deliveryFee) : "Gratis"}</span>
+                            </div>
+                          </>
+                        )}
+                        <div className="mt-1 flex items-baseline justify-between">
+                          <span className="smallcaps text-[11px] text-ink-soft">Total a pagar</span>
+                          <span className="font-display text-[20px] font-semibold text-navy">{formatCOP(grandTotal)}</span>
+                        </div>
                       </div>
 
                       {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
@@ -585,7 +751,7 @@ export default function CartBar() {
                         disabled={sending}
                         className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft transition-transform active:scale-[0.98] disabled:opacity-60"
                       >
-                        {sending ? "Enviando…" : "Enviar pedido para recoger"}
+                        {sending ? "Enviando…" : isDelivery ? "Enviar pedido a domicilio" : "Enviar pedido para recoger"}
                       </button>
                     </>
                   )}
@@ -603,9 +769,19 @@ export default function CartBar() {
                   <p className="mt-4 font-display text-[28px] font-semibold leading-tight text-navy">
                     ¡Gracias{name.trim() ? `, ${name.trim().split(" ")[0]}` : ""}!
                   </p>
-                  <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
-                    Da tu nombre en tienda para recoger. Te avisamos cuando esté listo.
-                  </p>
+                  {isDelivery ? (
+                    <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
+                      Te llevamos tu pedido a <b className="text-ink">{address.trim()}</b>
+                      {schedMode === "scheduled" && schedDate && schedTime
+                        ? ` el ${schedDate} a las ${schedTime}`
+                        : " lo antes posible"}
+                      . Te avisamos cuando vaya en camino.
+                    </p>
+                  ) : (
+                    <p className="mt-2 text-[13px] leading-relaxed text-ink-soft">
+                      Da tu nombre en tienda para recoger. Te avisamos cuando esté listo.
+                    </p>
+                  )}
                   {wantsBilling && (
                     <p className="mt-2 text-[12.5px] text-verde">
                       Tu factura electrónica llegará a tu correo. 🧾

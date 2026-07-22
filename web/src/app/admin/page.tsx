@@ -215,7 +215,7 @@ export default function PedidosPage() {
   const confirmPayment = async (order: Order) => {
     setPending((prev) => prev.filter((o) => o.id !== order.id));
     setOrders((prev) => [
-      { ...order, paid: true, status: "recibido", statusAt: new Date().toISOString() },
+      { ...order, paid: true, status: "preparacion", statusAt: new Date().toISOString() },
       ...prev.filter((o) => o.id !== order.id),
     ]);
     seenIds.current.add(order.id); // ya lo mostramos: que no vuelva a sonar
@@ -319,6 +319,35 @@ export default function PedidosPage() {
     </ul>
   );
 
+  // Bloque de domicilio: badge + dirección + hora programada (si aplica).
+  const deliveryBlock = (o: Order) => {
+    if (o.orderType !== "delivery") return null;
+    const sched = o.scheduledAt
+      ? new Date(o.scheduledAt).toLocaleString("es-CO", {
+          timeZone: "America/Bogota",
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : null;
+    return (
+      <div className="mx-4 mt-2 border border-verde/40 bg-verde/8 px-3 py-2">
+        <div className="flex items-center justify-between gap-2">
+          <span className="smallcaps text-[10px] font-semibold text-verde">
+            Domicilio{o.deliveryFee ? ` · ${formatCOP(o.deliveryFee)}` : ""}
+          </span>
+          <span className="text-[11px] font-medium text-navy">
+            {sched ? `Programado: ${sched}` : "Lo antes posible"}
+          </span>
+        </div>
+        {o.deliveryAddress && (
+          <p className="mt-1 text-[13px] leading-snug text-ink">📍 {o.deliveryAddress}</p>
+        )}
+      </div>
+    );
+  };
+
   // Tarjeta de un pedido PENDIENTE DE PAGO: aún no entra a la cocina.
   const pendingCard = (o: Order) => (
     <div
@@ -342,6 +371,8 @@ export default function PedidosPage() {
           <p className="mt-1 text-[11px] text-ink-faint">{timeAgo(o.createdAt)}</p>
         </div>
       </div>
+
+      {deliveryBlock(o)}
 
       {itemsList(o)}
 
@@ -371,9 +402,9 @@ export default function PedidosPage() {
         <button
           type="button"
           onClick={() => confirmPayment(o)}
-          className="h-13 w-3/5 border-l border-gold-soft/25 bg-verde py-3.5 text-[14.5px] font-semibold text-white transition-transform hover:bg-verde/90 active:scale-[0.99]"
+          className="h-13 w-3/5 border-l border-gold-soft/25 bg-verde py-3.5 text-[14px] font-semibold leading-tight text-white transition-transform hover:bg-verde/90 active:scale-[0.99]"
         >
-          Confirmar pago
+          Confirmar pago y preparar
         </button>
       </div>
     </div>
@@ -402,6 +433,8 @@ export default function PedidosPage() {
           <p className="mt-1 text-[11px] text-ink-faint">{timeAgo(o.createdAt)}</p>
         </div>
       </div>
+
+      {deliveryBlock(o)}
 
       <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
         {o.items.map((it, i) => (
@@ -615,7 +648,7 @@ export default function PedidosPage() {
           </header>
           <p className="mb-3 px-1 text-[11.5px] leading-relaxed text-ink-soft">
             Estos pedidos aún no entran a la cocina. Cuando veas la plata en la cuenta o el
-            comprobante, dale <b>Confirmar pago</b> y pasan a prepararse.
+            comprobante, dale <b>Confirmar pago y preparar</b> y arrancan de una en preparación.
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {pending.map(pendingCard)}

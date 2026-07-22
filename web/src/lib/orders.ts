@@ -59,6 +59,10 @@ export interface Order {
   items: OrderItem[];
   total: number;
   staffNote?: string; // nota interna que agrega el restaurante desde el panel
+  orderType?: "pickup" | "delivery"; // recoger o domicilio
+  deliveryAddress?: string; // dirección de entrega (domicilio)
+  deliveryFee?: number; // costo del domicilio
+  scheduledAt?: string | null; // ISO; hora programada (null = para ya)
 }
 
 // El cliente sólo ve un subconjunto público del pedido (sin datos de otros).

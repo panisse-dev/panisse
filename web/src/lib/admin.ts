@@ -2,6 +2,7 @@
 // de Supabase que verifican la clave del personal (p_code).
 import type { PriceEntry } from "./menu";
 import type { Order } from "./orders";
+import type { HomeTheme } from "./theme";
 import { FUNCTIONS_URL, rpc } from "./supabase";
 
 export const CODE_KEY = "panisse-staff-code";
@@ -44,11 +45,104 @@ export interface ClientRow {
   email: string | null;
   birthday: string | null;
   notes: string;
+  vip: boolean;
+  blacklisted: boolean;
   createdAt: string;
   lastActivityAt: string;
   ordersCount: number;
   totalSpent: number;
   lastOrderAt: string | null;
+  reservationsCount: number;
+  lastReservationAt: string | null;
+}
+
+// ── Reservas ──
+export type ReservationStatusAdmin =
+  | "pendiente"
+  | "confirmada"
+  | "cancelada"
+  | "cumplida"
+  | "no_show";
+
+export interface Reservation {
+  id: string;
+  code: string;
+  date: string; // YYYY-MM-DD
+  time: string; // "HH:MM"
+  party: number;
+  status: ReservationStatusAdmin;
+  createdAt: string;
+  customer: { name: string; phone: string; email: string };
+  note: string;
+  staffNote: string;
+  depositRequired: number;
+  depositPaid: boolean;
+  isWalkIn: boolean;
+  source: string; // 'web' | 'telefono' | 'google' | 'walkin' | 'otro'
+  tableId: string | null;
+  tableName: string | null;
+}
+
+export type ReservationSource = "web" | "telefono" | "google" | "walkin" | "otro";
+
+export const SOURCE_LABEL: Record<string, string> = {
+  web: "Página web",
+  telefono: "Teléfono",
+  google: "Google",
+  walkin: "Presencial",
+  otro: "Otro",
+};
+
+// ── Plano del salón (zonas y mesas) ──
+export interface FloorTableReservation {
+  id: string;
+  time: string;
+  party: number;
+  name: string;
+  status: ReservationStatusAdmin;
+  isWalkIn: boolean;
+}
+export interface FloorTable {
+  id: string;
+  name: string;
+  seats: number;
+  posX: number;
+  posY: number;
+  width: number;
+  height: number;
+  shape: "rect" | "round";
+  reservations: FloorTableReservation[];
+}
+export interface FloorZone {
+  id: string;
+  name: string;
+  sort: number;
+  tables: FloorTable[];
+}
+export interface Floor {
+  locationId: string;
+  zones: FloorZone[];
+}
+
+export interface ReservationDay {
+  day: string;
+  total: number;
+  pendientes: number;
+}
+
+export interface ReservationSettings {
+  enabled: boolean;
+  openDays: number[];
+  startTime: string;
+  endTime: string;
+  slotMinutes: number;
+  turnMinutes: number;
+  capacity: number;
+  maxParty: number;
+  advanceDays: number;
+  minHours: number;
+  depositPerPerson: number;
+  allowTableChoice: boolean;
 }
 
 // ── Analítica ──
@@ -72,6 +166,16 @@ export interface Analytics {
 
 export const staffVerify = (code: string) =>
   rpc<boolean>("staff_verify", { p_code: code });
+
+// Contexto del personal: qué sede maneja este código (o todas, si es el dueño).
+export interface StaffContext {
+  locationId: string | null;
+  locationName: string;
+  allLocations: boolean;
+}
+
+export const staffContext = (code: string) =>
+  rpc<StaffContext>("staff_context", { p_code: code });
 
 export const staffOrders = (code: string, day?: string | null) =>
   rpc<Order[]>("staff_orders", { p_code: code, p_day: day ?? null });
@@ -119,17 +223,235 @@ export const staffUpsertClient = (
     email?: string;
     birthday?: string;
     notes?: string;
+    vip?: boolean;
+    blacklisted?: boolean;
   },
 ) => rpc<string>("staff_upsert_client", { p_code: code, p: client });
 
 export const staffDeleteClient = (code: string, id: string) =>
   rpc<void>("staff_delete_client", { p_code: code, p_id: id });
 
+// Marca rápida VIP / lista negra sin abrir el formulario.
+export const staffSetClientFlag = (
+  code: string,
+  id: string,
+  flag: "vip" | "blacklisted",
+  value: boolean,
+) => rpc<void>("staff_set_client_flag", { p_code: code, p_id: id, p_flag: flag, p_value: value });
+
 // Nombre neutro ("resumen") a propósito: los bloqueadores de anuncios
 // bloquean las URLs que contienen "analytics", y eso tumbaba esta pantalla
 // en equipos con bloqueador. Por dentro es la misma consulta.
 export const staffAnalytics = (code: string, from: string, to: string) =>
   rpc<Analytics>("staff_resumen", { p_code: code, p_from: from, p_to: to });
+
+// ── Reservas ──
+export const staffReservations = (code: string, day?: string | null) =>
+  rpc<Reservation[]>("staff_reservations", { p_code: code, p_day: day ?? null });
+
+export const staffReservationsUpcoming = (code: string) =>
+  rpc<ReservationDay[]>("staff_reservations_upcoming", { p_code: code });
+
+// ── Plano del salón + Walk-In ──
+export const staffFloor = (code: string, day?: string | null, location?: string | null) =>
+  rpc<Floor>("staff_floor", { p_code: code, p_day: day ?? null, p_location: location ?? null });
+
+export const staffAssignTable = (code: string, reservationId: string, tableId: string | null) =>
+  rpc<void>("staff_assign_table", { p_code: code, p_reservation: reservationId, p_table: tableId });
+
+// ── Editar el plano (zonas y mesas) ──
+export const staffSaveZone = (
+  code: string,
+  zone: { id?: string; locationId?: string; name: string; sort?: number },
+) => rpc<string>("staff_save_zone", { p_code: code, p: zone });
+
+export const staffDeleteZone = (code: string, id: string) =>
+  rpc<void>("staff_delete_zone", { p_code: code, p_id: id });
+
+export const staffSaveTable = (
+  code: string,
+  table: {
+    id?: string;
+    zoneId?: string;
+    name: string;
+    seats: number;
+    shape?: "rect" | "round";
+    width?: number;
+    height?: number;
+    posX?: number;
+    posY?: number;
+  },
+) => rpc<string>("staff_save_table", { p_code: code, p: table });
+
+export const staffMoveTable = (code: string, id: string, x: number, y: number) =>
+  rpc<void>("staff_move_table", { p_code: code, p_id: id, p_x: Math.round(x), p_y: Math.round(y) });
+
+export const staffDeleteTable = (code: string, id: string) =>
+  rpc<void>("staff_delete_table", { p_code: code, p_id: id });
+
+export const staffWalkin = (
+  code: string,
+  data: { name?: string; phone?: string; party: number; note?: string; table?: string | null; location?: string | null },
+) => rpc<{ id: string; code: string; status: string }>("staff_walkin", { p_code: code, p: data });
+
+// Crear una reserva a mano (teléfono, Google, web, otro).
+export const staffCreateReservation = (
+  code: string,
+  data: {
+    name: string;
+    phone?: string;
+    email?: string;
+    party: number;
+    date: string; // YYYY-MM-DD
+    time: string; // HH:MM
+    note?: string;
+    source: ReservationSource;
+    table?: string | null;
+    location?: string | null;
+  },
+) => rpc<{ id: string; code: string; status: string }>("staff_create_reservation", { p_code: code, p: data });
+
+export const staffSetReservationSource = (code: string, id: string, source: ReservationSource) =>
+  rpc<void>("staff_set_reservation_source", { p_code: code, p_id: id, p_source: source });
+
+export const staffSetReservationStatus = (code: string, id: string, status: string) =>
+  rpc<void>("staff_set_reservation_status", { p_code: code, p_id: id, p_status: status });
+
+export const staffSetReservationNote = (code: string, id: string, note: string) =>
+  rpc<void>("staff_set_reservation_note", { p_code: code, p_id: id, p_note: note });
+
+export const staffSetReservationDeposit = (code: string, id: string, paid: boolean) =>
+  rpc<void>("staff_set_reservation_deposit", { p_code: code, p_id: id, p_paid: paid });
+
+// ── Bloqueos de días/horas ──
+export interface ReservationBlock {
+  id: string;
+  date: string; // YYYY-MM-DD
+  allDay: boolean;
+  startTime: string | null; // "HH:MM"
+  endTime: string | null;
+  reason: string;
+  locationId: string | null;
+  locationName: string;
+}
+
+// ── Estadísticas de reservas ──
+export interface ReservationStats {
+  kpis: {
+    total: number;
+    totalPeople: number;
+    effective: number;
+    effectivePeople: number;
+    pending: number;
+    noShow: number;
+    cancelled: number;
+    avgParty: number | null;
+  };
+  byDay: { day: string; count: number; people: number }[];
+  byMonth: { month: string; count: number; people: number }[];
+  byHour: { hour: number; count: number }[];
+  byMeal: { desayuno: number; almuerzo: number; cena: number };
+  byOrigin: { source: string; count: number }[];
+  byStatus: Record<ReservationStatusAdmin, number>;
+  byLocation: { id: string; name: string; count: number }[];
+}
+
+export const staffReservationStats = (code: string, from: string, to: string) =>
+  rpc<ReservationStats>("staff_reservation_stats", { p_code: code, p_from: from, p_to: to });
+
+export const staffReservationBlocks = (code: string, from?: string, to?: string) =>
+  rpc<ReservationBlock[]>("staff_reservation_blocks", {
+    p_code: code,
+    p_from: from ?? null,
+    p_to: to ?? null,
+  });
+
+export const staffAddReservationBlock = (
+  code: string,
+  block: {
+    date: string;
+    allDay: boolean;
+    startTime?: string;
+    endTime?: string;
+    reason?: string;
+    location?: string | null;
+  },
+) => rpc<string>("staff_add_reservation_block", { p_code: code, p: block });
+
+export const staffRemoveReservationBlock = (code: string, id: string) =>
+  rpc<void>("staff_remove_reservation_block", { p_code: code, p_id: id });
+
+export const staffReservationSettings = (code: string) =>
+  rpc<ReservationSettings>("staff_reservation_settings", { p_code: code });
+
+export const staffUpdateReservationSettings = (
+  code: string,
+  patch: Partial<ReservationSettings>,
+) => rpc<void>("staff_update_reservation_settings", { p_code: code, p: patch });
+
+// ── Ajustes: sedes y títulos de menús ──
+export interface LocationRow {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  whatsapp: string;
+  active: boolean;
+}
+
+export interface MenuRow {
+  slug: string;
+  label: string;
+  tagline: string;
+  name: string;
+}
+
+export const staffLocations = (code: string) =>
+  rpc<LocationRow[]>("staff_locations", { p_code: code });
+
+export const staffUpdateLocation = (code: string, id: string, patch: Partial<LocationRow>) =>
+  rpc<void>("staff_update_location", { p_code: code, p_id: id, p: patch });
+
+// ── Domicilios (config por sede) ──
+export interface DeliverySettings {
+  locationId: string;
+  locationName: string;
+  enabled: boolean;
+  fee: number;
+  minOrder: number;
+  scheduling: boolean;
+  leadMinutes: number;
+  daysAhead: number;
+  startTime: string; // "HH:MM"
+  endTime: string; // "HH:MM"
+  note: string;
+}
+
+export const staffDeliverySettings = (code: string) =>
+  rpc<DeliverySettings[]>("staff_delivery_settings", { p_code: code });
+
+export const staffUpdateDeliverySettings = (
+  code: string,
+  locationId: string,
+  patch: Partial<Omit<DeliverySettings, "locationId" | "locationName">>,
+) =>
+  rpc<void>("staff_update_delivery_settings", {
+    p_code: code,
+    p_location: locationId,
+    p: patch,
+  });
+
+// ── Apariencia de la portada del cliente ──
+export const staffHomeTheme = (code: string) =>
+  rpc<HomeTheme>("staff_home_theme", { p_code: code });
+
+export const staffUpdateHomeTheme = (code: string, theme: HomeTheme) =>
+  rpc<void>("staff_update_home_theme", { p_code: code, p: theme });
+
+export const staffMenus = (code: string) => rpc<MenuRow[]>("staff_menus", { p_code: code });
+
+export const staffUpdateMenu = (code: string, slug: string, patch: Partial<MenuRow>) =>
+  rpc<void>("staff_update_menu", { p_code: code, p_slug: slug, p: patch });
 
 /** Sube una foto de producto vía Edge Function y devuelve la URL pública. */
 export async function uploadImage(code: string, file: File): Promise<string> {
