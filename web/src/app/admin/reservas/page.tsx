@@ -235,7 +235,7 @@ export default function ReservasPage() {
             className="h-9 border border-gold-soft/60 bg-card px-2 text-[12.5px] text-ink-soft outline-none"
           />
         </div>
-        <div className="hscroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:justify-end lg:px-0 lg:pb-0">
+        <div className="chips-scroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:justify-end lg:px-0 lg:pb-0">
           <button
             type="button"
             onClick={() => setNuevaOpen(true)}
@@ -1358,7 +1358,7 @@ function FloorPanel({
       </div>
 
       {/* Zonas */}
-      <div className="hscroll mt-3 flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
+      <div className="chips-scroll mt-3 flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1">
         {zones.map((z) => (
           <button
             key={z.id}

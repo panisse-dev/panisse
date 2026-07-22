@@ -111,20 +111,14 @@ body {
 }
 
 /* ── Horizontal chip scroller: hide scrollbar, fade edges to hint overflow ── */
+/* Fila deslizable con la barra de scroll oculta. Sin velo en los bordes:
+   así el elemento seleccionado (p. ej. una pestaña navy) nunca se ve
+   difuminado. */
 .chips-scroll {
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  mask-image: linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent);
 }
 .chips-scroll::-webkit-scrollbar { display: none; }
-
-/* Fila deslizable SIN el velo de los bordes (para pestañas y botones cuyo
-   elemento seleccionado no debe verse difuminado). */
-.hscroll {
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-}
-.hscroll::-webkit-scrollbar { display: none; }
 
 /* ── Body scroll lock when a sheet/overlay is open ── */
 .scroll-locked {
