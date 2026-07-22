@@ -134,9 +134,13 @@ export default function Home() {
                   <span className="smallcaps block font-display text-[19px] font-medium leading-tight tracking-[0.12em] text-navy">
                     {titles[menu.slug]?.label || menu.label}
                   </span>
-                  <span className="mt-1 block text-[12px] text-gold-deep">
-                    {titles[menu.slug]?.tagline || menu.tagline}
-                  </span>
+                  {/* La frase respeta lo del panel: si la dejas vacía, no se
+                      muestra. Sólo cae a la frase por defecto mientras carga. */}
+                  {(titles[menu.slug] ? titles[menu.slug].tagline : menu.tagline) && (
+                    <span className="mt-1 block text-[12px] text-gold-deep">
+                      {titles[menu.slug] ? titles[menu.slug].tagline : menu.tagline}
+                    </span>
+                  )}
                 </Link>
               ))}
             </nav>
