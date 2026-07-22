@@ -6,7 +6,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { CODE_KEY, staffVerify } from "@/lib/admin";
+import { CODE_KEY, staffContext, staffVerify } from "@/lib/admin";
 
 interface StaffCtx {
   code: string;
@@ -84,6 +84,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [input, setInput] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [sedeName, setSedeName] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem(CODE_KEY);
@@ -93,6 +94,17 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     }
     setChecked(true);
   }, []);
+
+  // Sede según la clave con que se entró (o "Todas las sedes" para el dueño).
+  useEffect(() => {
+    if (!code) {
+      setSedeName("");
+      return;
+    }
+    staffContext(code)
+      .then((c) => setSedeName(c.locationName))
+      .catch(() => setSedeName(""));
+  }, [code]);
 
   const login = async () => {
     const c = input.trim();
@@ -158,6 +170,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <div className="px-2">
             <p className="smallcaps text-[10px] text-gold-soft/70">Panisse</p>
             <h1 className="font-display text-[22px] leading-tight text-gold-soft">Panel</h1>
+            {sedeName && (
+              <p className="smallcaps mt-1.5 flex items-center gap-1.5 text-[10.5px] font-semibold text-gold-soft/90">
+                <span className="inline-block h-1.5 w-1.5 rounded-full bg-gold-soft" />
+                {sedeName}
+              </p>
+            )}
           </div>
           <nav aria-label="Secciones del panel" className="mt-8 flex flex-col gap-1.5">
             {TABS.map((t) => {
@@ -194,6 +212,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             <div className="px-1">
               <p className="smallcaps text-[9px] text-gold-deep">Panisse</p>
               <h1 className="font-display text-[18px] leading-tight text-navy">Panel</h1>
+              {sedeName && (
+                <p className="mt-0.5 flex items-center gap-1 text-[10.5px] font-semibold leading-tight text-gold-deep">
+                  <span className="inline-block h-1.5 w-1.5 rounded-full bg-gold-deep" />
+                  {sedeName}
+                </p>
+              )}
             </div>
             <button
               type="button"
