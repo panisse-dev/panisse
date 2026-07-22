@@ -277,6 +277,10 @@ export const staffSaveZone = (
 export const staffDeleteZone = (code: string, id: string) =>
   rpc<void>("staff_delete_zone", { p_code: code, p_id: id });
 
+// Mover un salón en el orden de las pestañas (dir < 0 izquierda, > 0 derecha).
+export const staffMoveZone = (code: string, id: string, dir: number) =>
+  rpc<void>("staff_move_zone", { p_code: code, p_id: id, p_dir: dir });
+
 export const staffSaveTable = (
   code: string,
   table: {

@@ -12,6 +12,7 @@ import {
   staffCreateReservation,
   staffDeleteTable,
   staffDeleteZone,
+  staffMoveZone,
   staffFloor,
   staffMoveTable,
   staffRemoveReservationBlock,
@@ -1587,6 +1588,10 @@ function FloorPanel({
     if (!window.confirm(`¿Borrar la zona "${active.name}" y todas sus mesas?`)) return;
     run(() => staffDeleteZone(code, active.id));
   };
+  const moveZone = (dir: number) => {
+    if (!active) return;
+    run(() => staffMoveZone(code, active.id, dir));
+  };
   const addTable = () => {
     if (!active) return;
     const n = active.tables.length + 1;
@@ -1693,6 +1698,30 @@ function FloorPanel({
           <button type="button" onClick={addTable} className="smallcaps h-8 bg-navy px-3 text-[10px] font-semibold text-gold-soft">
             + Mesa
           </button>
+          {zones.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => moveZone(-1)}
+                disabled={zones[0]?.id === active.id}
+                className="h-8 border border-gold-soft/70 px-2.5 text-[13px] font-semibold text-ink-soft disabled:opacity-40"
+                aria-label="Mover salón a la izquierda"
+                title="Mover salón a la izquierda"
+              >
+                ◀
+              </button>
+              <button
+                type="button"
+                onClick={() => moveZone(1)}
+                disabled={zones[zones.length - 1]?.id === active.id}
+                className="h-8 border border-gold-soft/70 px-2.5 text-[13px] font-semibold text-ink-soft disabled:opacity-40"
+                aria-label="Mover salón a la derecha"
+                title="Mover salón a la derecha"
+              >
+                ▶
+              </button>
+            </>
+          )}
           <button type="button" onClick={renameZone} className="smallcaps h-8 border border-gold-soft/70 px-3 text-[10px] font-medium text-ink-soft">
             Renombrar zona
           </button>
