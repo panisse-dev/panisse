@@ -45,6 +45,7 @@ export interface OrderItem {
   unitPrice: number;
   qty: number;
   note?: string; // nota/descripción que el cliente escribe para este plato
+  brand?: string; // "roka" | "panisse" — para dividir por cocina en Pilares
 }
 
 export interface Order {

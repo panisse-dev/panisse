@@ -5,7 +5,7 @@
 // como una sola lista ordenada por hora.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { formatCOP } from "@/lib/format";
-import { DOC_TYPE_SHORT, STATUS_LABEL, type Billing, type Order, type OrderStatus } from "@/lib/orders";
+import { DOC_TYPE_SHORT, STATUS_LABEL, type Billing, type Order, type OrderItem, type OrderStatus } from "@/lib/orders";
 import {
   isAuthError,
   staffConfirmPayment,
@@ -18,6 +18,47 @@ import {
 import { useStaff } from "@/components/admin/AdminShell";
 
 const POLL_MS = 8000;
+
+const brandLabel = (b?: string) => (b === "roka" ? "Roka" : "Panisse");
+
+// Lista de platos del pedido. Si hay platos de dos marcas (Pilares: Roka +
+// Panisse), se muestran divididos por cocina; si todos son de una, va normal.
+function ItemsList({ items }: { items: OrderItem[] }) {
+  const present = Array.from(new Set(items.map((i) => i.brand || "panisse")));
+  const multi = present.length > 1;
+  const ordered = ["roka", "panisse", ...present.filter((b) => b !== "roka" && b !== "panisse")];
+  const groups = ordered
+    .filter((b) => present.includes(b))
+    .map((b) => ({ brand: b, items: items.filter((i) => (i.brand || "panisse") === b) }));
+
+  return (
+    <div className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
+      {groups.map((g) => (
+        <div key={g.brand} className="[&:not(:first-child)]:mt-2.5">
+          {multi && (
+            <p className="smallcaps mb-1 border-l-2 border-navy pl-1.5 text-[10px] font-semibold text-navy">
+              Cocina {brandLabel(g.brand)}
+            </p>
+          )}
+          {g.items.map((it, i) => (
+            <div key={i} className="py-0.5">
+              <div className="flex justify-between gap-2">
+                <span>
+                  <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
+                  {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
+                </span>
+                <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
+              </div>
+              {it.note && (
+                <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">↳ {it.note}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const NEXT: Record<OrderStatus, OrderStatus | null> = {
   recibido: "preparacion",
@@ -300,24 +341,7 @@ export default function PedidosPage() {
     );
 
   // Lista de platos de un pedido (misma en cocina y en pendientes).
-  const itemsList = (o: Order) => (
-    <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
-      {o.items.map((it, i) => (
-        <li key={i} className="py-0.5">
-          <div className="flex justify-between gap-2">
-            <span>
-              <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
-              {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
-            </span>
-            <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
-          </div>
-          {it.note && (
-            <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">↳ {it.note}</p>
-          )}
-        </li>
-      ))}
-    </ul>
-  );
+  const itemsList = (o: Order) => <ItemsList items={o.items} />;
 
   // Bloque de domicilio: badge + dirección + hora programada (si aplica).
   const deliveryBlock = (o: Order) => {
@@ -436,24 +460,7 @@ export default function PedidosPage() {
 
       {deliveryBlock(o)}
 
-      <ul className="mt-3 border-t border-gold-soft/25 px-4 py-2.5 text-[13.5px] text-ink">
-        {o.items.map((it, i) => (
-          <li key={i} className="py-0.5">
-            <div className="flex justify-between gap-2">
-              <span>
-                <span className="font-semibold text-navy">{it.qty}×</span> {it.name}
-                {it.variant && <span className="text-ink-faint"> · {it.variant}</span>}
-              </span>
-              <span className="shrink-0 text-ink-soft">{formatCOP(it.unitPrice * it.qty)}</span>
-            </div>
-            {it.note && (
-              <p className="border-l-2 border-gold pl-1.5 text-[12px] italic text-gold-deep">
-                ↳ {it.note}
-              </p>
-            )}
-          </li>
-        ))}
-      </ul>
+      <ItemsList items={o.items} />
 
       {o.customer.note && (
         <p className="mx-4 mb-1 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
