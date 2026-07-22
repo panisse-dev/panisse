@@ -81,6 +81,7 @@ export interface Reservation {
   source: string; // 'web' | 'telefono' | 'google' | 'walkin' | 'otro'
   tableId: string | null;
   tableName: string | null;
+  tables: { id: string; name: string }[];
 }
 
 export type ReservationSource = "web" | "telefono" | "google" | "walkin" | "otro";
@@ -259,6 +260,14 @@ export const staffFloor = (code: string, day?: string | null, location?: string 
 export const staffAssignTable = (code: string, reservationId: string, tableId: string | null) =>
   rpc<void>("staff_assign_table", { p_code: code, p_reservation: reservationId, p_table: tableId });
 
+// Reemplaza el conjunto de mesas de una reserva (una o varias, para grupos grandes).
+export const staffSetReservationTables = (code: string, reservationId: string, tableIds: string[]) =>
+  rpc<void>("staff_set_reservation_tables", {
+    p_code: code,
+    p_reservation: reservationId,
+    p_tables: tableIds,
+  });
+
 // ── Editar el plano (zonas y mesas) ──
 export const staffSaveZone = (
   code: string,
@@ -291,7 +300,7 @@ export const staffDeleteTable = (code: string, id: string) =>
 
 export const staffWalkin = (
   code: string,
-  data: { name?: string; phone?: string; party: number; note?: string; table?: string | null; location?: string | null },
+  data: { name?: string; phone?: string; party: number; note?: string; table?: string | null; tables?: string[]; location?: string | null },
 ) => rpc<{ id: string; code: string; status: string }>("staff_walkin", { p_code: code, p: data });
 
 // Crear una reserva a mano (teléfono, Google, web, otro).
@@ -307,6 +316,7 @@ export const staffCreateReservation = (
     note?: string;
     source: ReservationSource;
     table?: string | null;
+    tables?: string[];
     location?: string | null;
   },
 ) => rpc<{ id: string; code: string; status: string }>("staff_create_reservation", { p_code: code, p: data });

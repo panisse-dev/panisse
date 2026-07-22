@@ -7,7 +7,7 @@ import { formatCOP } from "@/lib/format";
 import {
   isAuthError,
   staffAddReservationBlock,
-  staffAssignTable,
+  staffSetReservationTables,
   staffContext,
   staffCreateReservation,
   staffDeleteTable,
@@ -31,6 +31,7 @@ import {
   SOURCE_LABEL,
   type Floor,
   type FloorTable,
+  type FloorZone,
   type Reservation,
   type ReservationBlock,
   type ReservationDay,
@@ -118,6 +119,8 @@ export default function ReservasPage() {
   const [connError, setConnError] = useState(false);
   const [noteEditId, setNoteEditId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
+  // Reserva cuya asignación de mesas se está editando (abre el selector).
+  const [tablesEditId, setTablesEditId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showFloor, setShowFloor] = useState(false);
@@ -206,16 +209,21 @@ export default function ReservasPage() {
     }
   };
 
-  const assignTable = async (r: Reservation, tableId: string | null) => {
+  // Asigna una o varias mesas a una reserva (grupos grandes ocupan más de una).
+  const setReservationTables = async (r: Reservation, ids: string[]) => {
+    const picked = ids
+      .map((id) => tables.find((t) => t.id === id))
+      .filter((t): t is (typeof tables)[number] => Boolean(t))
+      .map((t) => ({ id: t.id, name: t.label.split(" · ")[1] ?? t.label }));
     setList((prev) =>
       prev.map((x) =>
         x.id === r.id
-          ? { ...x, tableId, tableName: tables.find((t) => t.id === tableId)?.label.split(" · ")[1] ?? null }
+          ? { ...x, tables: picked, tableId: picked[0]?.id ?? null, tableName: picked[0]?.name ?? null }
           : x,
       ),
     );
     try {
-      await staffAssignTable(code, r.id, tableId);
+      await staffSetReservationTables(code, r.id, ids);
       poll();
     } catch (e) {
       if (isAuthError(e)) logout();
@@ -398,7 +406,7 @@ export default function ReservasPage() {
       {walkinOpen && (
         <WalkinModal
           code={code}
-          tables={tables}
+          zones={floor?.zones ?? []}
           initialTable={walkinTable}
           onClose={() => {
             setWalkinOpen(false);
@@ -416,7 +424,7 @@ export default function ReservasPage() {
       {nuevaOpen && (
         <NuevaReservaModal
           code={code}
-          tables={tables}
+          zones={floor?.zones ?? []}
           defaultDay={day}
           onClose={() => setNuevaOpen(false)}
           onDone={() => {
@@ -541,24 +549,43 @@ export default function ReservasPage() {
                   </div>
                 </div>
 
-                {/* Mesa asignada */}
-                <div className="mx-4 mt-2 flex items-center gap-2">
-                  <span className="smallcaps text-[9px] text-gold-deep">Mesa</span>
-                  <select
-                    value={r.tableId ?? ""}
-                    onChange={(e) => assignTable(r, e.target.value || null)}
-                    className={`h-8 flex-1 border px-2 text-[12.5px] outline-none focus:border-navy ${
-                      r.tableId ? "border-navy/40 bg-navy/[0.03] text-navy" : "border-gold-soft/60 bg-card text-ink-faint"
-                    }`}
+                {/* Mesa(s) asignada(s) — una o varias para grupos grandes */}
+                <div className="mx-4 mt-2 flex flex-wrap items-center gap-1.5">
+                  <span className="smallcaps text-[9px] text-gold-deep">
+                    {r.tables.length > 1 ? "Mesas" : "Mesa"}
+                  </span>
+                  {r.tables.length > 0 ? (
+                    r.tables.map((t) => (
+                      <span
+                        key={t.id}
+                        className="smallcaps inline-block border border-navy/40 bg-navy/[0.05] px-2 py-1 text-[11px] font-semibold text-navy"
+                      >
+                        {t.name}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-[11.5px] text-ink-faint">Sin asignar</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setTablesEditId(r.id)}
+                    className="ml-auto border border-gold-soft/70 px-2.5 py-1 text-[11px] font-medium text-gold-deep"
                   >
-                    <option value="">Sin asignar</option>
-                    {tables.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.label} ({t.seats})
-                      </option>
-                    ))}
-                  </select>
+                    {r.tables.length > 0 ? "Cambiar" : "Asignar"}
+                  </button>
                 </div>
+                {tablesEditId === r.id && (
+                  <TablePicker
+                    zones={floor?.zones ?? []}
+                    selected={r.tables.map((t) => t.id)}
+                    party={r.party}
+                    onCancel={() => setTablesEditId(null)}
+                    onSave={(ids) => {
+                      setTablesEditId(null);
+                      setReservationTables(r, ids);
+                    }}
+                  />
+                )}
 
                 {r.note && (
                   <p className="mx-4 mt-2 border-l-2 border-gold px-2.5 py-1 text-[12.5px] italic text-ink-soft">
@@ -1328,6 +1355,153 @@ function BlocksPanel({ code }: { code: string }) {
   );
 }
 
+// ══ Selector de mesas (una o varias) para una reserva o walk-in ══
+function TablePicker({
+  zones,
+  selected,
+  party,
+  onCancel,
+  onSave,
+}: {
+  zones: FloorZone[];
+  selected: string[];
+  party: number;
+  onCancel: () => void;
+  onSave: (ids: string[]) => void;
+}) {
+  const [sel, setSel] = useState<string[]>(selected);
+  const allTables = useMemo(() => zones.flatMap((z) => z.tables), [zones]);
+  const seats = sel.reduce((n, id) => n + (allTables.find((t) => t.id === id)?.seats ?? 0), 0);
+  const toggle = (id: string) =>
+    setSel((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Asignar mesas"
+    >
+      <button type="button" aria-label="Cerrar" onClick={onCancel} className="anim-fade-in absolute inset-0 bg-navy/45 backdrop-blur-[2px]" />
+      <div className="anim-sheet-up relative mx-auto w-full max-w-md">
+        <div className="max-h-[85dvh] overflow-y-auto rounded-t-3xl bg-card px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-4 shadow-[0_-12px_40px_rgba(4,17,29,0.25)] lg:max-h-[80vh] lg:rounded-2xl lg:pb-6">
+          <h3 className="font-display text-[18px] text-navy">Asignar mesas</h3>
+          <p className="mt-0.5 text-[11.5px] text-ink-faint">
+            Toca las mesas para este grupo. Para grupos grandes puedes juntar varias.
+          </p>
+
+          {zones.length === 0 ? (
+            <p className="mt-6 text-center text-[13px] text-ink-faint">No hay mesas en esta sede.</p>
+          ) : (
+            zones.map((z) => (
+              <div key={z.id} className="mt-3">
+                <p className="smallcaps text-[10px] text-gold-deep">{z.name}</p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5">
+                  {z.tables.map((t) => {
+                    const on = sel.includes(t.id);
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => toggle(t.id)}
+                        className={`flex flex-col items-center border px-3 py-1.5 text-center ${
+                          on ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/70 bg-paper text-ink-soft"
+                        }`}
+                      >
+                        <span className="font-display text-[14px] leading-none">{t.name}</span>
+                        <span className={`text-[9px] ${on ? "text-gold-soft/80" : "text-ink-faint"}`}>{t.seats} pax</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))
+          )}
+
+          <div className="mt-4 flex items-center justify-between border-t border-gold-soft/30 pt-3 text-[12.5px]">
+            <span className="text-ink-soft">
+              {sel.length === 0
+                ? "Sin mesas"
+                : `${sel.length} ${sel.length === 1 ? "mesa" : "mesas"} · ${seats} sillas`}
+            </span>
+            <span className={seats < party && sel.length > 0 ? "font-semibold text-[#b3261e]" : "text-ink-faint"}>
+              Grupo: {party}
+            </span>
+          </div>
+          {seats < party && sel.length > 0 && (
+            <p className="mt-1 text-[11.5px] text-[#b3261e]">Ojo: las sillas no alcanzan para {party} personas.</p>
+          )}
+
+          <div className="mt-4 flex gap-2">
+            <button type="button" onClick={() => onSave(sel)} className="h-12 flex-1 bg-navy text-[14px] font-semibold text-gold-soft">
+              Guardar
+            </button>
+            {sel.length > 0 && (
+              <button type="button" onClick={() => onSave([])} className="h-12 border border-gold-soft/70 px-4 text-[13px] text-ink-soft">
+                Quitar
+              </button>
+            )}
+            <button type="button" onClick={onCancel} className="h-12 border border-gold-soft/70 px-4 text-[13px] text-ink-soft">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Campo de mesas para los formularios (muestra las elegidas y abre el selector).
+function TablesField({
+  zones,
+  value,
+  party,
+  onChange,
+}: {
+  zones: FloorZone[];
+  value: string[];
+  party: number;
+  onChange: (ids: string[]) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const allTables = useMemo(() => zones.flatMap((z) => z.tables), [zones]);
+  const names = value
+    .map((id) => allTables.find((t) => t.id === id)?.name)
+    .filter((n): n is string => Boolean(n));
+  return (
+    <div className="mt-3">
+      <span className="smallcaps text-[10px] text-gold-deep">Mesas (opcional)</span>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-1 flex min-h-11 w-full flex-wrap items-center gap-1.5 border border-gold-soft/70 bg-paper px-3 py-2 text-left text-[14px] outline-none focus:border-navy"
+      >
+        {names.length > 0 ? (
+          names.map((n, i) => (
+            <span key={i} className="smallcaps inline-block border border-navy/40 bg-navy/[0.05] px-2 py-0.5 text-[11px] font-semibold text-navy">
+              {n}
+            </span>
+          ))
+        ) : (
+          <span className="text-ink-faint">Sin asignar · toca para elegir</span>
+        )}
+      </button>
+      {open && (
+        <TablePicker
+          zones={zones}
+          selected={value}
+          party={party}
+          onCancel={() => setOpen(false)}
+          onSave={(ids) => {
+            setOpen(false);
+            onChange(ids);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 // ══ Plano del salón (ver y editar) ══
 // Reemplaza una mesa (por id) dentro del Floor, devolviendo una copia nueva.
 function withTable(floor: Floor, id: string, patch: Partial<FloorTable>): Floor {
@@ -1752,14 +1926,14 @@ function TableEditor({
 // ══ Registrar Walk-In ══
 function WalkinModal({
   code,
-  tables,
+  zones,
   initialTable,
   onClose,
   onDone,
   onAuth,
 }: {
   code: string;
-  tables: { id: string; label: string; seats: number }[];
+  zones: FloorZone[];
   initialTable: string | null;
   onClose: () => void;
   onDone: () => void;
@@ -1769,7 +1943,7 @@ function WalkinModal({
   const [phone, setPhone] = useState("");
   const [party, setParty] = useState(2);
   const [note, setNote] = useState("");
-  const [table, setTable] = useState<string>(initialTable ?? "");
+  const [tableIds, setTableIds] = useState<string[]>(initialTable ? [initialTable] : []);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -1783,7 +1957,7 @@ function WalkinModal({
         phone: phone.trim(),
         party,
         note: note.trim(),
-        table: table || null,
+        tables: tableIds,
       });
       onDone();
     } catch (e) {
@@ -1818,15 +1992,7 @@ function WalkinModal({
             <span className="smallcaps text-[10px] text-gold-deep">Celular (opcional)</span>
             <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" placeholder="+57 300 123 4567" className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3 text-[15px] text-ink outline-none focus:border-navy" />
           </label>
-          <label className="mt-3 block">
-            <span className="smallcaps text-[10px] text-gold-deep">Mesa (opcional)</span>
-            <select value={table} onChange={(e) => setTable(e.target.value)} className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3 text-[14px] text-ink outline-none focus:border-navy">
-              <option value="">Sin asignar</option>
-              {tables.map((t) => (
-                <option key={t.id} value={t.id}>{t.label} ({t.seats})</option>
-              ))}
-            </select>
-          </label>
+          <TablesField zones={zones} value={tableIds} party={party} onChange={setTableIds} />
           <label className="mt-3 block">
             <span className="smallcaps text-[10px] text-gold-deep">Nota (opcional)</span>
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ej. junto a la ventana" className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3 text-[15px] text-ink outline-none focus:border-navy" />
@@ -1855,14 +2021,14 @@ const NUEVA_SOURCES: { key: ReservationSource; label: string }[] = [
 
 function NuevaReservaModal({
   code,
-  tables,
+  zones,
   defaultDay,
   onClose,
   onDone,
   onAuth,
 }: {
   code: string;
-  tables: { id: string; label: string; seats: number }[];
+  zones: FloorZone[];
   defaultDay: string;
   onClose: () => void;
   onDone: () => void;
@@ -1876,7 +2042,7 @@ function NuevaReservaModal({
   const [date, setDate] = useState(defaultDay);
   const [time, setTime] = useState("19:00");
   const [note, setNote] = useState("");
-  const [table, setTable] = useState("");
+  const [tableIds, setTableIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -1902,7 +2068,7 @@ function NuevaReservaModal({
         time,
         note: note.trim(),
         source,
-        table: table || null,
+        tables: tableIds,
       });
       onDone();
     } catch (e) {
@@ -1968,15 +2134,7 @@ function NuevaReservaModal({
             <span className="smallcaps text-[10px] text-gold-deep">Correo (opcional)</span>
             <input value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" placeholder="correo@ejemplo.com" className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3 text-[15px] text-ink outline-none focus:border-navy" />
           </label>
-          <label className="mt-3 block">
-            <span className="smallcaps text-[10px] text-gold-deep">Mesa (opcional)</span>
-            <select value={table} onChange={(e) => setTable(e.target.value)} className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3 text-[14px] text-ink outline-none focus:border-navy">
-              <option value="">Sin asignar</option>
-              {tables.map((t) => (
-                <option key={t.id} value={t.id}>{t.label} ({t.seats})</option>
-              ))}
-            </select>
-          </label>
+          <TablesField zones={zones} value={tableIds} party={party} onChange={setTableIds} />
           <label className="mt-3 block">
             <span className="smallcaps text-[10px] text-gold-deep">Nota (opcional)</span>
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Ej. cumpleaños, junto a la ventana" className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3 text-[15px] text-ink outline-none focus:border-navy" />
