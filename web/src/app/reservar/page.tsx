@@ -581,32 +581,33 @@ export default function ReservarPage() {
                 </button>
               </div>
 
-              {/* Agregar decoración (solo reservas de ROKA) */}
+              {/* Agregar decoración (solo reservas de ROKA) — en un recuadro
+                  contenido para que quede alineado con los demás campos */}
               {isRoka && decorations.length > 0 && (
-                <div className="mt-5 border-t border-gold-soft/40 pt-4">
-                  <p className="font-display text-[16px] text-navy">Agregar decoración 🎉</p>
-                  <p className="mt-0.5 text-[11.5px] text-ink-faint">
+                <div className="mt-4 border border-gold-soft/50 bg-paper p-3.5">
+                  <p className="font-display text-[15px] text-navy">Agregar decoración 🎉</p>
+                  <p className="mt-0.5 text-[11.5px] leading-snug text-ink-faint">
                     ¿Celebras algo? Suma una decoración a tu mesa (opcional).
                   </p>
                   <div className="mt-3 flex flex-col gap-2">
                     <button
                       type="button"
                       onClick={() => setDecorationId("")}
-                      className={`flex items-center justify-between border px-3.5 py-3 text-left transition-colors ${decorationId === "" ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                      className={`flex items-center justify-between gap-3 border px-3 py-2.5 text-left transition-colors ${decorationId === "" ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
                     >
                       <span className="text-[13.5px] text-ink">Sin decoración</span>
-                      <span className={`h-4 w-4 rounded-full border ${decorationId === "" ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                      <span className={`h-4 w-4 shrink-0 rounded-full border ${decorationId === "" ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
                     </button>
                     {decorations.map((d) => (
                       <button
                         key={d.id}
                         type="button"
                         onClick={() => setDecorationId(d.id)}
-                        className={`flex items-start justify-between gap-3 border px-3.5 py-3 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                        className={`flex items-start justify-between gap-3 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
                       >
-                        <span className="min-w-0">
+                        <span className="min-w-0 flex-1">
                           <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
-                          <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-soft">{d.description}</span>
+                          <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
                           <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
                         </span>
                         <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
@@ -614,7 +615,7 @@ export default function ReservarPage() {
                     ))}
                   </div>
                   {chosenDecoration && (
-                    <p className="mt-2 text-[11px] leading-relaxed text-ink-faint">
+                    <p className="mt-2.5 text-[11px] leading-relaxed text-ink-faint">
                       La decoración se paga aparte al llegar. Te confirmamos la disponibilidad.
                     </p>
                   )}
