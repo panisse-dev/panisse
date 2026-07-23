@@ -106,12 +106,13 @@ function fmtDay(iso: string): string {
   return `${dow} ${d} ${meses[m - 1]}`;
 }
 
-// Teléfono a formato WhatsApp (móvil colombiano).
-function waLink(phone: string, msg: string): string | null {
+// Enlace de WhatsApp. Siempre devuelve un enlace para que TODAS las reservas
+// muestren el ícono: si hay teléfono, abre el chat con ese número; si no lo
+// hay, abre WhatsApp con el mensaje listo para elegir el contacto.
+function waLink(phone: string, msg: string): string {
   let d = (phone || "").replace(/\D/g, "");
   if (d.startsWith("00")) d = d.slice(2);
   if (d.length === 10 && d.startsWith("3")) d = "57" + d;
-  if (!d) return null;
   return `https://wa.me/${d}?text=${encodeURIComponent(msg)}`;
 }
 
