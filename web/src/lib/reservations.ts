@@ -110,6 +110,7 @@ export interface Decoration {
   name: string;
   description: string;
   price: number;
+  image: string | null;
 }
 
 export const publicDecorations = () => rpc<Decoration[]>("public_decorations");

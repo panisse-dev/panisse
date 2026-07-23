@@ -81,7 +81,13 @@ export interface Reservation {
   source: string; // 'web' | 'telefono' | 'google' | 'walkin' | 'otro'
   petFriendly: boolean;
   reducedMobility: boolean;
-  decoration: { id: string; name: string; description: string; price: number } | null;
+  decoration: {
+    id: string;
+    name: string;
+    description: string;
+    price: number;
+    image?: string | null;
+  } | null;
   tableId: string | null;
   tableName: string | null;
   tables: { id: string; name: string }[];
@@ -94,6 +100,7 @@ export interface DecorationRow {
   description: string;
   price: number;
   active: boolean;
+  image: string | null;
 }
 
 export const staffDecorations = (code: string) =>

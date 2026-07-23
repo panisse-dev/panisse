@@ -15,6 +15,7 @@ import {
   staffUpdateHomeTheme,
   staffUpdateLocation,
   staffUpdateMenu,
+  uploadImage,
   type DecorationRow,
   type DeliverySettings,
   type LocationRow,
@@ -152,8 +153,28 @@ function DecorationCard({
   const [description, setDescription] = useState(dec.description);
   const [price, setPrice] = useState(String(dec.price));
   const [active, setActive] = useState(dec.active);
+  const [image, setImage] = useState(dec.image || "");
+  const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+
+  const pickPhoto = async (file: File) => {
+    setUploading(true);
+    setMsg("");
+    try {
+      const url = await uploadImage(code, file);
+      setImage(url);
+      // Se guarda de una para que quede lista en la carta del cliente.
+      await staffUpdateDecoration(code, dec.id, { image: url });
+      setMsg("Foto lista ✓");
+      onSaved();
+    } catch (e) {
+      if (isAuthError(e)) onAuth();
+      else setMsg("No se pudo subir la foto.");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const save = async () => {
     setSaving(true);
@@ -164,6 +185,7 @@ function DecorationCard({
         description: description.trim(),
         price: Number(price) || 0,
         active,
+        image: image || null,
       });
       setMsg("Guardado ✓");
       onSaved();
@@ -184,7 +206,48 @@ function DecorationCard({
           Activa
         </label>
       </div>
-      <div className="mt-2 flex flex-col gap-3">
+
+      {/* Foto que ve el cliente */}
+      <div className="mt-3 flex items-center gap-3">
+        {image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={image} alt={dec.name} className="h-20 w-20 shrink-0 rounded border border-gold-soft/50 object-cover" />
+        ) : (
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded border border-dashed border-gold-soft/60 text-[10px] text-ink-faint">
+            Sin foto
+          </div>
+        )}
+        <div className="min-w-0">
+          <label className="smallcaps inline-block cursor-pointer border border-gold-soft/70 bg-card px-3 py-2 text-[10.5px] font-semibold text-navy">
+            {uploading ? "Subiendo…" : image ? "Cambiar foto" : "Subir foto"}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              disabled={uploading}
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) pickPhoto(f);
+                e.target.value = "";
+              }}
+            />
+          </label>
+          {image && (
+            <button
+              type="button"
+              onClick={() => setImage("")}
+              className="ml-2 text-[11.5px] text-ink-faint underline"
+            >
+              Quitar
+            </button>
+          )}
+          <p className="mt-1 text-[10.5px] leading-snug text-ink-faint">
+            Es la foto que ve el cliente al elegir la decoración.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-col gap-3">
         <Field label="Nombre" value={name} onChange={setName} />
         <Field label="Descripción" value={description} onChange={setDescription} placeholder="Globos, postre, aviso…" />
         <label className="block">

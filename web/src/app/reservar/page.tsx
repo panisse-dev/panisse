@@ -374,12 +374,24 @@ export default function ReservarPage() {
           {chosenDecoration && (
             <div className="mx-auto mt-4 max-w-[20rem] border border-gold-soft/50 bg-paper px-4 py-3 text-left">
               <p className="smallcaps text-[10px] text-gold-deep">Decoración 🎉</p>
-              <p className="mt-1 text-[13.5px] font-medium text-navy">
-                {chosenDecoration.name} · {formatCOP(chosenDecoration.price)}
-              </p>
-              <p className="mt-0.5 text-[11.5px] leading-snug text-ink-soft">
-                {chosenDecoration.description}
-              </p>
+              <div className="mt-1 flex items-start gap-3">
+                {chosenDecoration.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={chosenDecoration.image}
+                    alt={`Decoración ${chosenDecoration.name}`}
+                    className="h-16 w-16 shrink-0 rounded border border-gold-soft/40 object-cover"
+                  />
+                )}
+                <div className="min-w-0">
+                  <p className="text-[13.5px] font-medium text-navy">
+                    {chosenDecoration.name} · {formatCOP(chosenDecoration.price)}
+                  </p>
+                  <p className="mt-0.5 text-[11.5px] leading-snug text-ink-soft">
+                    {chosenDecoration.description}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
 
@@ -601,8 +613,17 @@ export default function ReservarPage() {
                         key={d.id}
                         type="button"
                         onClick={() => setDecorationId(d.id)}
-                        className={`flex items-start justify-between gap-3 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
+                        className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
                       >
+                        {d.image && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={d.image}
+                            alt={`Decoración ${d.name}`}
+                            loading="lazy"
+                            className="h-16 w-16 shrink-0 rounded border border-gold-soft/40 object-cover"
+                          />
+                        )}
                         <span className="min-w-0 flex-1">
                           <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
                           <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
