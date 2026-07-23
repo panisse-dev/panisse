@@ -561,17 +561,24 @@ export default function ReservasPage() {
                         Walk-In
                       </span>
                     ) : (
-                      <select
-                        value={r.source === "walkin" ? "otro" : r.source}
-                        onChange={(e) => setSource(r, e.target.value as ReservationSource)}
-                        aria-label="Origen de la reserva"
-                        className="smallcaps h-6 border border-gold-soft/60 bg-card px-1 text-[9px] font-medium text-ink-soft outline-none"
+                      // Origen como ícono (web/teléfono/Google); al tocarlo se puede cambiar.
+                      <div
+                        className="relative inline-flex h-7 w-8 items-center justify-center border border-gold-soft/60 bg-card"
+                        title={`Origen: ${SOURCE_LABEL[r.source] ?? r.source}`}
                       >
-                        <option value="web">Página web</option>
-                        <option value="telefono">Teléfono</option>
-                        <option value="google">Google</option>
-                        <option value="otro">Otro</option>
-                      </select>
+                        <SourceIcon source={r.source === "walkin" ? "otro" : r.source} />
+                        <select
+                          value={r.source === "walkin" ? "otro" : r.source}
+                          onChange={(e) => setSource(r, e.target.value as ReservationSource)}
+                          aria-label="Origen de la reserva"
+                          className="absolute inset-0 cursor-pointer opacity-0"
+                        >
+                          <option value="web">Página web</option>
+                          <option value="telefono">Teléfono</option>
+                          <option value="google">Google</option>
+                          <option value="otro">Otro</option>
+                        </select>
+                      </div>
                     )}
                   </div>
                 </div>
