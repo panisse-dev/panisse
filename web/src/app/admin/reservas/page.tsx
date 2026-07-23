@@ -622,6 +622,17 @@ export default function ReservasPage() {
                   </div>
                 )}
 
+                {/* Decoración de celebración elegida (ROKA) */}
+                {r.decoration && (
+                  <div className="mx-4 mt-2 border border-gold/60 bg-gold-soft/12 px-3 py-2">
+                    <p className="smallcaps text-[9.5px] text-gold-deep">Decoración 🎉</p>
+                    <p className="mt-0.5 text-[12.5px] font-medium text-navy">
+                      {r.decoration.name} · {formatCOP(r.decoration.price)}
+                    </p>
+                    <p className="text-[11px] leading-snug text-ink-soft">{r.decoration.description}</p>
+                  </div>
+                )}
+
                 {/* Mesa(s) asignada(s) — una o varias para grupos grandes */}
                 <div className="mx-4 mt-2 flex flex-wrap items-center gap-1.5">
                   <span className="smallcaps text-[9px] text-gold-deep">

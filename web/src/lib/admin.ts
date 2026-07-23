@@ -81,10 +81,26 @@ export interface Reservation {
   source: string; // 'web' | 'telefono' | 'google' | 'walkin' | 'otro'
   petFriendly: boolean;
   reducedMobility: boolean;
+  decoration: { id: string; name: string; description: string; price: number } | null;
   tableId: string | null;
   tableName: string | null;
   tables: { id: string; name: string }[];
 }
+
+// ── Decoraciones (editables en el panel) ──
+export interface DecorationRow {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  active: boolean;
+}
+
+export const staffDecorations = (code: string) =>
+  rpc<DecorationRow[]>("staff_decorations", { p_code: code });
+
+export const staffUpdateDecoration = (code: string, id: string, patch: Partial<DecorationRow>) =>
+  rpc<void>("staff_update_decoration", { p_code: code, p_id: id, p: patch });
 
 export type ReservationSource = "web" | "telefono" | "google" | "walkin" | "otro";
 

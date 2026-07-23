@@ -210,9 +210,9 @@ export default function Home() {
               </>
             )}
 
-            {/* Reservar mesa */}
+            {/* Reservar mesa (si está en ROKA, la reserva ofrece decoración) */}
             <Link
-              href="/reservar"
+              href={brand === "roka" ? "/reservar?marca=roka" : "/reservar"}
               className="anim-fade-up mt-5 flex items-center justify-center gap-2.5 bg-navy px-6 py-4 text-center text-gold-soft shadow-[0_2px_14px_rgba(4,27,49,0.12)] transition-transform active:scale-[0.985]"
               style={{ animationDelay: "0.4s" }}
             >

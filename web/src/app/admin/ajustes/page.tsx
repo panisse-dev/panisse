@@ -5,14 +5,17 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   isAuthError,
+  staffDecorations,
   staffDeliverySettings,
   staffHomeTheme,
   staffLocations,
   staffMenus,
+  staffUpdateDecoration,
   staffUpdateDeliverySettings,
   staffUpdateHomeTheme,
   staffUpdateLocation,
   staffUpdateMenu,
+  type DecorationRow,
   type DeliverySettings,
   type LocationRow,
   type MenuRow,
@@ -33,21 +36,24 @@ export default function AjustesPage() {
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [menus, setMenus] = useState<MenuRow[]>([]);
   const [deliveries, setDeliveries] = useState<DeliverySettings[]>([]);
+  const [decorations, setDecorations] = useState<DecorationRow[]>([]);
   const [theme, setTheme] = useState<HomeTheme | null>(null);
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     try {
-      const [locs, mns, dels, thm] = await Promise.all([
+      const [locs, mns, dels, thm, decs] = await Promise.all([
         staffLocations(code),
         staffMenus(code),
         staffDeliverySettings(code),
         staffHomeTheme(code),
+        staffDecorations(code),
       ]);
       setLocations(locs);
       setMenus(mns);
       setDeliveries(dels);
       setTheme(thm);
+      setDecorations(decs);
       setError("");
     } catch (e) {
       if (isAuthError(e)) logout();
@@ -113,6 +119,88 @@ export default function AjustesPage() {
           ))}
         </div>
       </section>
+
+      {/* ── Decoraciones de ROKA ── */}
+      <section className="mt-8">
+        <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">Decoraciones (ROKA)</h2>
+        <p className="mt-1 text-[11.5px] text-ink-faint">
+          Las decoraciones de celebración que el cliente puede agregar al reservar en ROKA. Puedes
+          cambiar nombre, descripción, precio o apagar una.
+        </p>
+        <div className="mt-3 flex flex-col gap-3">
+          {decorations.map((d) => (
+            <DecorationCard key={d.id} code={code} dec={d} onSaved={load} onAuth={logout} />
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function DecorationCard({
+  code,
+  dec,
+  onSaved,
+  onAuth,
+}: {
+  code: string;
+  dec: DecorationRow;
+  onSaved: () => void;
+  onAuth: () => void;
+}) {
+  const [name, setName] = useState(dec.name);
+  const [description, setDescription] = useState(dec.description);
+  const [price, setPrice] = useState(String(dec.price));
+  const [active, setActive] = useState(dec.active);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const save = async () => {
+    setSaving(true);
+    setMsg("");
+    try {
+      await staffUpdateDecoration(code, dec.id, {
+        name: name.trim(),
+        description: description.trim(),
+        price: Number(price) || 0,
+        active,
+      });
+      setMsg("Guardado ✓");
+      onSaved();
+    } catch (e) {
+      if (isAuthError(e)) onAuth();
+      else setMsg("No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className={`border p-4 ${active ? "border-gold-soft/60 bg-paper" : "border-gold-soft/40 bg-paper-deep/40"}`}>
+      <div className="flex items-center justify-between">
+        <p className="font-display text-[16px] text-navy">{dec.name}</p>
+        <label className="flex items-center gap-2 text-[12px] text-ink-soft">
+          <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="h-4 w-4 accent-[#04111D]" />
+          Activa
+        </label>
+      </div>
+      <div className="mt-2 flex flex-col gap-3">
+        <Field label="Nombre" value={name} onChange={setName} />
+        <Field label="Descripción" value={description} onChange={setDescription} placeholder="Globos, postre, aviso…" />
+        <label className="block">
+          <span className="smallcaps text-[10px] text-gold-deep">Precio</span>
+          <div className="mt-1 flex items-center gap-2">
+            <input
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="h-11 w-full border border-gold-soft/70 bg-card px-3 text-[15px] text-ink outline-none focus:border-navy"
+            />
+            <span className="shrink-0 text-[12px] text-ink-faint">COP · {formatCOP(Number(price) || 0)}</span>
+          </div>
+        </label>
+      </div>
+      <SaveRow saving={saving} msg={msg} onSave={save} />
     </div>
   );
 }

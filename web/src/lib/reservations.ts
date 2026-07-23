@@ -104,6 +104,19 @@ export const createReservation = (data: NewReservation) =>
 export const getReservationStatus = (id: string) =>
   rpc<PublicReservation | null>("get_reservation_public", { p_id: id });
 
+// ── Decoraciones de celebración (ROKA) ──
+export interface Decoration {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+}
+
+export const publicDecorations = () => rpc<Decoration[]>("public_decorations");
+
+export const reservationSetDecoration = (id: string, decorationId: string) =>
+  rpc<void>("reservation_set_decoration", { p_id: id, p_decoration_id: decorationId });
+
 // ── Ayudas de presentación ──
 
 export const RES_STATUS_LABEL: Record<ReservationStatus, string> = {

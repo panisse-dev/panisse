@@ -8,10 +8,13 @@ import {
   createReservation,
   formatDateLabel,
   formatTime,
+  publicDecorations,
   publicFloor,
   reservationAvailability,
   reservationConfig,
+  reservationSetDecoration,
   type CreatedReservation,
+  type Decoration,
   type PublicFloor,
   type PublicTable,
   type ReservationConfig,
@@ -74,6 +77,19 @@ export default function ReservarPage() {
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState<CreatedReservation | null>(null);
+
+  // Decoraciones de celebración: solo para reservas de ROKA (?marca=roka).
+  const [isRoka, setIsRoka] = useState(false);
+  const [decorations, setDecorations] = useState<Decoration[]>([]);
+  const [decorationId, setDecorationId] = useState<string>(""); // "" = sin decoración
+
+  useEffect(() => {
+    const roka = new URLSearchParams(window.location.search).get("marca") === "roka";
+    setIsRoka(roka);
+    if (roka) publicDecorations().then(setDecorations).catch(() => setDecorations([]));
+  }, []);
+
+  const chosenDecoration = decorations.find((d) => d.id === decorationId) || null;
 
   useScrollLock(step === "datos");
 
@@ -209,6 +225,15 @@ export default function ReservarPage() {
         reducedMobility: mobility,
         birthday: birthday || undefined,
       });
+      // Decoración de celebración (ROKA): se guarda aparte para no tocar la
+      // creación de la reserva. Si falla, la reserva ya quedó igual.
+      if (isRoka && decorationId) {
+        try {
+          await reservationSetDecoration(created.id, decorationId);
+        } catch {
+          /* la reserva ya se creó; la decoración se puede agregar luego */
+        }
+      }
       setDone(created);
       setStep("listo");
     } catch (e) {
@@ -294,6 +319,7 @@ export default function ReservarPage() {
       phone.trim() ? `Teléfono: ${phone.trim()}` : null,
       email.trim() ? `Correo: ${email.trim()}` : null,
       note.trim() ? `Nota: ${note.trim()}` : null,
+      chosenDecoration ? `Decoración: ${chosenDecoration.name} (${formatCOP(chosenDecoration.price)})` : null,
       deposit > 0 ? `Abono para separar: ${formatCOP(deposit)}` : null,
     ]
       .filter((l) => l !== null)
@@ -347,6 +373,18 @@ export default function ReservarPage() {
               label={tableName ? zoneName || "Mesa" : "Por asignar"}
             />
           </div>
+
+          {chosenDecoration && (
+            <div className="mx-auto mt-4 max-w-[20rem] border border-gold-soft/50 bg-paper px-4 py-3 text-left">
+              <p className="smallcaps text-[10px] text-gold-deep">Decoración 🎉</p>
+              <p className="mt-1 text-[13.5px] font-medium text-navy">
+                {chosenDecoration.name} · {formatCOP(chosenDecoration.price)}
+              </p>
+              <p className="mt-0.5 text-[11.5px] leading-snug text-ink-soft">
+                {chosenDecoration.description}
+              </p>
+            </div>
+          )}
 
           <p className="mx-auto mt-5 max-w-[19rem] text-[13px] leading-relaxed text-ink-soft">
             Al confirmar te llegan todos los datos ya escritos, solo pulsa enviar. ¡Te esperamos!
@@ -542,6 +580,46 @@ export default function ReservarPage() {
                   </span>
                 </button>
               </div>
+
+              {/* Agregar decoración (solo reservas de ROKA) */}
+              {isRoka && decorations.length > 0 && (
+                <div className="mt-5 border-t border-gold-soft/40 pt-4">
+                  <p className="font-display text-[16px] text-navy">Agregar decoración 🎉</p>
+                  <p className="mt-0.5 text-[11.5px] text-ink-faint">
+                    ¿Celebras algo? Suma una decoración a tu mesa (opcional).
+                  </p>
+                  <div className="mt-3 flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setDecorationId("")}
+                      className={`flex items-center justify-between border px-3.5 py-3 text-left transition-colors ${decorationId === "" ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                    >
+                      <span className="text-[13.5px] text-ink">Sin decoración</span>
+                      <span className={`h-4 w-4 rounded-full border ${decorationId === "" ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                    </button>
+                    {decorations.map((d) => (
+                      <button
+                        key={d.id}
+                        type="button"
+                        onClick={() => setDecorationId(d.id)}
+                        className={`flex items-start justify-between gap-3 border px-3.5 py-3 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                      >
+                        <span className="min-w-0">
+                          <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
+                          <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-soft">{d.description}</span>
+                          <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
+                        </span>
+                        <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                      </button>
+                    ))}
+                  </div>
+                  {chosenDecoration && (
+                    <p className="mt-2 text-[11px] leading-relaxed text-ink-faint">
+                      La decoración se paga aparte al llegar. Te confirmamos la disponibilidad.
+                    </p>
+                  )}
+                </div>
+              )}
 
               {deposit > 0 && (
                 <p className="mt-4 border border-gold-soft/50 bg-paper px-3 py-2.5 text-[12px] leading-relaxed text-ink-soft">
