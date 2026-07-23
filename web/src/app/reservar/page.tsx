@@ -20,7 +20,6 @@ import {
   type ReservationConfig,
   type Slot,
 } from "@/lib/reservations";
-import { useScrollLock } from "@/lib/scrollLock";
 import { formatCOP } from "@/lib/format";
 import { useLocation } from "@/lib/location";
 
@@ -90,8 +89,6 @@ export default function ReservarPage() {
   }, []);
 
   const chosenDecoration = decorations.find((d) => d.id === decorationId) || null;
-
-  useScrollLock(step === "datos");
 
   // Cargar configuración
   useEffect(() => {
