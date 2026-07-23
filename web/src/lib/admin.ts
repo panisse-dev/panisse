@@ -79,6 +79,8 @@ export interface Reservation {
   depositPaid: boolean;
   isWalkIn: boolean;
   source: string; // 'web' | 'telefono' | 'google' | 'walkin' | 'otro'
+  petFriendly: boolean;
+  reducedMobility: boolean;
   tableId: string | null;
   tableName: string | null;
   tables: { id: string; name: string }[];

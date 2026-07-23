@@ -548,22 +548,24 @@ export default function ReservasPage() {
               `¡Hola ${r.customer.name.split(" ")[0] || ""}! Sobre tu reserva en PANISSE para ${r.party} el ${fmtDay(r.date)} a las ${fmtTime(r.time)}.`,
             );
             return (
-              <div key={r.id} className="border border-gold-soft/50 bg-card shadow-[0_1px_8px_rgba(4,27,49,0.06)]">
+              <div
+                key={r.id}
+                onClick={() => setDetailId(r.id)}
+                title="Ver ficha completa de la reserva"
+                className="cursor-pointer border border-gold-soft/50 bg-card shadow-[0_1px_8px_rgba(4,27,49,0.06)] transition-colors hover:border-gold-soft"
+              >
                 <div className="flex items-start justify-between gap-3 px-4 pt-3.5">
                   <div className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => setDetailId(r.id)}
-                      className="block text-left"
-                      title="Ver ficha de la reserva"
-                    >
-                      <p className="font-display text-[22px] leading-none text-navy">{fmtTime(r.time)}</p>
-                      <p className="mt-1 text-[13px] font-medium text-ink underline decoration-gold-soft/70 decoration-1 underline-offset-2">
-                        {r.customer.name} · {r.party} {r.party === 1 ? "persona" : "personas"}
-                      </p>
-                    </button>
+                    <p className="font-display text-[22px] leading-none text-navy">{fmtTime(r.time)}</p>
+                    <p className="mt-1 text-[13px] font-medium text-ink">
+                      {r.customer.name} · {r.party} {r.party === 1 ? "persona" : "personas"}
+                    </p>
                     {r.customer.phone && (
-                      <a href={`tel:${r.customer.phone}`} className="text-[12px] text-gold-deep underline">
+                      <a
+                        href={`tel:${r.customer.phone}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[12px] text-gold-deep underline"
+                      >
                         {r.customer.phone}
                       </a>
                     )}
@@ -582,6 +584,7 @@ export default function ReservasPage() {
                     ) : (
                       // Origen como ícono (web/teléfono/Google); al tocarlo se puede cambiar.
                       <div
+                        onClick={(e) => e.stopPropagation()}
                         className="relative inline-flex h-7 w-8 items-center justify-center border border-gold-soft/60 bg-card"
                         title={`Origen: ${SOURCE_LABEL[r.source] ?? r.source}`}
                       >
@@ -602,6 +605,22 @@ export default function ReservasPage() {
                   </div>
                 </div>
 
+                {/* Viene con mascota / movilidad reducida */}
+                {(r.petFriendly || r.reducedMobility) && (
+                  <div className="mx-4 mt-2 flex flex-wrap gap-1.5">
+                    {r.petFriendly && (
+                      <span className="inline-flex items-center gap-1 border border-gold-soft/60 bg-paper px-2 py-1 text-[11px] font-medium text-ink-soft">
+                        <span aria-hidden>🐾</span> Mascota
+                      </span>
+                    )}
+                    {r.reducedMobility && (
+                      <span className="inline-flex items-center gap-1 border border-gold-soft/60 bg-paper px-2 py-1 text-[11px] font-medium text-ink-soft">
+                        <span aria-hidden>♿</span> Movilidad reducida
+                      </span>
+                    )}
+                  </div>
+                )}
+
                 {/* Mesa(s) asignada(s) — una o varias para grupos grandes */}
                 <div className="mx-4 mt-2 flex flex-wrap items-center gap-1.5">
                   <span className="smallcaps text-[9px] text-gold-deep">
@@ -621,23 +640,28 @@ export default function ReservasPage() {
                   )}
                   <button
                     type="button"
-                    onClick={() => setTablesEditId(r.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setTablesEditId(r.id);
+                    }}
                     className="ml-auto border border-gold-soft/70 px-2.5 py-1 text-[11px] font-medium text-gold-deep"
                   >
                     {r.tables.length > 0 ? "Cambiar" : "Asignar"}
                   </button>
                 </div>
                 {tablesEditId === r.id && (
-                  <TablePicker
-                    zones={floor?.zones ?? []}
-                    selected={r.tables.map((t) => t.id)}
-                    party={r.party}
-                    onCancel={() => setTablesEditId(null)}
-                    onSave={(ids) => {
-                      setTablesEditId(null);
-                      setReservationTables(r, ids);
-                    }}
-                  />
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <TablePicker
+                      zones={floor?.zones ?? []}
+                      selected={r.tables.map((t) => t.id)}
+                      party={r.party}
+                      onCancel={() => setTablesEditId(null)}
+                      onSave={(ids) => {
+                        setTablesEditId(null);
+                        setReservationTables(r, ids);
+                      }}
+                    />
+                  </div>
                 )}
 
                 {r.note && (
@@ -648,7 +672,7 @@ export default function ReservasPage() {
                 )}
 
                 {r.depositRequired > 0 && (
-                  <div className="mx-4 mt-2 flex items-center justify-between gap-2 border border-gold-soft/50 bg-paper px-3 py-2">
+                  <div onClick={(e) => e.stopPropagation()} className="mx-4 mt-2 flex items-center justify-between gap-2 border border-gold-soft/50 bg-paper px-3 py-2">
                     <span className="text-[12px] text-ink-soft">
                       Abono {formatCOP(r.depositRequired)}
                     </span>
@@ -663,7 +687,7 @@ export default function ReservasPage() {
                 )}
 
                 {/* Nota interna */}
-                <div className="px-4 py-2">
+                <div className="px-4 py-2" onClick={(e) => e.stopPropagation()}>
                   {noteEditId === r.id ? (
                     <div>
                       <textarea
@@ -697,7 +721,7 @@ export default function ReservasPage() {
 
                 {/* Confirmar al cliente: WhatsApp (manual) y correo (Gmail) — compactos */}
                 {(wa || r.customer.email) && (
-                  <div className="flex flex-wrap gap-1.5 border-t border-gold-soft/25 px-4 py-2">
+                  <div onClick={(e) => e.stopPropagation()} className="flex flex-wrap gap-1.5 border-t border-gold-soft/25 px-4 py-2">
                     {wa && (
                       <a
                         href={wa}
@@ -734,7 +758,7 @@ export default function ReservasPage() {
                 )}
 
                 {/* Acciones según estado */}
-                <div className="flex flex-wrap gap-px border-t border-gold-soft/25 bg-gold-soft/25">
+                <div onClick={(e) => e.stopPropagation()} className="flex flex-wrap gap-px border-t border-gold-soft/25 bg-gold-soft/25">
                   {r.status === "pendiente" && (
                     <ActionBtn primary onClick={() => setStatus(r, "confirmada")}>Confirmar</ActionBtn>
                   )}
@@ -2326,11 +2350,13 @@ function Toggle({
   icon,
   on,
   onChange,
+  disabled,
 }: {
   label: string;
   icon: string;
   on: boolean;
   onChange: (v: boolean) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex items-center justify-between gap-2 border border-gold-soft/50 bg-paper px-3 py-2.5">
@@ -2340,10 +2366,11 @@ function Toggle({
       </span>
       <button
         type="button"
-        onClick={() => onChange(!on)}
+        onClick={() => !disabled && onChange(!on)}
+        disabled={disabled}
         className={`smallcaps h-7 w-16 border px-2 text-[10px] font-semibold ${
           on ? "border-verde bg-verde text-white" : "border-gold-soft/70 bg-card text-ink-faint"
-        }`}
+        } ${disabled ? "cursor-default" : ""}`}
       >
         {on ? "Sí" : "No"}
       </button>
@@ -2371,6 +2398,8 @@ function ReservationDetailModal({
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [pickTables, setPickTables] = useState(false);
+  // Solo lectura por defecto; se desbloquea con "Modificar reserva".
+  const [editMode, setEditMode] = useState(false);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -2428,19 +2457,26 @@ function ReservationDetailModal({
     setSaving(true);
     setError("");
     try {
-      await staffUpdateReservation(code, id, {
-        party,
-        date,
-        time,
-        petFriendly: pet,
-        reducedMobility: mobility,
-        staffNote: comment.trim(),
-        name: name.trim(),
-        phone: phone.trim(),
-        email: email.trim(),
-        birthday: birthday || null,
-      });
-      await staffSetReservationTables(code, id, tableIds);
+      // En solo lectura solo se guarda el comentario; al modificar, todo.
+      await staffUpdateReservation(
+        code,
+        id,
+        editMode
+          ? {
+              party,
+              date,
+              time,
+              petFriendly: pet,
+              reducedMobility: mobility,
+              staffNote: comment.trim(),
+              name: name.trim(),
+              phone: phone.trim(),
+              email: email.trim(),
+              birthday: birthday || null,
+            }
+          : { staffNote: comment.trim() },
+      );
+      if (editMode) await staffSetReservationTables(code, id, tableIds);
       onSaved();
     } catch (e) {
       if (isAuthError(e)) onAuth();
@@ -2450,8 +2486,10 @@ function ReservationDetailModal({
   };
 
   const wa = waLink(phone, `¡Hola ${name.split(" ")[0] || ""}! Sobre tu reserva en PANISSE.`);
-  const inputCls =
-    "mt-1 h-10 w-full border border-gold-soft/70 bg-paper px-3 text-[14px] text-ink outline-none focus:border-navy";
+  // En solo lectura los campos se ven como texto; al modificar, como campos.
+  const inputCls = editMode
+    ? "mt-1 h-10 w-full border border-gold-soft/70 bg-paper px-3 text-[14px] text-ink outline-none focus:border-navy"
+    : "mt-1 h-10 w-full border border-transparent bg-transparent px-0 text-[14px] font-medium text-navy outline-none";
 
   return (
     <div
@@ -2484,25 +2522,49 @@ function ReservationDetailModal({
                 </div>
                 <button type="button" onClick={onClose} className="text-[12px] text-ink-faint underline">Cerrar</button>
               </div>
-              <p className="mt-0.5 text-[11px] text-ink-faint">
-                Código {d.code} · {SOURCE_LABEL[d.source] ?? d.source}
-                {d.isWalkIn ? " · Walk-In" : ""}
-              </p>
+              <div className="mt-0.5 flex items-center justify-between gap-2">
+                <p className="text-[11px] text-ink-faint">
+                  Código {d.code} · {SOURCE_LABEL[d.source] ?? d.source}
+                  {d.isWalkIn ? " · Walk-In" : ""}
+                </p>
+                {!editMode ? (
+                  <button
+                    type="button"
+                    onClick={() => setEditMode(true)}
+                    className="smallcaps flex shrink-0 items-center gap-1 border border-gold-soft/70 px-2.5 py-1 text-[10px] font-semibold text-gold-deep"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                      <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                    </svg>
+                    Modificar reserva
+                  </button>
+                ) : (
+                  <span className="smallcaps shrink-0 border border-navy/40 bg-navy/[0.05] px-2.5 py-1 text-[10px] font-semibold text-navy">
+                    Modificando
+                  </span>
+                )}
+              </div>
+              {!editMode && (
+                <p className="mt-2 border-l-2 border-gold-soft/60 pl-2 text-[11px] leading-snug text-ink-faint">
+                  Los datos del cliente no se modifican. Puedes escribir un comentario, o tocar
+                  “Modificar reserva” para cambiar algo.
+                </p>
+              )}
 
               {/* ── Datos del cliente ── */}
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <label className="block sm:col-span-2">
                   <span className="smallcaps text-[9px] text-gold-deep">Nombre</span>
-                  <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+                  <input value={name} onChange={(e) => setName(e.target.value)} disabled={!editMode} className={inputCls} />
                 </label>
                 <label className="block">
                   <span className="smallcaps text-[9px] text-gold-deep">Correo</span>
-                  <input value={email} onChange={(e) => setEmail(e.target.value)} inputMode="email" className={inputCls} />
+                  <input value={email} onChange={(e) => setEmail(e.target.value)} disabled={!editMode} inputMode="email" className={inputCls} />
                 </label>
                 <label className="block">
                   <span className="smallcaps text-[9px] text-gold-deep">Celular</span>
                   <div className="flex items-center gap-1.5">
-                    <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" className={inputCls} />
+                    <input value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!editMode} inputMode="tel" className={inputCls} />
                     {phone && (
                       <a href={`tel:${phone}`} aria-label="Llamar" className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center border border-gold-soft/70 text-gold-deep">☎</a>
                     )}
@@ -2513,7 +2575,7 @@ function ReservationDetailModal({
                 </label>
                 <label className="block">
                   <span className="smallcaps text-[9px] text-gold-deep">Cumpleaños</span>
-                  <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} className={inputCls} />
+                  <input type="date" value={birthday} onChange={(e) => setBirthday(e.target.value)} disabled={!editMode} className={inputCls} />
                 </label>
               </div>
 
@@ -2531,19 +2593,23 @@ function ReservationDetailModal({
               <div className="mt-1.5 grid grid-cols-2 gap-2">
                 <label className="block">
                   <span className="smallcaps text-[9px] text-gold-deep">Fecha</span>
-                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} disabled={!editMode} className={inputCls} />
                 </label>
                 <label className="block">
                   <span className="smallcaps text-[9px] text-gold-deep">Hora</span>
-                  <input type="time" value={time} onChange={(e) => setTime(e.target.value)} className={inputCls} />
+                  <input type="time" value={time} onChange={(e) => setTime(e.target.value)} disabled={!editMode} className={inputCls} />
                 </label>
               </div>
               <div className="mt-2 flex items-center justify-between border border-gold-soft/50 bg-paper px-3 py-2">
                 <span className="smallcaps text-[10px] text-gold-deep">Personas</span>
                 <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setParty((p) => Math.max(1, p - 1))} className="h-9 w-9 border border-gold-soft/70 bg-card text-[18px] text-navy">−</button>
+                  {editMode && (
+                    <button type="button" onClick={() => setParty((p) => Math.max(1, p - 1))} className="h-9 w-9 border border-gold-soft/70 bg-card text-[18px] text-navy">−</button>
+                  )}
                   <span className="min-w-[2ch] text-center font-display text-[20px] text-navy">{party}</span>
-                  <button type="button" onClick={() => setParty((p) => Math.min(50, p + 1))} className="h-9 w-9 border border-gold-soft/70 bg-card text-[18px] text-navy">+</button>
+                  {editMode && (
+                    <button type="button" onClick={() => setParty((p) => Math.min(50, p + 1))} className="h-9 w-9 border border-gold-soft/70 bg-card text-[18px] text-navy">+</button>
+                  )}
                 </div>
               </div>
 
@@ -2551,9 +2617,11 @@ function ReservationDetailModal({
               <div className="mt-2 border border-gold-soft/50 bg-paper px-3 py-2.5">
                 <div className="flex items-center justify-between gap-2">
                   <span className="smallcaps text-[10px] text-gold-deep">Zona y mesa</span>
-                  <button type="button" onClick={() => setPickTables(true)} className="border border-gold-soft/70 px-2.5 py-1 text-[11px] font-medium text-gold-deep">
-                    {tableChips.length > 0 ? "Cambiar" : "Asignar"}
-                  </button>
+                  {editMode && (
+                    <button type="button" onClick={() => setPickTables(true)} className="border border-gold-soft/70 px-2.5 py-1 text-[11px] font-medium text-gold-deep">
+                      {tableChips.length > 0 ? "Cambiar" : "Asignar"}
+                    </button>
+                  )}
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {tableChips.length > 0 ? (
@@ -2570,8 +2638,8 @@ function ReservationDetailModal({
 
               {/* Perro / movilidad reducida */}
               <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                <Toggle label="Viene con perro" icon="🐾" on={pet} onChange={setPet} />
-                <Toggle label="Movilidad reducida" icon="♿" on={mobility} onChange={setMobility} />
+                <Toggle label="Viene con perro" icon="🐾" on={pet} onChange={setPet} disabled={!editMode} />
+                <Toggle label="Movilidad reducida" icon="♿" on={mobility} onChange={setMobility} disabled={!editMode} />
               </div>
 
               {/* Nota del cliente (solo lectura) */}
@@ -2596,7 +2664,7 @@ function ReservationDetailModal({
               {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
               <div className="mt-4 flex gap-2">
                 <button type="button" onClick={save} disabled={saving} className="h-12 flex-1 bg-navy text-[14px] font-semibold text-gold-soft disabled:opacity-60">
-                  {saving ? "Guardando…" : "Guardar cambios"}
+                  {saving ? "Guardando…" : editMode ? "Guardar cambios" : "Guardar comentario"}
                 </button>
                 <button type="button" onClick={onClose} className="h-12 border border-gold-soft/70 px-5 text-[13px] text-ink-soft">Cerrar</button>
               </div>
