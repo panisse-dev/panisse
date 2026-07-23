@@ -964,6 +964,48 @@ function monthLabel(ym: string): string {
   return MONTHS_SHORT[m - 1] ?? ym;
 }
 
+// Ícono chico del canal por el que llegó la reserva (web, teléfono, Google…).
+function SourceIcon({ source }: { source: string }) {
+  const label = SOURCE_LABEL[source] ?? source;
+  if (source === "google") {
+    return (
+      <span
+        className="flex h-4 w-4 shrink-0 items-center justify-center font-display text-[13px] font-bold leading-none text-gold-deep"
+        title={label}
+        aria-label={label}
+      >
+        G
+      </span>
+    );
+  }
+  const paths =
+    source === "web"
+      ? "M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18|M3 12h18|M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"
+      : source === "telefono"
+        ? "M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3-8.6A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6a2 2 0 0 1 1.7 2Z"
+        : source === "walkin"
+          ? "M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2|M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
+          : "M5 12h.01M12 12h.01M19 12h.01";
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4 shrink-0 text-gold-deep"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      role="img"
+      aria-label={label}
+    >
+      <title>{label}</title>
+      {paths.split("|").map((p, i) => (
+        <path key={i} d={p} />
+      ))}
+    </svg>
+  );
+}
+
 function StatsPanel({ code, onAuth }: { code: string; onAuth: () => void }) {
   const [range, setRange] = useState("30d");
   const [from, setFrom] = useState("");
@@ -1123,17 +1165,18 @@ function StatsPanel({ code, onAuth }: { code: string; onAuth: () => void }) {
                 {(data.byOrigin ?? []).length === 0 ? (
                   <p className="py-4 text-center text-[12px] text-ink-faint">Sin datos en este rango.</p>
                 ) : (
-                  <ul className="flex flex-col gap-2">
+                  <ul className="flex flex-col gap-2.5">
                     {data.byOrigin.map((o) => (
-                      <li key={o.source}>
-                        <div className="flex items-baseline justify-between gap-2 text-[12px]">
-                          <span className="text-ink">{SOURCE_LABEL[o.source] ?? o.source}</span>
-                          <span className="font-medium text-navy">
-                            {o.count} <span className="text-ink-faint">· {o.people} pers.</span>
-                          </span>
-                        </div>
-                        <div className="mt-0.5 h-1.5 bg-paper-deep">
-                          <div className="h-full bg-gold-deep/80" style={{ width: `${(o.count / originMax) * 100}%` }} />
+                      <li key={o.source} className="flex items-center gap-2.5">
+                        <SourceIcon source={o.source} />
+                        <div className="flex-1">
+                          <div className="flex items-baseline justify-end gap-1 text-[11.5px]">
+                            <span className="font-medium text-navy">{o.count}</span>
+                            <span className="text-ink-faint">· {o.people} pers.</span>
+                          </div>
+                          <div className="mt-0.5 h-1 bg-paper-deep">
+                            <div className="h-full bg-gold-deep/80" style={{ width: `${(o.count / originMax) * 100}%` }} />
+                          </div>
                         </div>
                       </li>
                     ))}

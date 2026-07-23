@@ -85,6 +85,11 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [sedeName, setSedeName] = useState("");
+  // Cambio de sede: pide la clave de la otra sede y cambia el contexto.
+  const [switchOpen, setSwitchOpen] = useState(false);
+  const [switchInput, setSwitchInput] = useState("");
+  const [switchError, setSwitchError] = useState("");
+  const [switchBusy, setSwitchBusy] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem(CODE_KEY);
@@ -132,6 +137,29 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     setCode("");
     setAuthed(false);
   }, []);
+
+  // Cambiar de sede sin salir: verifica la clave de la otra sede y cambia.
+  const doSwitch = async () => {
+    const c = switchInput.trim();
+    if (!c || switchBusy) return;
+    setSwitchError("");
+    setSwitchBusy(true);
+    try {
+      const ok = await staffVerify(c);
+      if (!ok) {
+        setSwitchError("Clave incorrecta.");
+        return;
+      }
+      localStorage.setItem(CODE_KEY, c);
+      setCode(c);
+      setSwitchOpen(false);
+      setSwitchInput("");
+    } catch {
+      setSwitchError("No se pudo conectar.");
+    } finally {
+      setSwitchBusy(false);
+    }
+  };
 
   if (!checked) return null;
 
@@ -196,14 +224,28 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
               );
             })}
           </nav>
-          <button
-            type="button"
-            onClick={logout}
-            className="mt-auto flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium text-gold-soft/60 hover:bg-white/5 hover:text-gold-soft"
-          >
-            <Icon className="h-4.5 w-4.5" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-            Salir
-          </button>
+          <div className="mt-auto flex flex-col gap-1">
+            <button
+              type="button"
+              onClick={() => {
+                setSwitchOpen(true);
+                setSwitchInput("");
+                setSwitchError("");
+              }}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium text-gold-soft/70 hover:bg-white/5 hover:text-gold-soft"
+            >
+              <Icon className="h-4.5 w-4.5" d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z|M12 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4" />
+              Cambiar sede
+            </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-[13px] font-medium text-gold-soft/60 hover:bg-white/5 hover:text-gold-soft"
+            >
+              <Icon className="h-4.5 w-4.5" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              Salir
+            </button>
+          </div>
         </aside>
 
         {/* ── Barra superior (móvil) ── */}
@@ -219,13 +261,26 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 </p>
               )}
             </div>
-            <button
-              type="button"
-              onClick={logout}
-              className="px-2 py-1 text-[11.5px] text-ink-faint underline underline-offset-2"
-            >
-              Salir
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setSwitchOpen(true);
+                  setSwitchInput("");
+                  setSwitchError("");
+                }}
+                className="px-1 py-1 text-[11.5px] text-gold-deep underline underline-offset-2"
+              >
+                Cambiar sede
+              </button>
+              <button
+                type="button"
+                onClick={logout}
+                className="px-1 py-1 text-[11.5px] text-ink-faint underline underline-offset-2"
+              >
+                Salir
+              </button>
+            </div>
           </div>
           <nav aria-label="Secciones del panel" className="chips-scroll -mx-1 flex gap-1.5 overflow-x-auto px-1 pb-2.5 pt-1">
             {TABS.map((t) => {
@@ -252,6 +307,37 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <div className="mx-auto w-full max-w-6xl px-3 pb-16 lg:px-8 lg:pt-6">{children}</div>
         </main>
       </div>
+
+      {/* ── Cambiar de sede (pide la clave) ── */}
+      {switchOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-6" role="dialog" aria-modal="true" aria-label="Cambiar de sede">
+          <button type="button" aria-label="Cerrar" onClick={() => setSwitchOpen(false)} className="anim-fade-in absolute inset-0 bg-navy/50 backdrop-blur-[2px]" />
+          <div className="anim-fade-up relative w-full max-w-xs border border-gold-soft/60 bg-card px-6 py-6 shadow-[0_12px_40px_rgba(4,17,29,0.3)]">
+            <h2 className="text-center font-display text-[19px] text-navy">Cambiar de sede</h2>
+            <p className="mt-1 text-center text-[12px] text-ink-faint">
+              Escribe la clave de la sede a la que quieres entrar.
+            </p>
+            <input
+              type="password"
+              value={switchInput}
+              onChange={(e) => setSwitchInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && doSwitch()}
+              placeholder="Clave de la sede"
+              autoFocus
+              className="mt-4 h-12 w-full border border-gold-soft/70 bg-paper px-4 text-center text-[16px] tracking-wide text-ink outline-none focus:border-navy"
+            />
+            {switchError && <p className="mt-2 text-center text-[12.5px] text-[#b3261e]">{switchError}</p>}
+            <div className="mt-4 flex gap-2">
+              <button type="button" onClick={doSwitch} disabled={switchBusy} className="h-11 flex-1 bg-navy text-[14px] font-semibold text-gold-soft disabled:opacity-60">
+                {switchBusy ? "Verificando…" : "Cambiar"}
+              </button>
+              <button type="button" onClick={() => setSwitchOpen(false)} className="h-11 border border-gold-soft/70 px-4 text-[13px] text-ink-soft">
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Ctx.Provider>
   );
 }
