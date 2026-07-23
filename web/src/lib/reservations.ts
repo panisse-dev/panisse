@@ -59,6 +59,8 @@ export interface NewReservation {
   note: string;
   location: string; // sede (id)
   table?: string | null; // mesa elegida (opcional)
+  petFriendly?: boolean; // viene con mascota
+  reducedMobility?: boolean; // viene con persona de movilidad reducida
 }
 
 // ── Mapa del salón que ve el cliente para elegir mesa ──

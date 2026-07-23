@@ -67,6 +67,8 @@ export default function ReservarPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [note, setNote] = useState("");
+  const [pet, setPet] = useState(false);
+  const [mobility, setMobility] = useState(false);
 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState("");
@@ -191,6 +193,8 @@ export default function ReservarPage() {
         note: note.trim(),
         location: sedeId ?? "",
         table: tableId,
+        petFriendly: pet,
+        reducedMobility: mobility,
       });
       setDone(created);
       setStep("listo");
@@ -482,6 +486,36 @@ export default function ReservarPage() {
                   className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-navy"
                 />
               </label>
+
+              {/* Para ubicarte mejor en el salón */}
+              <div className="mt-3.5 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPet((v) => !v)}
+                  aria-pressed={pet}
+                  className={`flex items-center justify-between gap-2 border px-3.5 py-3 text-left transition-colors ${pet ? "border-verde bg-verde/8" : "border-gold-soft/70 bg-paper"}`}
+                >
+                  <span className="flex items-center gap-2 text-[13.5px] text-ink">
+                    <span aria-hidden>🐾</span> Voy con mascota
+                  </span>
+                  <span className={`smallcaps flex h-6 w-12 items-center justify-center border text-[10px] font-semibold ${pet ? "border-verde bg-verde text-white" : "border-gold-soft/70 text-ink-faint"}`}>
+                    {pet ? "Sí" : "No"}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobility((v) => !v)}
+                  aria-pressed={mobility}
+                  className={`flex items-center justify-between gap-2 border px-3.5 py-3 text-left transition-colors ${mobility ? "border-verde bg-verde/8" : "border-gold-soft/70 bg-paper"}`}
+                >
+                  <span className="flex items-center gap-2 text-[13.5px] text-ink">
+                    <span aria-hidden>♿</span> Voy con alguien de movilidad reducida
+                  </span>
+                  <span className={`smallcaps flex h-6 w-12 shrink-0 items-center justify-center border text-[10px] font-semibold ${mobility ? "border-verde bg-verde text-white" : "border-gold-soft/70 text-ink-faint"}`}>
+                    {mobility ? "Sí" : "No"}
+                  </span>
+                </button>
+              </div>
 
               {deposit > 0 && (
                 <p className="mt-4 border border-gold-soft/50 bg-paper px-3 py-2.5 text-[12px] leading-relaxed text-ink-soft">
