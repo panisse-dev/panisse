@@ -365,6 +365,10 @@ export interface ReservationDetail {
 export const staffReservationDetail = (code: string, id: string) =>
   rpc<ReservationDetail>("staff_reservation_detail", { p_code: code, p_id: id });
 
+// Enviar (o reenviar) a mano el correo de confirmación de una reserva.
+export const staffSendReservationEmail = (code: string, id: string) =>
+  rpc<boolean>("staff_send_reservation_email", { p_code: code, p_id: id });
+
 export const staffUpdateReservation = (
   code: string,
   id: string,

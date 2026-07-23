@@ -21,6 +21,7 @@ import {
   staffReservationBlocks,
   staffReservations,
   staffReservationDetail,
+  staffSendReservationEmail,
   staffUpdateReservation,
   staffReservationSettings,
   staffReservationStats,
@@ -127,6 +128,9 @@ export default function ReservasPage() {
   const [tablesEditId, setTablesEditId] = useState<string | null>(null);
   // Reserva cuya ficha completa está abierta.
   const [detailId, setDetailId] = useState<string | null>(null);
+  // Feedback del botón "Enviar correo" por reserva.
+  const [emailSentId, setEmailSentId] = useState<string | null>(null);
+  const [emailBusyId, setEmailBusyId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [showFloor, setShowFloor] = useState(false);
@@ -276,6 +280,21 @@ export default function ReservasPage() {
     } catch (e) {
       if (isAuthError(e)) logout();
       else poll();
+    }
+  };
+
+  const sendEmail = async (r: Reservation) => {
+    if (emailBusyId) return;
+    setEmailBusyId(r.id);
+    try {
+      await staffSendReservationEmail(code, r.id);
+      setEmailSentId(r.id);
+      setTimeout(() => setEmailSentId((id) => (id === r.id ? null : id)), 3500);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else window.alert(e instanceof Error ? e.message : "No se pudo enviar el correo.");
+    } finally {
+      setEmailBusyId(null);
     }
   };
 
@@ -676,10 +695,38 @@ export default function ReservasPage() {
                   )}
                 </div>
 
-                {wa && (
-                  <a href={wa} target="_blank" rel="noopener noreferrer" className="flex h-11 w-full items-center justify-center gap-2 border-t border-gold-soft/25 bg-verde/10 text-[13.5px] font-semibold text-verde hover:bg-verde/15">
-                    Escribir por WhatsApp
-                  </a>
+                {/* Confirmar al cliente: WhatsApp (manual) o correo (automático) */}
+                {(wa || r.customer.email) && (
+                  <div className="flex border-t border-gold-soft/25">
+                    {wa && (
+                      <a
+                        href={wa}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex h-11 flex-1 items-center justify-center gap-1.5 bg-verde/10 text-[12.5px] font-semibold text-verde hover:bg-verde/15"
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+                          <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
+                        </svg>
+                        WhatsApp
+                      </a>
+                    )}
+                    {r.customer.email && (
+                      <button
+                        type="button"
+                        onClick={() => sendEmail(r)}
+                        disabled={emailBusyId === r.id}
+                        title={`Enviar confirmación a ${r.customer.email}`}
+                        className={`flex h-11 flex-1 items-center justify-center gap-1.5 text-[12.5px] font-semibold disabled:opacity-60 ${wa ? "border-l border-gold-soft/25" : ""} ${emailSentId === r.id ? "bg-verde/15 text-verde" : "bg-navy/[0.04] text-navy hover:bg-navy/[0.08]"}`}
+                      >
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+                          <path d="m22 6-10 7L2 6" />
+                        </svg>
+                        {emailBusyId === r.id ? "Enviando…" : emailSentId === r.id ? "Correo enviado ✓" : "Enviar correo"}
+                      </button>
+                    )}
+                  </div>
                 )}
 
                 {/* Acciones según estado */}
