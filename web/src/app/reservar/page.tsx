@@ -539,27 +539,27 @@ export default function ReservarPage() {
 
               <label className="mt-3.5 block">
                 <span className="smallcaps text-[10px] text-gold-deep">Nota (opcional)</span>
-                <textarea
+                <input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Ej. cumpleaños, silla para bebé, cerca de la ventana…"
-                  rows={2}
-                  className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3.5 py-2.5 text-[15px] text-ink outline-none focus:border-navy"
+                  placeholder="Ej. cumpleaños, silla para bebé…"
+                  className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
                 />
               </label>
 
-              {/* Para ubicarte mejor en el salón */}
-              <div className="mt-3.5 flex flex-col gap-2">
+              {/* Mascota y movilidad, en una sola fila debajo de la nota */}
+              <div className="mt-2 grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setPet((v) => !v)}
                   aria-pressed={pet}
-                  className={`flex items-center justify-between gap-2 border px-3.5 py-3 text-left transition-colors ${pet ? "border-verde bg-verde/8" : "border-gold-soft/70 bg-paper"}`}
+                  className={`flex items-center justify-between gap-1.5 border px-2.5 py-2.5 text-left transition-colors ${pet ? "border-verde bg-verde/8" : "border-gold-soft/70 bg-paper"}`}
                 >
-                  <span className="flex items-center gap-2 text-[13.5px] text-ink">
-                    <span aria-hidden>🐾</span> Voy con mascota
+                  <span className="flex min-w-0 items-center gap-1.5 text-[12px] leading-snug text-ink">
+                    <span aria-hidden className="shrink-0">🐾</span>
+                    <span className="min-w-0">Con mascota</span>
                   </span>
-                  <span className={`smallcaps flex h-6 w-12 items-center justify-center border text-[10px] font-semibold ${pet ? "border-verde bg-verde text-white" : "border-gold-soft/70 text-ink-faint"}`}>
+                  <span className={`smallcaps flex h-5 w-7 shrink-0 items-center justify-center border text-[9px] font-semibold ${pet ? "border-verde bg-verde text-white" : "border-gold-soft/70 text-ink-faint"}`}>
                     {pet ? "Sí" : "No"}
                   </span>
                 </button>
@@ -567,12 +567,13 @@ export default function ReservarPage() {
                   type="button"
                   onClick={() => setMobility((v) => !v)}
                   aria-pressed={mobility}
-                  className={`flex items-center justify-between gap-2 border px-3.5 py-3 text-left transition-colors ${mobility ? "border-verde bg-verde/8" : "border-gold-soft/70 bg-paper"}`}
+                  className={`flex items-center justify-between gap-1.5 border px-2.5 py-2.5 text-left transition-colors ${mobility ? "border-verde bg-verde/8" : "border-gold-soft/70 bg-paper"}`}
                 >
-                  <span className="flex items-center gap-2 text-[13.5px] text-ink">
-                    <span aria-hidden>♿</span> Voy con alguien de movilidad reducida
+                  <span className="flex min-w-0 items-center gap-1.5 text-[12px] leading-snug text-ink">
+                    <span aria-hidden className="shrink-0">♿</span>
+                    <span className="min-w-0">Movilidad reducida</span>
                   </span>
-                  <span className={`smallcaps flex h-6 w-12 shrink-0 items-center justify-center border text-[10px] font-semibold ${mobility ? "border-verde bg-verde text-white" : "border-gold-soft/70 text-ink-faint"}`}>
+                  <span className={`smallcaps flex h-5 w-7 shrink-0 items-center justify-center border text-[9px] font-semibold ${mobility ? "border-verde bg-verde text-white" : "border-gold-soft/70 text-ink-faint"}`}>
                     {mobility ? "Sí" : "No"}
                   </span>
                 </button>
