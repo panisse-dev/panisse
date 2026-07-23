@@ -719,9 +719,12 @@ export default function ReservasPage() {
                         title={`Enviar confirmación a ${r.customer.email}`}
                         className={`flex h-11 flex-1 items-center justify-center gap-1.5 text-[12.5px] font-semibold disabled:opacity-60 ${wa ? "border-l border-gold-soft/25" : ""} ${emailSentId === r.id ? "bg-verde/15 text-verde" : "bg-navy/[0.04] text-navy hover:bg-navy/[0.08]"}`}
                       >
-                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                          <path d="M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
-                          <path d="m22 6-10 7L2 6" />
+                        <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                          <path fill="#4285F4" d="M1.636 21.002h3.819V11.73L0 7.639v11.727c0 .905.733 1.636 1.636 1.636z" />
+                          <path fill="#34A853" d="M18.545 21.002h3.819c.904 0 1.636-.732 1.636-1.636V7.639l-5.455 4.091z" />
+                          <path fill="#FBBC04" d="M18.545 4.638v7.092L24 7.639V5.456c0-2.022-2.309-3.178-3.927-1.964z" />
+                          <path fill="#EA4335" d="M5.455 11.73V4.638L12 9.548l6.545-4.91v7.092L12 16.64z" />
+                          <path fill="#C5221F" d="M0 5.456v2.183l5.455 4.091V4.638L3.927 3.492C2.309 2.278 0 3.434 0 5.456z" />
                         </svg>
                         {emailBusyId === r.id ? "Enviando…" : emailSentId === r.id ? "Correo enviado ✓" : "Enviar correo"}
                       </button>
