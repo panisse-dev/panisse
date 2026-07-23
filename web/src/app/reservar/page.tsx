@@ -66,6 +66,7 @@ export default function ReservarPage() {
   const [checking, setChecking] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [note, setNote] = useState("");
   const [pet, setPet] = useState(false);
   const [mobility, setMobility] = useState(false);
@@ -177,9 +178,20 @@ export default function ReservarPage() {
   const submit = async () => {
     setError("");
     if (!known) return;
-    if (!known.known && !name.trim()) {
-      setError("Escribe tu nombre para la reserva");
-      return;
+    // Cliente nuevo: nombre, celular y cumpleaños son obligatorios (el correo ya se validó).
+    if (!known.known) {
+      if (!name.trim()) {
+        setError("Escribe tu nombre para la reserva");
+        return;
+      }
+      if (!phone.trim()) {
+        setError("Escribe tu celular");
+        return;
+      }
+      if (!birthday) {
+        setError("Escribe tu fecha de cumpleaños");
+        return;
+      }
     }
     setSending(true);
     try {
@@ -195,6 +207,7 @@ export default function ReservarPage() {
         table: tableId,
         petFriendly: pet,
         reducedMobility: mobility,
+        birthday: birthday || undefined,
       });
       setDone(created);
       setStep("listo");
@@ -463,7 +476,7 @@ export default function ReservarPage() {
                     />
                   </label>
                   <label className="mt-3.5 block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Teléfono</span>
+                    <span className="smallcaps text-[10px] text-gold-deep">Celular *</span>
                     <input
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
@@ -473,6 +486,19 @@ export default function ReservarPage() {
                       className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
                     />
                   </label>
+                  <label className="mt-3.5 block">
+                    <span className="smallcaps text-[10px] text-gold-deep">Fecha de cumpleaños *</span>
+                    <input
+                      type="date"
+                      value={birthday}
+                      onChange={(e) => setBirthday(e.target.value)}
+                      autoComplete="bday"
+                      className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                    />
+                  </label>
+                  <p className="mt-1.5 text-[11px] leading-snug text-ink-faint">
+                    Pedimos estos datos solo la primera vez, para tu reserva y para saludarte en tu cumpleaños.
+                  </p>
                 </>
               )}
 

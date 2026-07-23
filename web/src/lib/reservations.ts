@@ -61,6 +61,7 @@ export interface NewReservation {
   table?: string | null; // mesa elegida (opcional)
   petFriendly?: boolean; // viene con mascota
   reducedMobility?: boolean; // viene con persona de movilidad reducida
+  birthday?: string; // fecha de cumpleaños (YYYY-MM-DD) — obligatoria si es cliente nuevo
 }
 
 // ── Mapa del salón que ve el cliente para elegir mesa ──
