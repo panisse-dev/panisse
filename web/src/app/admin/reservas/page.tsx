@@ -695,17 +695,18 @@ export default function ReservasPage() {
                   )}
                 </div>
 
-                {/* Confirmar al cliente: WhatsApp (manual) o correo (automático) */}
+                {/* Confirmar al cliente: WhatsApp (manual) y correo (Gmail) — compactos */}
                 {(wa || r.customer.email) && (
-                  <div className="flex border-t border-gold-soft/25">
+                  <div className="flex flex-wrap gap-1.5 border-t border-gold-soft/25 px-4 py-2">
                     {wa && (
                       <a
                         href={wa}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex h-11 flex-1 items-center justify-center gap-1.5 bg-verde/10 text-[12.5px] font-semibold text-verde hover:bg-verde/15"
+                        title="Confirmar por WhatsApp"
+                        className="flex h-8 items-center gap-1.5 border border-verde/40 bg-verde/8 px-2.5 text-[11.5px] font-semibold text-verde hover:bg-verde/15"
                       >
-                        <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
                           <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
                         </svg>
                         WhatsApp
@@ -716,17 +717,17 @@ export default function ReservasPage() {
                         type="button"
                         onClick={() => sendEmail(r)}
                         disabled={emailBusyId === r.id}
-                        title={`Enviar confirmación a ${r.customer.email}`}
-                        className={`flex h-11 flex-1 items-center justify-center gap-1.5 text-[12.5px] font-semibold disabled:opacity-60 ${wa ? "border-l border-gold-soft/25" : ""} ${emailSentId === r.id ? "bg-verde/15 text-verde" : "bg-navy/[0.04] text-navy hover:bg-navy/[0.08]"}`}
+                        title={`Enviar correo a ${r.customer.email}`}
+                        className={`flex h-8 items-center gap-1.5 border px-2.5 text-[11.5px] font-semibold disabled:opacity-60 ${emailSentId === r.id ? "border-verde/50 bg-verde/10 text-verde" : "border-gold-soft/60 bg-card text-navy hover:bg-paper"}`}
                       >
-                        <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden>
                           <path fill="#4285F4" d="M1.636 21.002h3.819V11.73L0 7.639v11.727c0 .905.733 1.636 1.636 1.636z" />
                           <path fill="#34A853" d="M18.545 21.002h3.819c.904 0 1.636-.732 1.636-1.636V7.639l-5.455 4.091z" />
                           <path fill="#FBBC04" d="M18.545 4.638v7.092L24 7.639V5.456c0-2.022-2.309-3.178-3.927-1.964z" />
                           <path fill="#EA4335" d="M5.455 11.73V4.638L12 9.548l6.545-4.91v7.092L12 16.64z" />
                           <path fill="#C5221F" d="M0 5.456v2.183l5.455 4.091V4.638L3.927 3.492C2.309 2.278 0 3.434 0 5.456z" />
                         </svg>
-                        {emailBusyId === r.id ? "Enviando…" : emailSentId === r.id ? "Correo enviado ✓" : "Enviar correo"}
+                        {emailBusyId === r.id ? "Enviando…" : emailSentId === r.id ? "Enviado ✓" : "Correo"}
                       </button>
                     )}
                   </div>
