@@ -538,8 +538,11 @@ export default function CartBar() {
                       }}
                       onKeyDown={(e) => e.key === "Enter" && !known && checkEmail()}
                       placeholder="tucorreo@ejemplo.com"
+                      type="email"
                       inputMode="email"
                       autoComplete="email"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       autoFocus
                       className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
                     />
