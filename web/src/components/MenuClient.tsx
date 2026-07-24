@@ -254,7 +254,18 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
         ))}
 
         <footer className="mt-14 px-5 text-center">
-          <div className="ornament w-full text-gold">
+          {/* Reservar desde la carta. En Roka, la reserva ofrece decoración. */}
+          <Link
+            href={isRoka ? "/reservar?marca=roka" : "/reservar"}
+            className="mx-auto flex max-w-xs items-center justify-center gap-2.5 bg-navy px-6 py-4 text-gold-soft shadow-[0_2px_14px_rgba(4,27,49,0.12)] transition-transform active:scale-[0.985]"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5 text-gold" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" />
+            </svg>
+            <span className="smallcaps text-[14px] font-medium tracking-[0.12em]">Reservar una mesa</span>
+          </Link>
+          <div className="ornament mt-14 w-full text-gold">
             <span className="text-[10px]">❦</span>
           </div>
           <p className="mt-4 text-[11px] leading-relaxed text-ink-faint">

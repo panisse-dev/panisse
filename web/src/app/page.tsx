@@ -151,20 +151,31 @@ export default function Home() {
             {multiBrand && !brand ? (
               /* ── Elegir marca (Pilares: Panisse o Roka) ── */
               <div className={`flex flex-col gap-5 ${sede && sedes.length > 1 ? "mt-6" : "mt-12"}`}>
-                {shownBrands.map((b, i) => (
-                  <button
-                    key={b}
-                    type="button"
-                    onClick={() => setBrand(b)}
-                    className={`anim-fade-up group relative block border border-gold-soft bg-card px-6 py-6 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985] ${b === "roka" ? "theme-roka" : ""}`}
-                    style={{ animationDelay: `${0.12 + i * 0.09}s` }}
-                  >
-                    <span className="smallcaps block font-display text-[22px] font-medium leading-tight tracking-[0.14em] text-navy">
-                      {BRANDS[b].label}
-                    </span>
-                    <span className="mt-1 block text-[12px] text-gold-deep">{BRANDS[b].tagline}</span>
-                  </button>
-                ))}
+                {shownBrands.map((b, i) => {
+                  // Cartas de esta marca en la sede actual. Si la marca tiene una
+                  // sola carta (Roka), el botón abre esa carta directo, sin una
+                  // segunda pantalla. Si tiene varias (Panisse), abre la lista.
+                  const brandMenus = visibleMenus.filter((m) => (m.brand ?? "panisse") === b);
+                  const tileClass = `anim-fade-up group relative block border border-gold-soft bg-card px-6 py-6 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985] ${b === "roka" ? "theme-roka" : ""}`;
+                  const inner = (
+                    <>
+                      <span className="smallcaps block font-display text-[22px] font-medium leading-tight tracking-[0.14em] text-navy">
+                        {BRANDS[b].label}
+                      </span>
+                      <span className="mt-1 block text-[12px] text-gold-deep">{BRANDS[b].tagline}</span>
+                    </>
+                  );
+                  const style = { animationDelay: `${0.12 + i * 0.09}s` };
+                  return brandMenus.length === 1 ? (
+                    <Link key={b} href={`/menu/${brandMenus[0].slug}`} className={tileClass} style={style}>
+                      {inner}
+                    </Link>
+                  ) : (
+                    <button key={b} type="button" onClick={() => setBrand(b)} className={tileClass} style={style}>
+                      {inner}
+                    </button>
+                  );
+                })}
               </div>
             ) : (
               <>
