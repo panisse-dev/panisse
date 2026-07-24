@@ -309,31 +309,11 @@ export default function ReservarPage() {
   // ── Confirmación ──
   if (step === "listo" && done) {
     const clientName = name.trim() || known?.name || "";
-    // Mensaje de WhatsApp con TODOS los datos de la reserva, para el restaurante.
-    const waConfirm = [
-      "¡Hola PANISSE! Quiero confirmar mi reserva 🗓️",
-      "",
-      `*Reserva #${done.code}*`,
-      `Nombre: ${clientName || "—"}`,
-      `Personas: ${party}`,
-      `Día: ${formatDateLabel(date)}`,
-      `Hora: ${formatTime(time)}`,
-      tableName ? `Mesa: ${tableName}${zoneName ? ` (${zoneName})` : ""}` : null,
-      sede ? `Sede: ${sede.name}` : null,
-      phone.trim() ? `Teléfono: ${phone.trim()}` : null,
-      email.trim() ? `Correo: ${email.trim()}` : null,
-      note.trim() ? `Nota: ${note.trim()}` : null,
-      chosenDecoration ? `Decoración: ${chosenDecoration.name} (${formatCOP(chosenDecoration.price)})` : null,
-      deposit > 0 ? `Abono para separar: ${formatCOP(deposit)}` : null,
-    ]
-      .filter((l) => l !== null)
-      .join("\n");
     const firstName = clientName.split(" ")[0] || "";
     const shortDate = new Date(`${date}T12:00:00`).toLocaleDateString("es-CO", {
       day: "numeric",
       month: "long",
     });
-    const contact = (sede?.whatsapp || restaurant.whatsapp).trim();
     return (
       <Shell>
         <div className="px-1 pt-4 text-center">
@@ -348,8 +328,8 @@ export default function ReservarPage() {
             ¡Reserva recibida{firstName ? `, ${firstName}` : ""}!
           </h1>
           <p className="mx-auto mt-2 max-w-[19rem] text-[13.5px] leading-relaxed text-ink-soft">
-            Tu reserva quedó registrada. Para dejarla <b className="text-navy">confirmada</b>, envíala por
-            WhatsApp con el botón de abajo.
+            Tu reserva quedó registrada. Te enviamos los detalles a tu{" "}
+            <b className="text-navy">correo</b> y te confirmamos muy pronto.
           </p>
 
           {/* Información de la reserva, en fila de íconos */}
@@ -403,29 +383,23 @@ export default function ReservarPage() {
           )}
 
           <p className="mx-auto mt-5 max-w-[19rem] text-[13px] leading-relaxed text-ink-soft">
-            Al confirmar te llegan todos los datos ya escritos, solo pulsa enviar. ¡Te esperamos!
+            ¡Te esperamos! Revisa tu correo con los datos de tu reserva.
           </p>
           {deposit > 0 && (
             <p className="mt-2 text-[12.5px] leading-relaxed text-gold-deep">
-              Para separar la mesa se pide un abono de <b>{formatCOP(deposit)}</b>. Te contamos cómo
-              pagarlo al confirmar.
+              Para separar la mesa se pide un abono de <b>{formatCOP(deposit)}</b>. Te escribimos para
+              contarte cómo pagarlo y dejar tu mesa separada.
             </p>
           )}
-          <WhatsAppButton phone={sede?.whatsapp} text={waConfirm} label="Confirmar por WhatsApp" />
           <Link
             href="/"
-            className="mt-3 flex h-12 w-full items-center justify-center border border-gold-soft/70 bg-card text-[14px] font-medium text-ink-soft"
+            className="mt-5 flex h-12 w-full items-center justify-center bg-navy text-[14px] font-semibold text-gold-soft"
           >
             Volver al inicio
           </Link>
-          {contact && (
-            <p className="mt-5 text-[11px] text-ink-faint">
-              ¿Dudas? Escríbenos al{" "}
-              <a href={`https://wa.me/${contact.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="text-gold-deep underline">
-                {contact}
-              </a>
-            </p>
-          )}
+          {/* Sin botón de "confirmar": la reserva ya se envió al panel y el
+              correo sale solo. Solo dejamos cómo escribirnos si hay dudas. */}
+          <WhatsAppButton phone={sede?.whatsapp} label="¿Tienes alguna duda? Escríbenos" />
         </div>
       </Shell>
     );
