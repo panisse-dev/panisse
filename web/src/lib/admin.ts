@@ -188,6 +188,18 @@ export interface Analytics {
   topProductsOrders: { id: string; name: string; qty: number; revenue: number }[];
   topCategories: { name: string; views: number }[];
   devices: { device: string; sessions: number }[];
+  reservations?: {
+    total: number;
+    confirmed: number; // confirmadas + cumplidas
+    fulfilled: number; // cumplidas (el cliente vino)
+    cancelled: number;
+    noShow: number; // reservó y no llegó
+    guests: number; // personas (sin contar canceladas)
+    deposits: number; // abonos cobrados (COP)
+    byDay: { day: string; total: number; guests: number }[];
+    byDow: { dow: number; total: number }[];
+    byHour: { hour: number; total: number }[];
+  };
 }
 
 export const staffVerify = (code: string) =>

@@ -179,6 +179,22 @@ export default function AnaliticaPage() {
   });
   const days = data?.visitsByDay ?? [];
 
+  // ── Reservas ──
+  const res = data?.reservations;
+  const resDays = res?.byDay ?? [];
+  const resDow = Array.from({ length: 7 }, (_, i) => {
+    const found = (res?.byDow ?? []).find((d) => d.dow === i + 1);
+    return found?.total ?? 0;
+  });
+  const resHours = Array.from({ length: 24 }, (_, h) => {
+    const found = (res?.byHour ?? []).find((d) => d.hour === h);
+    return found?.total ?? 0;
+  });
+  // % de cumplimiento sobre las que ya pasaron (cumplidas + no llegaron).
+  const decided = res ? res.fulfilled + res.noShow : 0;
+  const showRate = decided > 0 ? Math.round((res!.fulfilled / decided) * 100) : null;
+  const noShowRate = decided > 0 ? Math.round((res!.noShow / decided) * 100) : null;
+
   return (
     <div className="mx-auto max-w-5xl">
       <h1 className="mt-3 hidden font-display text-[20px] text-navy lg:block">Analítica</h1>
@@ -240,6 +256,74 @@ export default function AnaliticaPage() {
                 format={(v) => formatCOP(v)}
               />
             </Card>
+
+            {/* ── Reservas ── */}
+            {res && res.total > 0 && (
+              <section className="mt-1 border-t border-gold-soft/40 pt-4">
+                <h2 className="smallcaps mb-3 flex items-center gap-2 text-[11px] font-semibold text-navy">
+                  <span className="inline-block h-2 w-2 rounded-full bg-verde" />
+                  Reservas
+                </h2>
+
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
+                  {[
+                    ["Reservas", String(res.total)],
+                    ["Personas", String(res.guests)],
+                    ["Cumplidas", String(res.fulfilled)],
+                    ["No llegaron", String(res.noShow)],
+                    ["Canceladas", String(res.cancelled)],
+                    ["Abonos cobrados", formatCOP(res.deposits)],
+                  ].map(([label, value]) => (
+                    <div key={label} className="border border-gold-soft/50 bg-card px-3 py-3">
+                      <p className="smallcaps text-[9px] text-gold-deep">{label}</p>
+                      <p className="mt-1 font-display text-[22px] leading-none text-navy">{value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Cumplimiento: cuántas de las que ya pasaron sí llegaron */}
+                {showRate != null && (
+                  <div className="mt-2 border border-gold-soft/50 bg-card px-4 py-3">
+                    <div className="flex items-baseline justify-between text-[12px]">
+                      <span className="smallcaps text-[9.5px] text-gold-deep">
+                        Cumplimiento (de las que ya pasaron)
+                      </span>
+                      <span className="font-medium text-navy">
+                        {showRate}% llegó
+                        <span className="ml-2 text-[10.5px] text-[#b3261e]">{noShowRate}% no llegó</span>
+                      </span>
+                    </div>
+                    <div className="mt-1.5 flex h-2 overflow-hidden rounded-full bg-paper-deep">
+                      <div className="h-full bg-verde" style={{ width: `${showRate}%` }} />
+                      <div className="h-full bg-[#b3261e]/70" style={{ width: `${noShowRate}%` }} />
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-3 flex flex-col gap-3">
+                  <Card title="Reservas por día">
+                    <Bars
+                      values={resDays.map((d) => d.total)}
+                      labels={resDays.map((d) => d.day.slice(8))}
+                      labelEvery={resDays.length > 14 ? Math.ceil(resDays.length / 10) : 1}
+                    />
+                  </Card>
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <Card title="Reservas por día de la semana">
+                      <Bars values={resDow} labels={DOW_LABELS} />
+                    </Card>
+                    <Card title="Reservas por hora">
+                      <Bars
+                        values={resHours}
+                        labels={resHours.map((_, h) => `${h}`)}
+                        labelEvery={3}
+                        height={100}
+                      />
+                    </Card>
+                  </div>
+                </div>
+              </section>
+            )}
 
             <div className="grid gap-3 sm:grid-cols-2">
               <Card title="Visitas por día de la semana">
