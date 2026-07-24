@@ -4,7 +4,7 @@
 // y más pedidos, horarios y dispositivos. Datos de la tabla de eventos
 // y de los pedidos en Supabase, agregados por staff_analytics.
 import { useCallback, useEffect, useState } from "react";
-import { isAuthError, staffAnalytics, type Analytics } from "@/lib/admin";
+import { isAuthError, staffAnalytics, staffLocations, type Analytics } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
 import { formatCOP } from "@/lib/format";
 
@@ -138,6 +138,8 @@ const DOW_LABELS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 export default function AnaliticaPage() {
   const { code, logout } = useStaff();
   const [range, setRange] = useState("7d");
+  const [sede, setSede] = useState<string | null>(null); // null = todas (sólo dueño)
+  const [sedes, setSedes] = useState<{ id: string; name: string }[]>([]);
   const [data, setData] = useState<Analytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -149,7 +151,7 @@ export default function AnaliticaPage() {
     from.setDate(from.getDate() - (days - 1));
     setLoading(true);
     try {
-      setData(await staffAnalytics(code, iso(from), iso(to)));
+      setData(await staffAnalytics(code, iso(from), iso(to), sede));
       setError("");
     } catch (e) {
       if (isAuthError(e)) logout();
@@ -157,15 +159,27 @@ export default function AnaliticaPage() {
     } finally {
       setLoading(false);
     }
-  }, [code, range, logout]);
+  }, [code, range, sede, logout]);
 
   useEffect(() => {
     load();
   }, [load]);
 
+  // Lista de sedes para el selector del dueño (si esta clave puede filtrar).
+  const canFilter = data?.scope?.canFilter ?? false;
+  useEffect(() => {
+    if (!canFilter || sedes.length > 0) return;
+    staffLocations(code)
+      .then((ls) => setSedes(ls.map((l) => ({ id: l.id, name: l.name }))))
+      .catch(() => setSedes([]));
+  }, [canFilter, sedes.length, code]);
+
   const kpis = data?.kpis;
+  // La conversión sólo tiene sentido con el total (las visitas no van por sede).
   const conversion =
-    kpis && kpis.menuVisits > 0 ? Math.round((kpis.orders / kpis.menuVisits) * 100) : null;
+    sede === null && kpis && kpis.menuVisits > 0
+      ? Math.round((kpis.orders / kpis.menuVisits) * 100)
+      : null;
 
   // Todo con respaldo a lista vacía: si algún dato llegara incompleto, la
   // pantalla se ve vacía en vez de congelarse.
@@ -214,6 +228,44 @@ export default function AnaliticaPage() {
           </button>
         ))}
       </div>
+
+      {/* Selector de sede — sólo para la clave del dueño (puede filtrar) */}
+      {canFilter && sedes.length > 0 && (
+        <div className="chips-scroll -mx-1 mt-2 flex items-center gap-1.5 overflow-x-auto px-1">
+          <span className="smallcaps mr-0.5 shrink-0 text-[9px] text-ink-faint">Sede</span>
+          <button
+            type="button"
+            onClick={() => setSede(null)}
+            className={`smallcaps h-8 shrink-0 border px-3.5 text-[10px] font-medium ${
+              sede === null ? "border-verde bg-verde text-white" : "border-gold-soft/60 bg-card text-ink-soft"
+            }`}
+          >
+            Todas
+          </button>
+          {sedes.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setSede(s.id)}
+              className={`smallcaps h-8 shrink-0 border px-3.5 text-[10px] font-medium ${
+                sede === s.id ? "border-verde bg-verde text-white" : "border-gold-soft/60 bg-card text-ink-soft"
+              }`}
+            >
+              {s.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Nota: al filtrar por sede, las visitas al menú siguen siendo del total */}
+      {canFilter && sede !== null && (
+        <p className="mt-2 rounded-md bg-gold-soft/15 px-3 py-2 text-[11px] leading-relaxed text-ink-soft">
+          Estás viendo <b>{sedes.find((s) => s.id === sede)?.name ?? "una sede"}</b>. Los{" "}
+          <b>pedidos</b> y las <b>reservas</b> son sólo de esta sede. Las <b>visitas al menú</b> se
+          muestran del total, porque el menú digital es el mismo enlace para las dos sedes (el
+          cliente elige sede al momento de pagar).
+        </p>
+      )}
 
       {error && <p className="mt-4 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
       {loading && !data && (

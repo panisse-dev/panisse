@@ -200,6 +200,8 @@ export interface Analytics {
     byDow: { dow: number; total: number }[];
     byHour: { hour: number; total: number }[];
   };
+  // Alcance: si esta clave puede elegir sede (dueño) y cuál está aplicada.
+  scope?: { canFilter: boolean; location: string | null };
 }
 
 export const staffVerify = (code: string) =>
@@ -280,8 +282,18 @@ export const staffSetClientFlag = (
 // Nombre neutro ("resumen") a propósito: los bloqueadores de anuncios
 // bloquean las URLs que contienen "analytics", y eso tumbaba esta pantalla
 // en equipos con bloqueador. Por dentro es la misma consulta.
-export const staffAnalytics = (code: string, from: string, to: string) =>
-  rpc<Analytics>("staff_resumen", { p_code: code, p_from: from, p_to: to });
+export const staffAnalytics = (
+  code: string,
+  from: string,
+  to: string,
+  location?: string | null,
+) =>
+  rpc<Analytics>("staff_resumen", {
+    p_code: code,
+    p_from: from,
+    p_to: to,
+    p_location: location ?? null,
+  });
 
 // ── Reservas ──
 export const staffReservations = (code: string, day?: string | null) =>
