@@ -83,9 +83,14 @@ export default function ReservarPage() {
   const [decorationId, setDecorationId] = useState<string>(""); // "" = sin decoración
 
   useEffect(() => {
-    const roka = new URLSearchParams(window.location.search).get("marca") === "roka";
+    const params = new URLSearchParams(window.location.search);
+    const roka = params.get("marca") === "roka";
     setIsRoka(roka);
     if (roka) publicDecorations().then(setDecorations).catch(() => setDecorations([]));
+    // Enlace/QR directo a una sede: /reservar?sede=pilares salta la pregunta.
+    const s = params.get("sede");
+    if (s) setSede(s);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const chosenDecoration = decorations.find((d) => d.id === decorationId) || null;
