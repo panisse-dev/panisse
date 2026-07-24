@@ -89,6 +89,8 @@ export default function ReservarPage() {
   }, []);
 
   const chosenDecoration = decorations.find((d) => d.id === decorationId) || null;
+  // Foto ampliada de la decoración que el cliente acaba de tocar
+  const [zoomDeco, setZoomDeco] = useState<Decoration | null>(null);
 
   // Cargar configuración
   useEffect(() => {
@@ -612,17 +614,28 @@ export default function ReservarPage() {
                       <button
                         key={d.id}
                         type="button"
-                        onClick={() => setDecorationId(d.id)}
+                        onClick={() => {
+                          setDecorationId(d.id);
+                          if (d.image) setZoomDeco(d); // se abre la foto en grande
+                        }}
                         className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
                       >
                         {d.image && (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={d.image}
-                            alt={`Decoración ${d.name}`}
-                            loading="lazy"
-                            className="h-16 w-16 shrink-0 rounded border border-gold-soft/40 object-cover"
-                          />
+                          <span className="relative h-16 w-16 shrink-0">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={d.image}
+                              alt={`Decoración ${d.name}`}
+                              loading="lazy"
+                              className="h-16 w-16 rounded border border-gold-soft/40 object-cover"
+                            />
+                            <span className="absolute bottom-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy/80 text-gold-soft" aria-hidden>
+                              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="11" cy="11" r="7" />
+                                <path d="m20 20-3.5-3.5M11 8v6M8 11h6" />
+                              </svg>
+                            </span>
+                          </span>
                         )}
                         <span className="min-w-0 flex-1">
                           <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
@@ -661,6 +674,59 @@ export default function ReservarPage() {
             </>
           )}
         </div>
+
+        {/* Foto grande de la decoración elegida */}
+        {zoomDeco?.image && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Foto de la decoración ${zoomDeco.name}`}
+          >
+            <button
+              type="button"
+              aria-label="Cerrar"
+              onClick={() => setZoomDeco(null)}
+              className="anim-fade-in absolute inset-0 bg-navy/70 backdrop-blur-[2px]"
+            />
+            <div className="anim-fade-up relative w-full max-w-sm overflow-hidden border border-gold-soft/60 bg-card shadow-[0_12px_40px_rgba(4,17,29,0.4)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={zoomDeco.image}
+                alt={`Decoración ${zoomDeco.name}`}
+                className="max-h-[58vh] w-full bg-navy object-contain"
+              />
+              <button
+                type="button"
+                onClick={() => setZoomDeco(null)}
+                aria-label="Cerrar"
+                className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-navy/70 text-gold-soft"
+              >
+                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                  <path d="M6 6l12 12M18 6 6 18" />
+                </svg>
+              </button>
+              <div className="px-4 py-3.5">
+                <p className="font-display text-[18px] text-navy">{zoomDeco.name}</p>
+                <p className="mt-0.5 text-[12px] leading-snug text-ink-soft">{zoomDeco.description}</p>
+                <p className="mt-1 text-[14px] font-semibold text-gold-deep">{formatCOP(zoomDeco.price)}</p>
+                <p className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-verde">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="M20 6 9 17l-5-5" />
+                  </svg>
+                  Elegiste esta decoración
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setZoomDeco(null)}
+                  className="mt-3 h-11 w-full bg-navy text-[14px] font-semibold text-gold-soft"
+                >
+                  Listo
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </Shell>
     );
   }
