@@ -1944,13 +1944,24 @@ function FloorPanel({
                 : editing
                   ? "border-gold-deep/60 bg-card text-navy cursor-move"
                   : "border-gold-soft/70 bg-card text-navy hover:border-verde hover:bg-verde/5";
+              // Horas de las reservas de esa mesa, para verlas en el plano.
+              const horas = t.reservations
+                .slice()
+                .sort((a, b) => a.time.localeCompare(b.time))
+                .map((r) => fmtTime(r.time));
               const inner = (
                 <>
                   <span className="font-display text-[15px] leading-none">{t.name}</span>
                   {occupied ? (
-                    <span className="mt-0.5 text-[9px] text-navy/70">
-                      {seated}/{t.seats}
-                    </span>
+                    <>
+                      <span className="mt-0.5 px-0.5 text-[8.5px] font-semibold leading-tight text-navy">
+                        {horas.slice(0, 2).join(" · ")}
+                        {horas.length > 2 && ` +${horas.length - 2}`}
+                      </span>
+                      <span className="text-[8.5px] leading-tight text-navy/70">
+                        {seated}/{t.seats}
+                      </span>
+                    </>
                   ) : (
                     <span className="mt-0.5 text-[9px] text-ink-faint">{t.seats} pax</span>
                   )}
