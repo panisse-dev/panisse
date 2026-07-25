@@ -303,8 +303,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </header>
 
         {/* ── Contenido ── */}
-        <main className="flex-1 lg:pl-60">
-          <div className="mx-auto w-full max-w-6xl px-3 pb-16 lg:px-8 lg:pt-6">{children}</div>
+        <main className="min-w-0 flex-1 lg:pl-60">
+          {/* En pantallas grandes (el computador del mostrador) el panel usa
+              todo el ancho disponible, para no tener que deslizar de lado. */}
+          <div className="mx-auto w-full max-w-[1700px] px-3 pb-16 lg:px-8 lg:pt-6">{children}</div>
         </main>
       </div>
 

@@ -381,7 +381,7 @@ export default function ReservasPage() {
             {soundOn ? "Sonido" : "Silencio"}
           </button>
         </div>
-        <div className="chips-scroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:justify-end lg:px-0 lg:pb-0">
+        <div className="chips-scroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:flex-wrap lg:justify-end lg:overflow-visible lg:px-0 lg:pb-0">
           <button
             type="button"
             onClick={() => setNuevaOpen(true)}
@@ -486,7 +486,7 @@ export default function ReservasPage() {
 
       {/* Próximos días con reservas */}
       {upcoming.length > 0 && (
-        <div className="chips-scroll -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1">
+        <div className="chips-scroll -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1 pb-1 lg:flex-wrap lg:overflow-visible">
           {upcoming.map((u) => (
             <button
               key={u.day}
@@ -813,7 +813,7 @@ export default function ReservasPage() {
           </div>
 
           {/* ── Columna derecha: mapa de mesas ── */}
-          <div className={`mt-4 lg:mt-0 lg:flex-1 ${showFloor ? "" : "hidden lg:block"}`}>
+          <div className={`mt-4 lg:mt-0 lg:min-w-0 lg:flex-1 ${showFloor ? "" : "hidden lg:block"}`}>
             <FloorPanel
               floor={floor}
               code={code}
