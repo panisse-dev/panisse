@@ -326,6 +326,16 @@ export default function ReservaPage() {
           </div>
         )}
 
+        {/* Ya cancelada: lo único que queda por hacer es volver a reservar */}
+        {cancelled && (
+          <Link
+            href="/reservar"
+            className="mt-5 flex h-12 w-full items-center justify-center bg-navy text-[14px] font-semibold text-gold-soft"
+          >
+            Reservar de nuevo
+          </Link>
+        )}
+
         {!cancelled && !res.editable && (
           <p className="mt-5 text-[12.5px] leading-relaxed text-ink-faint">
             Esta reserva ya está muy cerca (o ya pasó) para cambiarla desde aquí. Escríbenos y te
