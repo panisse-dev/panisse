@@ -1954,9 +1954,21 @@ function FloorPanel({
                   <span className="font-display text-[15px] leading-none">{t.name}</span>
                   {occupied ? (
                     <>
-                      <span className="mt-0.5 px-0.5 text-[8.5px] font-semibold leading-tight text-navy">
-                        {horas.slice(0, 2).join(" · ")}
-                        {horas.length > 2 && ` +${horas.length - 2}`}
+                      {/* La hora en una pastilla verde, como en los planos de sala */}
+                      <span className="mt-0.5 flex max-w-full flex-wrap items-center justify-center gap-0.5">
+                        {horas.slice(0, 2).map((h) => (
+                          <span
+                            key={h}
+                            className="rounded-full bg-verde px-1.5 py-[1px] text-[8.5px] font-semibold leading-[1.35] text-white"
+                          >
+                            {h}
+                          </span>
+                        ))}
+                        {horas.length > 2 && (
+                          <span className="rounded-full bg-verde/70 px-1 py-[1px] text-[8.5px] font-semibold leading-[1.35] text-white">
+                            +{horas.length - 2}
+                          </span>
+                        )}
                       </span>
                       <span className="text-[8.5px] leading-tight text-navy/70">
                         {seated}/{t.seats}
