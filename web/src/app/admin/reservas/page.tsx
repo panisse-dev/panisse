@@ -300,6 +300,9 @@ export default function ReservasPage() {
   };
 
   const active = list.filter((r) => r.status !== "cancelada");
+  // Se muestran para llevar la cuenta de cuántos cancelan y cuántos no llegan.
+  const cancelledCount = list.filter((r) => r.status === "cancelada").length;
+  const noShowCount = list.filter((r) => r.status === "no_show").length;
   const totalPeople = active
     .filter((r) => r.status !== "no_show")
     .reduce((s, r) => s + r.party, 0);
@@ -496,6 +499,11 @@ export default function ReservasPage() {
                   {u.pendientes} pend
                 </span>
               )}
+              {u.canceladas > 0 && (
+                <span className="rounded-full bg-ink-faint/25 px-1.5 text-[10px] font-semibold text-ink-soft">
+                  {u.canceladas} canc
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -511,6 +519,10 @@ export default function ReservasPage() {
           <div className={`lg:w-[400px] lg:shrink-0 ${showFloor ? "hidden lg:block" : ""}`}>
             <p className="text-[11px] text-ink-faint">
               {fmtDay(day)} · {active.length} reserva{active.length === 1 ? "" : "s"} · {totalPeople} personas
+              {cancelledCount > 0 && (
+                <span> · {cancelledCount} cancelada{cancelledCount === 1 ? "" : "s"}</span>
+              )}
+              {noShowCount > 0 && <span> · {noShowCount} no llegó</span>}
               {connError && <span className="text-[#b3261e]"> · sin conexión</span>}
             </p>
 

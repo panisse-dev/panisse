@@ -152,8 +152,9 @@ export interface Floor {
 
 export interface ReservationDay {
   day: string;
-  total: number;
+  total: number; // sin contar las canceladas
   pendientes: number;
+  canceladas: number;
 }
 
 export interface ReservationSettings {
