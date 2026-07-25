@@ -37,6 +37,14 @@ function addDays(iso: string, n: number): string {
   return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
 }
 
+// El campo del celular muestra "+57" aparte; aquí se arma el número completo.
+function fullPhone(raw: string): string {
+  const t = raw.trim();
+  if (t.startsWith("+")) return t;
+  const digits = t.replace(/\D/g, "");
+  return digits ? `+57${digits}` : "";
+}
+
 function isoDow(iso: string): number {
   const [y, m, d] = iso.split("-").map(Number);
   return ((new Date(y, m - 1, d).getDay() + 6) % 7) + 1; // 1=lun … 7=dom
@@ -183,18 +191,18 @@ export default function ReservarPage() {
     }
   };
 
+  // Al salir del campo del correo miramos si ya es cliente: si lo es, lo
+  // saludamos y no le pedimos el cumpleaños; si es nuevo, aparece ese campo.
   const checkEmail = async () => {
-    setError("");
     const e = email.trim();
-    if (!EMAIL_RE.test(e)) {
-      setError("Escribe un correo válido");
-      return;
-    }
+    if (!EMAIL_RE.test(e) || known) return;
     setChecking(true);
     try {
-      setKnown(await checkClient(e));
+      const c = await checkClient(e);
+      setKnown(c);
+      if (c.known && c.name && !name.trim()) setName(c.name);
     } catch {
-      setError("No se pudo verificar el correo. Revisa tu internet.");
+      /* si falla, se vuelve a intentar al confirmar la reserva */
     } finally {
       setChecking(false);
     }
@@ -202,28 +210,44 @@ export default function ReservarPage() {
 
   const submit = async () => {
     setError("");
-    if (!known) return;
-    // Cliente nuevo: nombre, celular y cumpleaños son obligatorios (el correo ya se validó).
-    if (!known.known) {
-      if (!name.trim()) {
-        setError("Escribe tu nombre para la reserva");
+    // Los tres datos se piden siempre, en un solo bloque.
+    if (!name.trim()) {
+      setError("Escribe tu nombre para la reserva");
+      return;
+    }
+    if (!phone.trim()) {
+      setError("Escribe tu celular");
+      return;
+    }
+    if (!EMAIL_RE.test(email.trim())) {
+      setError("Escribe un correo válido");
+      return;
+    }
+    // ¿Ya lo conocemos? Si no se alcanzó a verificar al salir del correo, se
+    // verifica ahora: al cliente nuevo se le pide además el cumpleaños.
+    let client = known;
+    if (!client) {
+      setChecking(true);
+      try {
+        client = await checkClient(email.trim());
+        setKnown(client);
+      } catch {
+        setError("No se pudo verificar el correo. Revisa tu internet.");
         return;
+      } finally {
+        setChecking(false);
       }
-      if (!phone.trim()) {
-        setError("Escribe tu celular");
-        return;
-      }
-      if (!birthday) {
-        setError("Escribe tu fecha de cumpleaños");
-        return;
-      }
+    }
+    if (!client.known && !birthday) {
+      setError("Escribe tu fecha de cumpleaños");
+      return;
     }
     setSending(true);
     try {
       const created = await createReservation({
-        name: known.known ? known.name || "" : name.trim(),
+        name: name.trim(),
         email: email.trim(),
-        phone: phone.trim(),
+        phone: fullPhone(phone),
         party,
         date,
         time,
@@ -452,99 +476,77 @@ export default function ReservarPage() {
             {tableName && <> · mesa {tableName}</>}
           </div>
 
-          <label className="block">
-            <span className="smallcaps text-[10px] text-gold-deep">Correo *</span>
+          {/* Los tres datos, juntos y compactos */}
+          <div className="border border-gold-soft/60 bg-paper p-3">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nombre y apellido"
+              autoComplete="name"
+              autoFocus
+              className="h-11 w-full border border-gold-soft/70 bg-card px-3 text-[14px] text-ink outline-none focus:border-navy"
+            />
+            <div className="mt-2 flex">
+              <span className="flex h-11 shrink-0 items-center gap-1.5 border border-r-0 border-gold-soft/70 bg-card px-2.5 text-[14px] text-ink-soft">
+                <span aria-hidden>🇨🇴</span> +57
+              </span>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="300 000 0000"
+                inputMode="tel"
+                autoComplete="tel"
+                className="h-11 w-full min-w-0 border border-gold-soft/70 bg-card px-3 text-[14px] text-ink outline-none focus:border-navy"
+              />
+            </div>
             <input
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
                 setKnown(null);
               }}
-              onKeyDown={(e) => e.key === "Enter" && !known && checkEmail()}
-              placeholder="tucorreo@ejemplo.com"
+              onBlur={checkEmail}
+              placeholder="Correo"
               type="email"
               inputMode="email"
               autoComplete="email"
               autoCapitalize="none"
               spellCheck={false}
-              autoFocus
-              className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+              className="mt-2 h-11 w-full border border-gold-soft/70 bg-card px-3 text-[14px] text-ink outline-none focus:border-navy"
             />
-          </label>
 
-          {!known ? (
-            <>
-              <p className="mt-2 text-[11.5px] text-ink-faint">
-                Si ya has venido antes, con tu correo recuperamos tus datos.
+            {known?.known && (
+              <p className="mt-2 text-[11.5px] text-verde">
+                ¡Hola de nuevo{known.name ? `, ${known.name.trim().split(" ")[0]}` : ""}! 👋
               </p>
-              {error && <p className="mt-3 text-center text-[12.5px] text-[#b3261e]">{error}</p>}
-              <button
-                type="button"
-                onClick={checkEmail}
-                disabled={checking}
-                className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft disabled:opacity-60"
-              >
-                {checking ? "Verificando…" : "Continuar"}
-              </button>
-            </>
-          ) : (
-            <>
-              {known.known ? (
-                <div className="mt-3.5 border-l-2 border-verde bg-verde/10 px-3 py-2.5">
-                  <p className="text-[13.5px] font-medium text-ink">
-                    ¡Hola de nuevo{known.name ? `, ${known.name.trim().split(" ")[0]}` : ""}! 👋
-                  </p>
-                  <p className="mt-0.5 text-[11.5px] text-ink-soft">
-                    Ya tenemos tus datos; con esto basta.
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <label className="mt-3.5 block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Nombre *</span>
-                    <input
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      placeholder="Tu nombre"
-                      autoComplete="name"
-                      autoFocus
-                      className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
-                    />
-                  </label>
-                  <label className="mt-3.5 block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Celular *</span>
-                    <input
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="Para avisarte por WhatsApp"
-                      inputMode="tel"
-                      autoComplete="tel"
-                      className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
-                    />
-                  </label>
-                  <label className="mt-3.5 block">
-                    <span className="smallcaps text-[10px] text-gold-deep">Fecha de cumpleaños *</span>
-                    <input
-                      type="date"
-                      value={birthday}
-                      onChange={(e) => setBirthday(e.target.value)}
-                      autoComplete="bday"
-                      className="mt-1 h-12 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
-                    />
-                  </label>
-                  <p className="mt-1.5 text-[11px] leading-snug text-ink-faint">
-                    Pedimos estos datos solo la primera vez, para tu reserva y para saludarte en tu cumpleaños.
-                  </p>
-                </>
-              )}
+            )}
 
-              <label className="mt-3.5 block">
+            {known && !known.known && (
+              <>
+                <label className="mt-2 block">
+                  <span className="smallcaps text-[10px] text-gold-deep">Fecha de cumpleaños *</span>
+                  <input
+                    type="date"
+                    value={birthday}
+                    onChange={(e) => setBirthday(e.target.value)}
+                    autoComplete="bday"
+                    className="mt-1 h-11 w-full border border-gold-soft/70 bg-card px-3 text-[14px] text-ink outline-none focus:border-navy"
+                  />
+                </label>
+                <p className="mt-1.5 text-[11px] leading-snug text-ink-faint">
+                  Solo la primera vez, para saludarte en tu cumpleaños.
+                </p>
+              </>
+            )}
+          </div>
+
+              <label className="mt-3 block">
                 <span className="smallcaps text-[10px] text-gold-deep">Nota (opcional)</span>
                 <input
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Ej. cumpleaños, silla para bebé…"
-                  className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3.5 text-[15px] text-ink outline-none focus:border-navy"
+                  className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-3.5 text-[14px] text-ink outline-none focus:border-navy"
                 />
               </label>
 
@@ -656,10 +658,8 @@ export default function ReservarPage() {
                 disabled={sending}
                 className="mt-4 h-12 w-full bg-navy text-[14px] font-semibold text-gold-soft disabled:opacity-60"
               >
-                {sending ? "Reservando…" : "Confirmar reserva"}
+                {sending ? "Reservando…" : checking ? "Verificando…" : "Confirmar reserva"}
               </button>
-            </>
-          )}
         </div>
 
         {/* Foto grande de la decoración elegida */}
