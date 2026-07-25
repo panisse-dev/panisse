@@ -526,6 +526,18 @@ export interface MenuRow {
   name: string;
 }
 
+// Marcas de la portada (Panisse / Roka): su botón y su frase.
+export interface BrandRow {
+  id: string;
+  label: string;
+  tagline: string;
+}
+
+export const staffBrands = (code: string) => rpc<BrandRow[]>("staff_brands", { p_code: code });
+
+export const staffUpdateBrand = (code: string, id: string, patch: Partial<BrandRow>) =>
+  rpc<void>("staff_update_brand", { p_code: code, p_id: id, p: patch });
+
 export const staffLocations = (code: string) =>
   rpc<LocationRow[]>("staff_locations", { p_code: code });
 

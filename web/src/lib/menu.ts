@@ -97,6 +97,18 @@ export async function fetchMenuTitles(): Promise<MenuTitle[]> {
   return rpc<MenuTitle[]>("public_menu_titles");
 }
 
+// Marcas de la portada (Panisse / Roka): su título y su frase, editables.
+export interface BrandTitle {
+  id: string;
+  label: string;
+  tagline: string;
+}
+
+export async function fetchBrands(): Promise<BrandTitle[]> {
+  const { rpc } = await import("./supabase");
+  return rpc<BrandTitle[]>("public_brands");
+}
+
 export function formatCOP(value: number): string {
   return "$" + value.toLocaleString("es-CO");
 }

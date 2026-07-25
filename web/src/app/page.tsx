@@ -3,11 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchMenuTitles, menus, restaurant, type MenuTitle } from "@/lib/menu";
+import { fetchBrands, fetchMenuTitles, menus, restaurant, type BrandTitle, type MenuTitle } from "@/lib/menu";
 import { useLocation } from "@/lib/location";
 import { DEFAULT_HOME_THEME, fontStack, publicHomeTheme, type HomeTheme } from "@/lib/theme";
 
-// Marcas que pueden convivir en una sede (Pilares).
+// Marcas que pueden convivir en una sede (Pilares). Lo que se muestra viene
+// de la base (editable en Ajustes); esto es solo el respaldo del arranque.
 const BRANDS: Record<string, { label: string; tagline: string }> = {
   panisse: { label: "Carta Panisse", tagline: "Nuestra cocina de siempre" },
   roka: { label: "Carta Roka", tagline: "Nikkei, peruana y parrilla" },
@@ -18,6 +19,8 @@ export default function Home() {
   const [theme, setTheme] = useState<HomeTheme>(DEFAULT_HOME_THEME);
   // Títulos y frases de las cartas, en vivo desde el panel.
   const [titles, setTitles] = useState<Record<string, MenuTitle>>({});
+  // Título y frase de cada marca, también en vivo desde el panel.
+  const [brands, setBrands] = useState<Record<string, BrandTitle> | null>(null);
 
   // Apariencia editable desde el panel (se aplica en vivo).
   useEffect(() => {
@@ -30,6 +33,11 @@ export default function Home() {
       .then((list) => setTitles(Object.fromEntries(list.map((m) => [m.slug, m]))))
       .catch(() => {
         /* si falla, se quedan los títulos por defecto */
+      });
+    fetchBrands()
+      .then((list) => setBrands(Object.fromEntries(list.map((b) => [b.id, b]))))
+      .catch(() => {
+        /* si falla, se queda el respaldo del código */
       });
   }, []);
 
@@ -160,9 +168,13 @@ export default function Home() {
                   const inner = (
                     <>
                       <span className="smallcaps block font-display text-[22px] font-medium leading-tight tracking-[0.14em] text-navy">
-                        {BRANDS[b].label}
+                        {brands ? brands[b]?.label || "" : BRANDS[b].label}
                       </span>
-                      <span className="mt-1 block text-[12px] text-gold-deep">{BRANDS[b].tagline}</span>
+                      {(brands ? brands[b]?.tagline : BRANDS[b].tagline) && (
+                        <span className="mt-1 block text-[12px] text-gold-deep">
+                          {brands ? brands[b].tagline : BRANDS[b].tagline}
+                        </span>
+                      )}
                     </>
                   );
                   const style = { animationDelay: `${0.12 + i * 0.09}s` };

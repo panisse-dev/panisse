@@ -9,16 +9,19 @@ import {
   staffDeliverySettings,
   staffHomeTheme,
   staffLocations,
+  staffBrands,
   staffMenus,
   staffUpdateDecoration,
   staffUpdateDeliverySettings,
   staffUpdateHomeTheme,
   staffUpdateLocation,
+  staffUpdateBrand,
   staffUpdateMenu,
   uploadImage,
   type DecorationRow,
   type DeliverySettings,
   type LocationRow,
+  type BrandRow,
   type MenuRow,
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
@@ -36,6 +39,7 @@ export default function AjustesPage() {
   const { code, logout } = useStaff();
   const [locations, setLocations] = useState<LocationRow[]>([]);
   const [menus, setMenus] = useState<MenuRow[]>([]);
+  const [brands, setBrands] = useState<BrandRow[]>([]);
   const [deliveries, setDeliveries] = useState<DeliverySettings[]>([]);
   const [decorations, setDecorations] = useState<DecorationRow[]>([]);
   const [theme, setTheme] = useState<HomeTheme | null>(null);
@@ -43,18 +47,20 @@ export default function AjustesPage() {
 
   const load = useCallback(async () => {
     try {
-      const [locs, mns, dels, thm, decs] = await Promise.all([
+      const [locs, mns, dels, thm, decs, brs] = await Promise.all([
         staffLocations(code),
         staffMenus(code),
         staffDeliverySettings(code),
         staffHomeTheme(code),
         staffDecorations(code),
+        staffBrands(code),
       ]);
       setLocations(locs);
       setMenus(mns);
       setDeliveries(dels);
       setTheme(thm);
       setDecorations(decs);
+      setBrands(brs);
       setError("");
     } catch (e) {
       if (isAuthError(e)) logout();
@@ -117,6 +123,20 @@ export default function AjustesPage() {
         <div className="mt-3 flex flex-col gap-3">
           {menus.map((m) => (
             <MenuCard key={m.slug} code={code} menu={m} onSaved={load} onAuth={logout} />
+          ))}
+        </div>
+      </section>
+
+      {/* ── Marcas de la portada ── */}
+      <section className="mt-8">
+        <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">Marcas de la portada</h2>
+        <p className="mt-1 text-[11.5px] text-ink-faint">
+          Los botones que ve el cliente en Pilares para elegir entre Panisse y Roka. Si dejas la
+          frase vacía, no aparece nada debajo del título.
+        </p>
+        <div className="mt-3 flex flex-col gap-3">
+          {brands.map((b) => (
+            <BrandCard key={b.id} code={code} brand={b} onSaved={load} onAuth={logout} />
           ))}
         </div>
       </section>
@@ -396,6 +416,48 @@ function MenuCard({
       <div className="flex flex-col gap-3">
         <Field label="Título" value={label} onChange={setLabel} />
         <Field label="Frase debajo" value={tagline} onChange={setTagline} />
+      </div>
+      <SaveRow saving={saving} msg={msg} onSave={save} />
+    </div>
+  );
+}
+
+function BrandCard({
+  code,
+  brand,
+  onSaved,
+  onAuth,
+}: {
+  code: string;
+  brand: BrandRow;
+  onSaved: () => void;
+  onAuth: () => void;
+}) {
+  const [label, setLabel] = useState(brand.label);
+  const [tagline, setTagline] = useState(brand.tagline);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const save = async () => {
+    setSaving(true);
+    setMsg("");
+    try {
+      await staffUpdateBrand(code, brand.id, { label: label.trim(), tagline: tagline.trim() });
+      setMsg("Guardado ✓");
+      onSaved();
+    } catch (e) {
+      if (isAuthError(e)) onAuth();
+      else setMsg("No se pudo guardar.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border border-gold-soft/60 bg-paper p-4">
+      <div className="flex flex-col gap-3">
+        <Field label="Título del botón" value={label} onChange={setLabel} />
+        <Field label="Frase debajo (puede quedar vacía)" value={tagline} onChange={setTagline} />
       </div>
       <SaveRow saving={saving} msg={msg} onSave={save} />
     </div>
