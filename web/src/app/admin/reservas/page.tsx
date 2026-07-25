@@ -532,8 +532,8 @@ export default function ReservasPage() {
               {connError && <span className="text-[#b3261e]"> · sin conexión</span>}
             </p>
 
-            {/* Pestañas por comida (desayuno / almuerzo / cena) */}
-            <div className="chips-scroll -mx-1 mt-2 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            {/* Pestañas por comida: las cuatro caben en una línea, sin correr */}
+            <div className="mt-2 grid grid-cols-4 gap-1">
               {(["todos", ...MEALS.map((m) => m.key)] as (Meal | "todos")[]).map((k) => {
                 const on = mealFilter === k;
                 const label = k === "todos" ? "Todas" : MEALS.find((m) => m.key === k)!.label;
@@ -543,10 +543,10 @@ export default function ReservasPage() {
                     key={k}
                     type="button"
                     onClick={() => setMealFilter(k)}
-                    className={`smallcaps flex h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[10.5px] font-medium ${on ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 bg-card text-ink-soft"}`}
+                    className={`flex h-7 items-center justify-center gap-1 rounded-full border px-1 text-[9px] font-medium uppercase tracking-[0.03em] ${on ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 bg-card text-ink-soft"}`}
                   >
-                    {label}
-                    <span className={`rounded-full px-1.5 text-[9.5px] font-semibold ${on ? "bg-gold-soft text-navy" : "bg-navy/10 text-navy"}`}>
+                    <span className="truncate">{label}</span>
+                    <span className={`shrink-0 rounded-full px-1 text-[8.5px] font-semibold ${on ? "bg-gold-soft text-navy" : "bg-navy/10 text-navy"}`}>
                       {n}
                     </span>
                   </button>
@@ -1583,6 +1583,11 @@ function TablePicker({
                 <div className="mt-1.5 flex flex-wrap gap-1.5">
                   {z.tables.map((t) => {
                     const on = sel.includes(t.id);
+                    // Horas ya reservadas en esa mesa, para no pisar otro turno.
+                    const horas = t.reservations
+                      .slice()
+                      .sort((a, b) => a.time.localeCompare(b.time))
+                      .map((r) => fmtTime(r.time));
                     return (
                       <button
                         key={t.id}
@@ -1593,7 +1598,25 @@ function TablePicker({
                         }`}
                       >
                         <span className="font-display text-[14px] leading-none">{t.name}</span>
-                        <span className={`text-[9px] ${on ? "text-gold-soft/80" : "text-ink-faint"}`}>{t.seats} pax</span>
+                        {horas.length > 0 ? (
+                          <span className="mt-0.5 flex flex-wrap items-center justify-center gap-0.5">
+                            {horas.slice(0, 2).map((h) => (
+                              <span
+                                key={h}
+                                className="rounded-full bg-verde px-1.5 py-[1px] text-[8.5px] font-semibold leading-[1.35] text-white"
+                              >
+                                {h}
+                              </span>
+                            ))}
+                            {horas.length > 2 && (
+                              <span className="rounded-full bg-verde/70 px-1 py-[1px] text-[8.5px] font-semibold leading-[1.35] text-white">
+                                +{horas.length - 2}
+                              </span>
+                            )}
+                          </span>
+                        ) : (
+                          <span className={`text-[9px] ${on ? "text-gold-soft/80" : "text-ink-faint"}`}>{t.seats} pax</span>
+                        )}
                       </button>
                     );
                   })}
