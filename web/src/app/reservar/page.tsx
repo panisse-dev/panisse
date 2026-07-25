@@ -95,17 +95,28 @@ export default function ReservarPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setIsRoka(params.get("marca") === "roka");
-    publicDecorations().then(setDecorations).catch(() => setDecorations([]));
     // Enlace/QR directo a una sede: /reservar?sede=pilares salta la pregunta.
     const s = params.get("sede");
     if (s) setSede(s);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Las decoraciones se ofrecen en las dos sedes.
+  // Las decoraciones dependen de la sede y de la fecha elegida: con la fecha
+  // se sabe cuáles alcanzan a prepararse (algunas piden un día de anticipación).
+  useEffect(() => {
+    if (!sedeId) return;
+    publicDecorations(sedeId, date || null)
+      .then(setDecorations)
+      .catch(() => setDecorations([]));
+  }, [sedeId, date]);
+
   const showDecorations = decorations.length > 0;
   const chosenDecoration =
-    (showDecorations && decorations.find((d) => d.id === decorationId)) || null;
+    (showDecorations && decorations.find((d) => d.id === decorationId && d.available)) || null;
+  // Si el cliente cambia la fecha y su decoración ya no alcanza, se suelta.
+  useEffect(() => {
+    if (decorationId && decorations.length > 0 && !chosenDecoration) setDecorationId("");
+  }, [decorationId, decorations, chosenDecoration]);
   // La lista larga vive en una ventana aparte para no alargar el formulario.
   const [decoOpen, setDecoOpen] = useState(false);
   // Foto ampliada de la decoración que el cliente acaba de tocar
@@ -423,6 +434,11 @@ export default function ReservarPage() {
                   </p>
                 </div>
               </div>
+              {chosenDecoration.prepaid && (
+                <p className="mt-2 text-[11px] leading-relaxed text-gold-deep">
+                  Te escribimos para confirmarla y cobrarla: se paga por adelantado.
+                </p>
+              )}
             </div>
           )}
 
@@ -673,7 +689,7 @@ export default function ReservarPage() {
                 <div className="min-w-0">
                   <p className="font-display text-[17px] leading-tight text-navy">Decoraciones 🎉</p>
                   <p className="mt-0.5 text-[11.5px] leading-snug text-ink-faint">
-                    Se paga aparte al llegar. Te confirmamos la disponibilidad.
+                    Se pagan aparte de la comida. Te confirmamos la disponibilidad.
                   </p>
                 </div>
                 <button
@@ -694,11 +710,18 @@ export default function ReservarPage() {
                     <button
                       key={d.id}
                       type="button"
+                      disabled={!d.available}
                       onClick={() => {
                         setDecorationId(d.id);
                         setDecoOpen(false);
                       }}
-                      className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                      className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${
+                        !d.available
+                          ? "border-gold-soft/40 bg-paper-deep/60"
+                          : decorationId === d.id
+                            ? "border-navy bg-navy/[0.04]"
+                            : "border-gold-soft/70 bg-paper"
+                      }`}
                     >
                       {d.image && (
                         // Tocar la foto la abre en grande; tocar el resto elige.
@@ -738,14 +761,42 @@ export default function ReservarPage() {
                         <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
                         <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
                         <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
+                        {d.available ? (
+                          (d.advanceDays > 0 || d.prepaid) && (
+                            <span className="mt-1 block text-[10.5px] leading-snug text-ink-faint">
+                              {d.advanceDays > 0 &&
+                                `Se pide con ${d.advanceDays} día${d.advanceDays === 1 ? "" : "s"} de anticipación`}
+                              {d.advanceDays > 0 && d.prepaid && " · "}
+                              {d.prepaid && "Se paga por adelantado"}
+                            </span>
+                          )
+                        ) : (
+                          <span className="mt-1 block text-[10.5px] font-medium leading-snug text-[#b3261e]">
+                            No alcanza para esa fecha: se pide con {d.advanceDays} día
+                            {d.advanceDays === 1 ? "" : "s"} de anticipación.
+                          </span>
+                        )}
                       </span>
-                      <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                      {d.available && (
+                        <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                      )}
                     </button>
                   ))}
                 </div>
               </div>
 
               <footer className="border-t border-gold-soft/40 px-4 py-3">
+                {/* Si algo no alcanza para esa fecha, se ofrece WhatsApp */}
+                {decorations.some((d) => !d.available) && (
+                  <a
+                    href={`https://wa.me/${(sede?.whatsapp || restaurant.whatsapp).replace(/\D/g, "")}?text=${encodeURIComponent(
+                      `Hola, quiero una decoración para mi reserva del ${formatDateLabel(date)} y es para pronto. ¿Se puede organizar?`,
+                    )}`}
+                    className="mb-2 flex h-11 w-full items-center justify-center border border-verde bg-verde/5 text-[12.5px] font-semibold text-verde"
+                  >
+                    ¿La quieres para hoy o mañana? Escríbenos
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => {

@@ -135,9 +135,17 @@ export interface Decoration {
   description: string;
   price: number;
   image: string | null;
+  advanceDays: number; // días de anticipación con que hay que pedirla
+  prepaid: boolean; // hay que pagarla por adelantado
+  available: boolean; // alcanza a prepararse para la fecha elegida
 }
 
-export const publicDecorations = () => rpc<Decoration[]>("public_decorations");
+// Las decoraciones de esa sede; con la fecha se sabe cuáles alcanzan.
+export const publicDecorations = (location?: string | null, date?: string | null) =>
+  rpc<Decoration[]>("public_decorations", {
+    p_location: location ?? null,
+    p_date: date ?? null,
+  });
 
 export const reservationSetDecoration = (id: string, decorationId: string) =>
   rpc<void>("reservation_set_decoration", { p_id: id, p_decoration_id: decorationId });
