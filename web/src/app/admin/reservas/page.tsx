@@ -400,12 +400,15 @@ export default function ReservasPage() {
             </svg>
             {soundOn ? "Sonido" : "Silencio"}
           </button>
-          {/* Hora de Pereira, siempre a la vista desde el mostrador */}
+          {/* Reloj digital: pantalla oscura con dígitos dorados */}
           <span
-            className="ml-1 shrink-0 font-display text-[19px] leading-none text-navy tabular-nums"
+            className="ml-1 flex h-9 shrink-0 items-center gap-1 rounded-md bg-navy px-2.5 font-mono text-[16px] font-semibold leading-none tracking-[0.06em] text-gold-soft tabular-nums shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)]"
             title="Hora actual"
           >
-            {ahora}
+            <span>{ahora.replace(/ ?[ap]m$/i, "")}</span>
+            <span className="text-[9px] font-bold uppercase tracking-normal text-gold-soft/70">
+              {/[ap]m$/i.exec(ahora)?.[0] ?? ""}
+            </span>
           </span>
         </div>
         <div className="chips-scroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:flex-wrap lg:justify-end lg:overflow-visible lg:px-0 lg:pb-0">
