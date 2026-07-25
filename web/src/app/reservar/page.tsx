@@ -373,7 +373,10 @@ export default function ReservarPage() {
 
           {/* Información de la reserva, en fila de íconos */}
           <p className="smallcaps mt-6 text-[10px] text-gold-deep">Información de tu reserva</p>
-          <div className="mt-2 grid grid-cols-4 divide-x divide-gold-soft/40 border border-gold-soft/50 bg-paper">
+          {/* La casilla de la mesa solo va si ya hay una asignada */}
+          <div
+            className={`mt-2 grid divide-x divide-gold-soft/40 border border-gold-soft/50 bg-paper ${tableName ? "grid-cols-4" : "grid-cols-3"}`}
+          >
             <InfoCell
               d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2|M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"
               value={`${party}`}
@@ -389,12 +392,13 @@ export default function ReservarPage() {
               value={formatTime(time)}
               label="Hora"
             />
-            <InfoCell
-              d="M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"
-              dashed
-              value={tableName || "—"}
-              label={tableName ? zoneName || "Mesa" : "Por asignar"}
-            />
+            {tableName && (
+              <InfoCell
+                d="M5 5h14a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"
+                value={tableName}
+                label={zoneName || "Mesa"}
+              />
+            )}
           </div>
 
           {chosenDecoration && (
@@ -985,7 +989,7 @@ function Shell({
 }
 
 // Celda de la fila de información de la confirmación (ícono + valor + etiqueta).
-function InfoCell({ d, value, label, dashed }: { d: string; value: string; label: string; dashed?: boolean }) {
+function InfoCell({ d, value, label }: { d: string; value: string; label: string }) {
   return (
     <div className="flex flex-col items-center gap-1 px-1 py-3.5 text-center">
       <svg
@@ -996,7 +1000,6 @@ function InfoCell({ d, value, label, dashed }: { d: string; value: string; label
         strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeDasharray={dashed ? "2.5 2.5" : undefined}
         aria-hidden
       >
         {d.split("|").map((p, i) => (
