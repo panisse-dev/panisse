@@ -141,6 +141,26 @@ export default function ReservasPage() {
   const [soundOn, setSoundOn] = useState(true);
   const [mealFilter, setMealFilter] = useState<Meal | "todos">("todos");
 
+  // Reloj del panel: hora de Pereira, se refresca sola.
+  const [ahora, setAhora] = useState("");
+  useEffect(() => {
+    const tick = () =>
+      setAhora(
+        new Date()
+          .toLocaleTimeString("es-CO", {
+            timeZone: "America/Bogota",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })
+          .replace(/\s*a\.\s*m\./i, " am")
+          .replace(/\s*p\.\s*m\./i, " pm"),
+      );
+    tick();
+    const iv = setInterval(tick, 10000);
+    return () => clearInterval(iv);
+  }, []);
+
   // Timbre para reservas nuevas (tono distinto al de la cocina).
   const audioCtx = useRef<AudioContext | null>(null);
   const resFirst = useRef(true);
@@ -380,6 +400,13 @@ export default function ReservasPage() {
             </svg>
             {soundOn ? "Sonido" : "Silencio"}
           </button>
+          {/* Hora de Pereira, siempre a la vista desde el mostrador */}
+          <span
+            className="ml-1 shrink-0 font-display text-[19px] leading-none text-navy tabular-nums"
+            title="Hora actual"
+          >
+            {ahora}
+          </span>
         </div>
         <div className="chips-scroll -mx-1 flex w-full items-center gap-1.5 overflow-x-auto px-1 pb-1 lg:mx-0 lg:w-auto lg:flex-wrap lg:justify-end lg:overflow-visible lg:px-0 lg:pb-0">
           <button
