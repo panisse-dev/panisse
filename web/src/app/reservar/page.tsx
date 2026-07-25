@@ -770,6 +770,20 @@ export default function ReservarPage() {
                   />
                 )}
                 <p className="mt-2 text-[11.5px] leading-snug text-ink-soft">{decoDetail.description}</p>
+                {(antelacion(decoDetail) || decoDetail.prepaid) && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {antelacion(decoDetail) && (
+                      <span className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-semibold leading-none text-gold-soft">
+                        {antelacion(decoDetail)} de anticipación
+                      </span>
+                    )}
+                    {decoDetail.prepaid && (
+                      <span className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-semibold leading-none text-gold-soft">
+                        Pago por adelantado
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 {/* Tono de las rosas */}
                 {decoDetail.colorOptions.length > 0 && (
@@ -982,18 +996,30 @@ export default function ReservarPage() {
                         <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
                         <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
                         <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
+                        {/* Las condiciones, en etiquetas azules para que se lean */}
                         {d.available ? (
                           (antelacion(d) || d.prepaid) && (
-                            <span className="mt-1 block text-[10.5px] leading-snug text-ink-faint">
-                              {antelacion(d) && `Se pide con ${antelacion(d)} de anticipación`}
-                              {antelacion(d) && d.prepaid && " · "}
-                              {d.prepaid && "Se paga por adelantado"}
+                            <span className="mt-1.5 flex flex-wrap gap-1">
+                              {antelacion(d) && (
+                                <span className="rounded-full bg-navy px-2 py-[3px] text-[9.5px] font-semibold leading-none text-gold-soft">
+                                  {antelacion(d)} de anticipación
+                                </span>
+                              )}
+                              {d.prepaid && (
+                                <span className="rounded-full bg-navy px-2 py-[3px] text-[9.5px] font-semibold leading-none text-gold-soft">
+                                  Pago por adelantado
+                                </span>
+                              )}
                             </span>
                           )
                         ) : (
-                          <span className="mt-1 block text-[10.5px] font-medium leading-snug text-[#b3261e]">
-                            Para esa hora ya no alcanza: se pide con {antelacion(d)} de
-                            anticipación.
+                          <span className="mt-1.5 flex flex-wrap gap-1">
+                            <span className="rounded-full bg-[#b3261e] px-2 py-[3px] text-[9.5px] font-semibold leading-none text-white">
+                              Para esa hora ya no alcanza
+                            </span>
+                            <span className="rounded-full bg-navy px-2 py-[3px] text-[9.5px] font-semibold leading-none text-gold-soft">
+                              {antelacion(d)} de anticipación
+                            </span>
                           </span>
                         )}
                       </span>
