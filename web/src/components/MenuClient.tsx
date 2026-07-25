@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchMenuData, type Layout, type Menu, type Product, type Section } from "@/lib/menu";
+import {
+  menuThemeFor,
+  menuThemeVars,
+  publicMenuThemes,
+  type MenuTheme,
+} from "@/lib/menuTheme";
 import { track } from "@/lib/track";
 import { useScrollLock } from "@/lib/scrollLock";
 import ProductRow from "./ProductRow";
@@ -190,10 +196,42 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
 
   const isRoka = menu.brand === "roka";
 
+  // Apariencia de la carta: se edita en el panel y se aplica en vivo.
+  const [skin, setSkin] = useState<MenuTheme>(menuThemeFor(menu.brand));
+  useEffect(() => {
+    publicMenuThemes()
+      .then((all) => {
+        const mine = all?.[isRoka ? "roka" : "panisse"];
+        if (mine) setSkin({ ...menuThemeFor(menu.brand), ...mine });
+      })
+      .catch(() => {
+        /* si falla, se queda el aspecto por defecto */
+      });
+  }, [menu.brand, isRoka]);
+
   return (
-    <div className={`page-col relative mx-auto min-h-dvh w-full max-w-md ${isRoka ? "theme-roka" : ""}`}>
-      {/* Fondo fijo: mármol en Panisse, crema liso en Roka */}
-      <div className="marble-fixed" aria-hidden />
+    <div
+      data-menu-skin
+      data-section-style={skin.sectionStyle}
+      style={menuThemeVars(skin)}
+      className="page-col relative mx-auto min-h-dvh w-full max-w-md"
+    >
+      {/* Fondo de la carta: mármol, color liso o una foto */}
+      <div
+        className="marble-fixed"
+        style={
+          skin.background === "marble"
+            ? undefined
+            : skin.background === "image" && skin.bgImage
+              ? {
+                  backgroundImage: `linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)), url(${skin.bgImage})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }
+              : { backgroundImage: "none", backgroundColor: "var(--color-paper)" }
+        }
+        aria-hidden
+      />
       {/* ── Encabezado sticky: barra + pestañas de secciones ── */}
       <div className="sticky top-0 z-30 border-b border-gold-soft/60 bg-card/92 backdrop-blur-md">
         <div className="flex items-center justify-between px-3 pb-1 pt-[calc(env(safe-area-inset-top)+10px)]">

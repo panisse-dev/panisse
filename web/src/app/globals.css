@@ -136,41 +136,41 @@ body {
   text-transform: uppercase;
 }
 
-/* ══ Tema ROKA — crema y café, inspirado en su carta (el PDF) ══
-   Reescribe la paleta por variables: como las utilidades (text-navy,
-   bg-card, border-gold-soft…) apuntan a estas variables, todo lo que esté
-   dentro de .theme-roka se repinta solo, sin tocar cada componente. */
-.theme-roka {
-  --color-paper: #f2ecdd;
-  --color-paper-deep: #e7dfca;
-  --color-card: #f8f3e6;
-  --color-ink: #352c1e;
-  --color-ink-soft: #6f6248;
-  --color-ink-faint: #9a8d72;
-  --color-navy: #2f2415; /* café espresso: títulos y pestaña activa */
-  --color-gold: #a3894f;
-  --color-gold-deep: #856a37;
-  --color-gold-soft: #c9b483;
-  --color-gold-faint: #e6dcc0;
+/* ══ Apariencia de las cartas (editable desde el panel) ══
+   El envoltorio de la carta lleva data-menu-skin y las variables de color y
+   letra en su style. Como las utilidades del sitio (text-navy, bg-card,
+   border-gold-soft…) apuntan a esas variables, la carta se repinta sola.
+   Aquí quedan solo las cosas que no se pueden expresar con variables:
+   el tamaño general de la letra y el estilo de los títulos de sección. */
+[data-menu-skin] {
+  --menu-scale: 1;
 }
-.theme-roka.page-col {
-  box-shadow: 0 0 40px rgba(53, 44, 30, 0.14);
+[data-menu-skin].page-col {
+  box-shadow: 0 0 40px rgba(4, 27, 49, 0.1);
 }
-/* Sin mármol: fondo crema liso */
-.theme-roka .marble-fixed {
-  background-image: none;
-  background-color: var(--color-paper);
+
+/* Tamaño general: escala los textos de la carta sin tocar cada componente. */
+[data-menu-skin] .ornament h2 {
+  font-size: calc(22px * var(--menu-scale));
 }
-/* Títulos de sección estilo carta Roka: recuadro fino en mayúsculas espaciadas */
-.theme-roka .ornament::before,
-.theme-roka .ornament::after {
+[data-menu-skin] main h4 {
+  font-size: calc(16.5px * var(--menu-scale));
+}
+[data-menu-skin] main p,
+[data-menu-skin] main span {
+  font-size: calc(1em * var(--menu-scale));
+}
+
+/* Títulos de sección: adorno clásico (por defecto) o recuadro estilo Roka. */
+[data-menu-skin][data-section-style="boxed"] .ornament::before,
+[data-menu-skin][data-section-style="boxed"] .ornament::after {
   display: none;
 }
-.theme-roka .ornament h2 {
+[data-menu-skin][data-section-style="boxed"] .ornament h2 {
   display: inline-block;
   border: 1px solid var(--color-gold-soft);
   padding: 0.42rem 1.15rem;
-  font-size: 15px;
+  font-size: calc(15px * var(--menu-scale));
   letter-spacing: 0.22em;
   text-transform: uppercase;
 }

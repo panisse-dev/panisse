@@ -25,6 +25,7 @@ import {
   type MenuRow,
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
+import MenuSkinEditor from "@/components/admin/MenuSkinEditor";
 import { formatCOP } from "@/lib/format";
 import {
   DEFAULT_HOME_THEME,
@@ -125,6 +126,18 @@ export default function AjustesPage() {
             <MenuCard key={m.slug} code={code} menu={m} onSaved={load} onAuth={logout} />
           ))}
         </div>
+      </section>
+
+      {/* ── Apariencia de las cartas ── */}
+      <section className="mt-8">
+        <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">
+          Apariencia de las cartas
+        </h2>
+        <p className="mt-1 text-[11.5px] text-ink-faint">
+          El fondo, los colores y la letra de cada carta. Lo que cambies aquí se ve en la vista
+          previa al instante y, al guardar, lo ven los clientes sin volver a publicar el sitio.
+        </p>
+        <MenuSkinEditor code={code} onAuth={logout} />
       </section>
 
       {/* ── Marcas de la portada ── */}

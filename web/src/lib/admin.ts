@@ -3,6 +3,7 @@
 import type { PriceEntry } from "./menu";
 import type { Order } from "./orders";
 import type { HomeTheme } from "./theme";
+import type { MenuTheme } from "./menuTheme";
 import { FUNCTIONS_URL, rpc } from "./supabase";
 
 export const CODE_KEY = "panisse-staff-code";
@@ -584,6 +585,13 @@ export const staffHomeTheme = (code: string) =>
 
 export const staffUpdateHomeTheme = (code: string, theme: HomeTheme) =>
   rpc<void>("staff_update_home_theme", { p_code: code, p: theme });
+
+// ── Apariencia de las cartas (una por marca) ──
+export const staffMenuThemes = (code: string) =>
+  rpc<Record<string, Partial<MenuTheme>>>("staff_menu_themes", { p_code: code });
+
+export const staffSaveMenuTheme = (code: string, brand: string, theme: MenuTheme) =>
+  rpc<void>("staff_save_menu_theme", { p_code: code, p_brand: brand, p: theme });
 
 export const staffMenus = (code: string) => rpc<MenuRow[]>("staff_menus", { p_code: code });
 

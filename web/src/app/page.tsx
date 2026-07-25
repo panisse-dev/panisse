@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBrands, fetchMenuTitles, menus, restaurant, type BrandTitle, type MenuTitle } from "@/lib/menu";
 import { useLocation } from "@/lib/location";
+import { menuThemeFor, menuThemeVars, publicMenuThemes, type MenuTheme } from "@/lib/menuTheme";
 import { DEFAULT_HOME_THEME, fontStack, publicHomeTheme, type HomeTheme } from "@/lib/theme";
 
 // Marcas que pueden convivir en una sede (Pilares). Lo que se muestra viene
@@ -21,6 +22,11 @@ export default function Home() {
   const [titles, setTitles] = useState<Record<string, MenuTitle>>({});
   // Título y frase de cada marca, también en vivo desde el panel.
   const [brands, setBrands] = useState<Record<string, BrandTitle> | null>(null);
+  // Aspecto de cada marca, para que su botón se vea con sus colores.
+  const [skins, setSkins] = useState<Record<string, MenuTheme>>({
+    panisse: menuThemeFor("panisse"),
+    roka: menuThemeFor("roka"),
+  });
 
   // Apariencia editable desde el panel (se aplica en vivo).
   useEffect(() => {
@@ -33,6 +39,16 @@ export default function Home() {
       .then((list) => setTitles(Object.fromEntries(list.map((m) => [m.slug, m]))))
       .catch(() => {
         /* si falla, se quedan los títulos por defecto */
+      });
+    publicMenuThemes()
+      .then((all) =>
+        setSkins({
+          panisse: { ...menuThemeFor("panisse"), ...(all?.panisse ?? {}) },
+          roka: { ...menuThemeFor("roka"), ...(all?.roka ?? {}) },
+        }),
+      )
+      .catch(() => {
+        /* si falla, se quedan los colores por defecto */
       });
     fetchBrands()
       .then((list) => setBrands(Object.fromEntries(list.map((b) => [b.id, b]))))
@@ -164,7 +180,9 @@ export default function Home() {
                   // sola carta (Roka), el botón abre esa carta directo, sin una
                   // segunda pantalla. Si tiene varias (Panisse), abre la lista.
                   const brandMenus = visibleMenus.filter((m) => (m.brand ?? "panisse") === b);
-                  const tileClass = `anim-fade-up group relative block border border-gold-soft bg-card px-6 py-6 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985] ${b === "roka" ? "theme-roka" : ""}`;
+                  const tileClass =
+                    "anim-fade-up group relative block border border-gold-soft bg-card px-6 py-6 text-center shadow-[0_2px_14px_rgba(4,27,49,0.08)] outline outline-1 outline-offset-[3px] outline-gold-soft/40 transition-transform active:scale-[0.985]";
+                  const tileStyle = menuThemeVars(skins[b] ?? menuThemeFor(b));
                   const inner = (
                     <>
                       <span className="smallcaps block font-display text-[22px] font-medium leading-tight tracking-[0.14em] text-navy">
@@ -177,7 +195,7 @@ export default function Home() {
                       )}
                     </>
                   );
-                  const style = { animationDelay: `${0.12 + i * 0.09}s` };
+                  const style = { ...tileStyle, animationDelay: `${0.12 + i * 0.09}s` };
                   return brandMenus.length === 1 ? (
                     <Link key={b} href={`/menu/${brandMenus[0].slug}`} className={tileClass} style={style}>
                       {inner}
