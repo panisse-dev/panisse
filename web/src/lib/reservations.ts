@@ -104,6 +104,30 @@ export const createReservation = (data: NewReservation) =>
 export const getReservationStatus = (id: string) =>
   rpc<PublicReservation | null>("get_reservation_public", { p_id: id });
 
+// ── El propio cliente cambia o cancela su reserva (enlace del correo) ──
+export interface ManagedReservation {
+  code: string;
+  status: ReservationStatus;
+  date: string; // YYYY-MM-DD
+  time: string; // HH:MM
+  party: number;
+  name: string;
+  location: string;
+  locationName: string;
+  editable: boolean; // aún se puede cambiar o cancelar
+}
+
+export const reservationView = (id: string) =>
+  rpc<ManagedReservation | null>("public_reservation_view", { p_id: id });
+
+export const reservationUpdate = (
+  id: string,
+  data: { date: string; time: string; party: number },
+) => rpc<ManagedReservation>("public_update_reservation", { p_id: id, p: data });
+
+export const reservationCancel = (id: string) =>
+  rpc<ManagedReservation>("public_cancel_reservation", { p_id: id });
+
 // ── Decoraciones de celebración (ROKA) ──
 export interface Decoration {
   id: string;
