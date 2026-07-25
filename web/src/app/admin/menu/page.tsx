@@ -430,6 +430,24 @@ export default function MenuAdminPage() {
           </button>
         </div>
       </header>
+      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+        <button
+          type="button"
+          onClick={() => openNew(s.id)}
+          className="smallcaps h-7 border border-navy bg-navy px-2.5 text-[9.5px] font-semibold text-gold-soft"
+        >
+          + Plato en {s.name}
+        </button>
+        {!sub && (
+          <button
+            type="button"
+            onClick={() => addSection(s.id)}
+            className="smallcaps h-7 border border-gold-soft/70 px-2.5 text-[9.5px] font-medium text-gold-deep"
+          >
+            + Subsección
+          </button>
+        )}
+      </div>
       {s.products.length > 0 && (
         <ul className="mt-1 divide-y divide-gold-soft/20 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:divide-y-0">
           {s.products.map((p) => (
@@ -440,24 +458,6 @@ export default function MenuAdminPage() {
       {(s.subsections || []).map((ss) => (
         <SectionBlock key={ss.id} s={ss} sub />
       ))}
-      <div className="mt-2.5 flex flex-wrap gap-1.5">
-        <button
-          type="button"
-          onClick={() => openNew(s.id)}
-          className="smallcaps h-8 border border-navy bg-navy px-3 text-[10px] font-semibold text-gold-soft"
-        >
-          + Plato
-        </button>
-        {!sub && (
-          <button
-            type="button"
-            onClick={() => addSection(s.id)}
-            className="smallcaps h-8 border border-gold-soft/70 px-3 text-[10px] font-medium text-gold-deep"
-          >
-            + Subsección
-          </button>
-        )}
-      </div>
     </section>
   );
 
