@@ -102,11 +102,12 @@ export default function ReservarPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ROKA está en Pilares: ahí se ofrecen las decoraciones.
-  const showDecorations =
-    decorations.length > 0 && (isRoka || sedeId === "pilares");
+  // Las decoraciones se ofrecen en las dos sedes.
+  const showDecorations = decorations.length > 0;
   const chosenDecoration =
     (showDecorations && decorations.find((d) => d.id === decorationId)) || null;
+  // La lista larga vive en una ventana aparte para no alargar el formulario.
+  const [decoOpen, setDecoOpen] = useState(false);
   // Foto ampliada de la decoración que el cliente acaba de tocar
   const [zoomDeco, setZoomDeco] = useState<Decoration | null>(null);
 
@@ -596,65 +597,47 @@ export default function ReservarPage() {
                 </button>
               </div>
 
-              {/* Agregar decoración (reservas de Pilares / ROKA) — en un recuadro
-                  contenido para que quede alineado con los demás campos */}
+              {/* Agregar decoración: una sola línea; la lista se abre aparte */}
               {showDecorations && (
-                <div className="mt-4 border border-gold-soft/50 bg-paper p-3.5">
-                  <p className="font-display text-[15px] text-navy">Agregar decoración 🎉</p>
-                  <p className="mt-0.5 text-[11.5px] leading-snug text-ink-faint">
-                    ¿Celebras algo? Suma una decoración a tu mesa (opcional).
-                  </p>
-                  <div className="mt-3 flex flex-col gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setDecorationId("")}
-                      className={`flex items-center justify-between gap-3 border px-3 py-2.5 text-left transition-colors ${decorationId === "" ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
-                    >
-                      <span className="text-[13.5px] text-ink">Sin decoración</span>
-                      <span className={`h-4 w-4 shrink-0 rounded-full border ${decorationId === "" ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
-                    </button>
-                    {decorations.map((d) => (
-                      <button
-                        key={d.id}
-                        type="button"
-                        onClick={() => {
-                          setDecorationId(d.id);
-                          if (d.image) setZoomDeco(d); // se abre la foto en grande
-                        }}
-                        className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-card"}`}
-                      >
-                        {d.image && (
-                          <span className="relative h-16 w-16 shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={d.image}
-                              alt={`Decoración ${d.name}`}
-                              loading="lazy"
-                              className="h-16 w-16 rounded border border-gold-soft/40 object-cover"
-                            />
-                            <span className="absolute bottom-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy/80 text-gold-soft" aria-hidden>
-                              <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="11" cy="11" r="7" />
-                                <path d="m20 20-3.5-3.5M11 8v6M8 11h6" />
-                              </svg>
-                            </span>
-                          </span>
-                        )}
-                        <span className="min-w-0 flex-1">
-                          <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
-                          <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
-                          <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
-                        </span>
-                        <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
-                      </button>
-                    ))}
-                  </div>
-                  {chosenDecoration && (
-                    <p className="mt-2.5 text-[11px] leading-relaxed text-ink-faint">
-                      La decoración se paga aparte al llegar. Te confirmamos la disponibilidad.
-                    </p>
+                <button
+                  type="button"
+                  onClick={() => setDecoOpen(true)}
+                  className="mt-4 flex w-full items-center gap-3 border border-gold-soft/60 bg-paper px-3 py-3 text-left"
+                >
+                  {chosenDecoration?.image ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={chosenDecoration.image}
+                      alt={`Decoración ${chosenDecoration.name}`}
+                      loading="lazy"
+                      className="h-11 w-11 shrink-0 rounded border border-gold-soft/40 object-cover"
+                    />
+                  ) : (
+                    <span aria-hidden className="text-[20px] leading-none">🎉</span>
                   )}
-                </div>
+                  <span className="min-w-0 flex-1">
+                    {chosenDecoration ? (
+                      <>
+                        <span className="block text-[13.5px] font-medium text-navy">
+                          {chosenDecoration.name}
+                        </span>
+                        <span className="mt-0.5 block text-[12px] font-semibold text-gold-deep">
+                          {formatCOP(chosenDecoration.price)}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="block text-[13.5px] text-ink">¿Celebras algo?</span>
+                        <span className="mt-0.5 block text-[11.5px] text-ink-faint">
+                          Agrega una decoración a tu mesa (opcional)
+                        </span>
+                      </>
+                    )}
+                  </span>
+                  <span className="smallcaps shrink-0 text-[10px] font-semibold text-gold-deep">
+                    {chosenDecoration ? "Cambiar" : "Ver"}
+                  </span>
+                </button>
               )}
 
               {deposit > 0 && (
@@ -675,6 +658,106 @@ export default function ReservarPage() {
                 {sending ? "Reservando…" : checking ? "Verificando…" : "Confirmar reserva"}
               </button>
         </div>
+
+        {/* Ventana con las decoraciones, para no alargar el formulario */}
+        {decoOpen && (
+          <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Elegir decoración">
+            <button
+              type="button"
+              aria-label="Cerrar"
+              onClick={() => setDecoOpen(false)}
+              className="anim-fade-in absolute inset-0 bg-navy/70 backdrop-blur-[2px]"
+            />
+            <div className="anim-fade-up relative flex max-h-[88dvh] w-full max-w-md flex-col border border-gold-soft/60 bg-card shadow-[0_12px_40px_rgba(4,17,29,0.4)]">
+              <header className="flex items-start justify-between gap-3 border-b border-gold-soft/40 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="font-display text-[17px] leading-tight text-navy">Decoraciones 🎉</p>
+                  <p className="mt-0.5 text-[11.5px] leading-snug text-ink-faint">
+                    Se paga aparte al llegar. Te confirmamos la disponibilidad.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDecoOpen(false)}
+                  aria-label="Cerrar"
+                  className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center text-ink-soft"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </header>
+
+              <div className="flex-1 overflow-y-auto px-4 py-3">
+                <div className="flex flex-col gap-2">
+                  {decorations.map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => {
+                        setDecorationId(d.id);
+                        setDecoOpen(false);
+                      }}
+                      className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                    >
+                      {d.image && (
+                        <span className="relative h-16 w-16 shrink-0">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={d.image}
+                            alt={`Decoración ${d.name}`}
+                            loading="lazy"
+                            className="h-16 w-16 rounded border border-gold-soft/40 object-cover"
+                          />
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Ver la foto de ${d.name} en grande`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setZoomDeco(d);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" || e.key === " ") {
+                                e.stopPropagation();
+                                setZoomDeco(d);
+                              }
+                            }}
+                            className="absolute bottom-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy/80 text-gold-soft"
+                          >
+                            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                              <circle cx="11" cy="11" r="7" />
+                              <path d="m20 20-3.5-3.5M11 8v6M8 11h6" />
+                            </svg>
+                          </span>
+                        </span>
+                      )}
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-[13.5px] font-medium text-navy">{d.name}</span>
+                        <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
+                        <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
+                      </span>
+                      <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <footer className="border-t border-gold-soft/40 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDecorationId("");
+                    setDecoOpen(false);
+                  }}
+                  className="h-11 w-full border border-gold-soft/70 bg-paper text-[13.5px] font-semibold text-navy"
+                >
+                  Sin decoración
+                </button>
+              </footer>
+            </div>
+          </div>
+        )}
 
         {/* Foto grande de la decoración elegida */}
         {zoomDeco?.image && (
