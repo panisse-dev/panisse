@@ -77,23 +77,28 @@ export default function ReservarPage() {
   const [error, setError] = useState("");
   const [done, setDone] = useState<CreatedReservation | null>(null);
 
-  // Decoraciones de celebración: solo para reservas de ROKA (?marca=roka).
+  // Decoraciones de celebración: son de ROKA, que opera en Pilares. Se ofrecen
+  // en toda reserva de Pilares (llegue el cliente por donde llegue) y también
+  // cuando entra desde la carta de ROKA (?marca=roka).
   const [isRoka, setIsRoka] = useState(false);
   const [decorations, setDecorations] = useState<Decoration[]>([]);
   const [decorationId, setDecorationId] = useState<string>(""); // "" = sin decoración
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const roka = params.get("marca") === "roka";
-    setIsRoka(roka);
-    if (roka) publicDecorations().then(setDecorations).catch(() => setDecorations([]));
+    setIsRoka(params.get("marca") === "roka");
+    publicDecorations().then(setDecorations).catch(() => setDecorations([]));
     // Enlace/QR directo a una sede: /reservar?sede=pilares salta la pregunta.
     const s = params.get("sede");
     if (s) setSede(s);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const chosenDecoration = decorations.find((d) => d.id === decorationId) || null;
+  // ROKA está en Pilares: ahí se ofrecen las decoraciones.
+  const showDecorations =
+    decorations.length > 0 && (isRoka || sedeId === "pilares");
+  const chosenDecoration =
+    (showDecorations && decorations.find((d) => d.id === decorationId)) || null;
   // Foto ampliada de la decoración que el cliente acaba de tocar
   const [zoomDeco, setZoomDeco] = useState<Decoration | null>(null);
 
@@ -231,7 +236,7 @@ export default function ReservarPage() {
       });
       // Decoración de celebración (ROKA): se guarda aparte para no tocar la
       // creación de la reserva. Si falla, la reserva ya quedó igual.
-      if (isRoka && decorationId) {
+      if (showDecorations && decorationId) {
         try {
           await reservationSetDecoration(created.id, decorationId);
         } catch {
@@ -575,9 +580,9 @@ export default function ReservarPage() {
                 </button>
               </div>
 
-              {/* Agregar decoración (solo reservas de ROKA) — en un recuadro
+              {/* Agregar decoración (reservas de Pilares / ROKA) — en un recuadro
                   contenido para que quede alineado con los demás campos */}
-              {isRoka && decorations.length > 0 && (
+              {showDecorations && (
                 <div className="mt-4 border border-gold-soft/50 bg-paper p-3.5">
                   <p className="font-display text-[15px] text-navy">Agregar decoración 🎉</p>
                   <p className="mt-0.5 text-[11.5px] leading-snug text-ink-faint">
