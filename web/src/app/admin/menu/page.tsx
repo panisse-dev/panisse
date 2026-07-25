@@ -11,8 +11,8 @@ import {
   staffCreateProduct,
   staffCreateSection,
   staffDeleteSection,
-  staffMoveProduct,
-  staffMoveSection,
+  staffReorderProducts,
+  staffReorderSections,
   staffUpdateSection,
   uploadImage,
   type AdminMenu,
@@ -20,6 +20,7 @@ import {
   type AdminSection,
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
+import Sortable, { DragHandle } from "@/components/admin/Sortable";
 import { formatCOP } from "@/lib/format";
 
 interface PriceDraft {
@@ -333,8 +334,15 @@ export default function MenuAdminPage() {
     return p.prices.length > 1 ? `${formatCOP(val)} +${p.prices.length - 1}` : formatCOP(val);
   };
 
-  const ProductRow = ({ p }: { p: AdminProduct }) => (
-    <li className={`flex items-center gap-3 py-2 lg:border-b lg:border-gold-soft/20 ${p.visible ? "" : "opacity-50"}`}>
+  const ProductRow = ({
+    p,
+    handle,
+  }: {
+    p: AdminProduct;
+    handle: { onPointerDown: (e: React.PointerEvent) => void };
+  }) => (
+    <div className={`flex items-center gap-2 border-b border-gold-soft/20 py-2 ${p.visible ? "" : "opacity-50"}`}>
+      <DragHandle onPointerDown={handle.onPointerDown} label={`Mover ${p.name}`} />
       <button
         type="button"
         onClick={() => openEditor(p)}
@@ -364,34 +372,23 @@ export default function MenuAdminPage() {
           <path d="m9 5 7 7-7 7" />
         </svg>
       </button>
-      <span className="flex shrink-0 items-center gap-1">
-        <button
-          type="button"
-          onClick={() => run(() => staffMoveProduct(code, p.id, -1))}
-          aria-label={`Subir ${p.name}`}
-          title="Subir"
-          className="flex h-7 w-6 items-center justify-center border border-gold-soft/50 text-[10px] text-ink-faint"
-        >
-          ▲
-        </button>
-        <button
-          type="button"
-          onClick={() => run(() => staffMoveProduct(code, p.id, 1))}
-          aria-label={`Bajar ${p.name}`}
-          title="Bajar"
-          className="flex h-7 w-6 items-center justify-center border border-gold-soft/50 text-[10px] text-ink-faint"
-        >
-          ▼
-        </button>
-        <Toggle on={p.visible} onChange={(v) => quickToggle(p, v)} label={`Visible: ${p.name}`} />
-      </span>
-    </li>
+      <Toggle on={p.visible} onChange={(v) => quickToggle(p, v)} label={`Visible: ${p.name}`} />
+    </div>
   );
 
-  const SectionBlock = ({ s, sub }: { s: AdminSection; sub?: boolean }) => (
+  const SectionBlock = ({
+    s,
+    sub,
+    handle,
+  }: {
+    s: AdminSection;
+    sub?: boolean;
+    handle: { onPointerDown: (e: React.PointerEvent) => void };
+  }) => (
     <section className={sub ? "mt-3 border-l-2 border-gold-soft/40 pl-3" : "mt-4 border border-gold-soft/50 bg-card px-4 py-3"}>
       <header className="flex items-center justify-between gap-2">
-        <div className="min-w-0">
+        <DragHandle onPointerDown={handle.onPointerDown} label={`Mover ${s.name}`} />
+        <div className="min-w-0 flex-1">
           <h3 className={`truncate font-display ${sub ? "text-[14px]" : "text-[16px]"} text-navy`}>
             {s.name}
           </h3>
@@ -400,24 +397,6 @@ export default function MenuAdminPage() {
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={() => run(() => staffMoveSection(code, s.id, -1))}
-            aria-label={`Subir ${s.name}`}
-            title="Subir"
-            className="flex h-8 w-7 items-center justify-center border border-gold-soft/50 text-[12px] text-ink-faint"
-          >
-            ▲
-          </button>
-          <button
-            type="button"
-            onClick={() => run(() => staffMoveSection(code, s.id, 1))}
-            aria-label={`Bajar ${s.name}`}
-            title="Bajar"
-            className="flex h-8 w-7 items-center justify-center border border-gold-soft/50 text-[12px] text-ink-faint"
-          >
-            ▼
-          </button>
           <button
             type="button"
             onClick={() => openSection(s)}
@@ -449,15 +428,20 @@ export default function MenuAdminPage() {
         )}
       </div>
       {s.products.length > 0 && (
-        <ul className="mt-1 divide-y divide-gold-soft/20 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:divide-y-0">
-          {s.products.map((p) => (
-            <ProductRow key={p.id} p={p} />
-          ))}
-        </ul>
+        <Sortable
+          items={s.products}
+          onReorder={(ids) => run(() => staffReorderProducts(code, s.id, ids))}
+          className="mt-1"
+          renderItem={(p, handle) => <ProductRow p={p} handle={handle} />}
+        />
       )}
-      {(s.subsections || []).map((ss) => (
-        <SectionBlock key={ss.id} s={ss} sub />
-      ))}
+      {(s.subsections || []).length > 0 && (
+        <Sortable
+          items={s.subsections || []}
+          onReorder={(ids) => run(() => staffReorderSections(code, menuSlug, s.id, ids))}
+          renderItem={(ss, h) => <SectionBlock s={ss} sub handle={h} />}
+        />
+      )}
     </section>
   );
 
@@ -489,8 +473,8 @@ export default function MenuAdminPage() {
           </div>
           <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
             <p className="text-[11px] text-ink-faint">
-              Toca un plato para editarlo · el interruptor lo muestra u oculta en la carta · las
-              flechas cambian el orden.
+              Toca un plato para editarlo · el interruptor lo muestra u oculta en la carta ·
+              arrástralo por los puntitos (⠿) para cambiar el orden.
             </p>
             <button
               type="button"
@@ -501,7 +485,13 @@ export default function MenuAdminPage() {
             </button>
           </div>
 
-          {menu?.sections.map((s) => <SectionBlock key={s.id} s={s} />)}
+          {menu && (
+            <Sortable
+              items={menu.sections}
+              onReorder={(ids) => run(() => staffReorderSections(code, menuSlug, null, ids))}
+              renderItem={(s, h) => <SectionBlock s={s} handle={h} />}
+            />
+          )}
         </>
       )}
 

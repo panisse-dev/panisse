@@ -276,6 +276,23 @@ export const staffMoveProduct = (code: string, id: string, dir: number) =>
 export const staffMoveSection = (code: string, id: string, dir: number) =>
   rpc<void>("staff_move_section", { p_code: code, p_id: id, p_dir: dir });
 
+// Orden completo después de arrastrar y soltar.
+export const staffReorderProducts = (code: string, sectionId: string, ids: string[]) =>
+  rpc<void>("staff_reorder_products", { p_code: code, p_section_id: sectionId, p_ids: ids });
+
+export const staffReorderSections = (
+  code: string,
+  menuSlug: string,
+  parentId: string | null,
+  ids: string[],
+) =>
+  rpc<void>("staff_reorder_sections", {
+    p_code: code,
+    p_menu_slug: menuSlug,
+    p_parent_id: parentId,
+    p_ids: ids,
+  });
+
 export const staffUpdateProduct = (
   code: string,
   id: string,
