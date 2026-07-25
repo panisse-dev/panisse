@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/lib/cart";
 import { useMyOrders } from "@/lib/myOrders";
 import { formatCOP } from "@/lib/format";
@@ -61,6 +61,8 @@ export default function CartBar() {
   const [paidTotal, setPaidTotal] = useState(0);
   const [paidSummary, setPaidSummary] = useState(""); // resumen de platos para el WhatsApp
   const [paidName, setPaidName] = useState(""); // nombre para que el restaurante cruce el pago
+  // Bloque de pago, para llevar al cliente ahí desde el aviso de arriba.
+  const payRef = useRef<HTMLDivElement | null>(null);
   const [copied, setCopied] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState(false);
 
@@ -791,17 +793,43 @@ export default function CartBar() {
                     </p>
                   )}
 
-                  <div className="mt-5 border border-gold-soft/50 bg-paper px-4 py-4">
-                    <p className="smallcaps text-[10px] text-gold-deep">Estado</p>
-                    {livePaid ? (
+                  {livePaid ? (
+                    <div className="mt-5 border border-gold-soft/50 bg-paper px-4 py-4">
+                      <p className="smallcaps text-[10px] text-gold-deep">Estado</p>
                       <StatusTrack status={liveStatus} />
-                    ) : (
-                      <p className="mt-2 text-[12.5px] leading-relaxed text-ink-soft">
-                        <b className="text-gold-deep">Esperando tu pago.</b> Paga abajo por
-                        transferencia o link; apenas confirmemos el pago, empezamos a prepararlo.
+                    </div>
+                  ) : (
+                    /* Falta el pago: es lo más importante de esta pantalla, así que
+                       va destacado para que el cliente no se quede esperando. */
+                    <div className="mt-5 border-2 border-gold bg-gold-soft/25 px-4 py-4 text-left shadow-[0_4px_18px_rgba(178,143,76,0.25)]">
+                      <div className="flex items-center gap-2.5">
+                        <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gold-deep text-white">
+                          <span className="absolute inset-0 animate-ping rounded-full bg-gold-deep/40" aria-hidden />
+                          <svg viewBox="0 0 24 24" className="relative h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                            <circle cx="12" cy="12" r="9" />
+                            <path d="M12 7v5l3 2" />
+                          </svg>
+                        </span>
+                        <p className="font-display text-[19px] font-semibold leading-tight text-navy">
+                          Falta tu pago
+                        </p>
+                      </div>
+                      <p className="mt-2 text-[13px] leading-relaxed text-ink">
+                        Tu pedido <b>todavía no entra a la cocina</b>. Págalo aquí abajo por
+                        transferencia o con el link; apenas confirmemos el pago empezamos a
+                        prepararlo.
                       </p>
-                    )}
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          payRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                        }
+                        className="mt-3 h-11 w-full bg-navy text-[14px] font-semibold text-gold-soft"
+                      >
+                        Ir a pagar ahora ↓
+                      </button>
+                    </div>
+                  )}
 
                   {/* Pago en línea (único medio): el portal de recaudo de
                       Davivienda o una transferencia directa a la cuenta. Se
@@ -816,7 +844,7 @@ export default function CartBar() {
                       </p>
                     </div>
                   ) : (
-                  <div className="mt-4 border border-gold-soft/50 bg-paper px-4 py-4 text-left">
+                  <div ref={payRef} className="mt-4 scroll-mt-4 border-2 border-gold-soft bg-paper px-4 py-4 text-left">
                     <p className="smallcaps text-[10px] text-gold-deep">Paga tu pedido</p>
                     <div className="mt-2 flex items-center justify-between gap-3">
                       <div>
