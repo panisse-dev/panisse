@@ -354,11 +354,21 @@ export default function ReservarPage() {
           </div>
           <p className="smallcaps mt-4 text-[10px] text-gold-deep">Panisse</p>
           <h1 className="mt-1 font-display text-[27px] font-semibold leading-tight text-verde">
-            ¡Reserva recibida{firstName ? `, ${firstName}` : ""}!
+            {done.status === "confirmada" ? "¡Reserva confirmada" : "¡Reserva recibida"}
+            {firstName ? `, ${firstName}` : ""}!
           </h1>
           <p className="mx-auto mt-2 max-w-[19rem] text-[13.5px] leading-relaxed text-ink-soft">
-            Tu reserva quedó registrada. Te enviamos los detalles a tu{" "}
-            <b className="text-navy">correo</b> y te confirmamos muy pronto.
+            {done.status === "confirmada" ? (
+              <>
+                Tu mesa quedó apartada. Te acabamos de enviar la confirmación a tu{" "}
+                <b className="text-navy">correo</b>. ¡Te esperamos!
+              </>
+            ) : (
+              <>
+                Tu reserva quedó registrada. Te enviamos los detalles a tu{" "}
+                <b className="text-navy">correo</b> y te confirmamos muy pronto.
+              </>
+            )}
           </p>
 
           {/* Información de la reserva, en fila de íconos */}
