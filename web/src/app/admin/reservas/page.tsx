@@ -403,7 +403,7 @@ export default function ReservasPage() {
               setShowStats(false);
               setShowSettings(false);
             }}
-            className={`smallcaps flex h-9 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-[10.5px] font-medium lg:hidden ${
+            className={`smallcaps flex h-9 shrink-0 items-center whitespace-nowrap rounded-full border px-3 text-[10.5px] font-medium xl:hidden ${
               showFloor ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 text-ink-soft"
             }`}
           >
@@ -520,9 +520,9 @@ export default function ReservasPage() {
       ) : showSettings ? (
         <SettingsPanel code={code} onSaved={poll} />
       ) : (
-        <div className="mt-3 gap-4 lg:flex lg:items-start">
+        <div className="mt-3 gap-4 xl:flex xl:items-start">
           {/* ── Columna izquierda: reservas del día ── */}
-          <div className={`lg:w-[400px] lg:shrink-0 ${showFloor ? "hidden lg:block" : ""}`}>
+          <div className={`xl:w-[400px] xl:shrink-0 ${showFloor ? "hidden xl:block" : ""}`}>
             <p className="text-[11px] text-ink-faint">
               {fmtDay(day)} · {active.length} reserva{active.length === 1 ? "" : "s"} · {totalPeople} personas
               {cancelledCount > 0 && (
@@ -813,7 +813,7 @@ export default function ReservasPage() {
           </div>
 
           {/* ── Columna derecha: mapa de mesas ── */}
-          <div className={`mt-4 lg:mt-0 lg:min-w-0 lg:flex-1 ${showFloor ? "" : "hidden lg:block"}`}>
+          <div className={`mt-4 xl:mt-0 xl:min-w-0 xl:flex-1 ${showFloor ? "" : "hidden xl:block"}`}>
             <FloorPanel
               floor={floor}
               code={code}
@@ -1753,6 +1753,22 @@ function FloorPanel({
   const [busy, setBusy] = useState(false);
   const drag = useRef<{ id: string; sx: number; sy: number; ox: number; oy: number; moved: boolean } | null>(null);
 
+  // El plano se reduce para caber en el ancho disponible: así no hay que
+  // deslizar de lado en el computador del mostrador.
+  const scale = useRef(1);
+  const [boxW, setBoxW] = useState(0);
+  const roRef = useRef<ResizeObserver | null>(null);
+  // Ref de función: se engancha en cuanto el lienzo aparece en pantalla.
+  const boxRef = useCallback((el: HTMLDivElement | null) => {
+    roRef.current?.disconnect();
+    roRef.current = null;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => setBoxW(entry.contentRect.width));
+    ro.observe(el);
+    roRef.current = ro;
+    setBoxW(el.clientWidth);
+  }, []);
+
   // Adopta lo que llega del servidor salvo mientras se arrastra una mesa.
   useEffect(() => {
     if (!drag.current) setLocal(floor);
@@ -1824,8 +1840,10 @@ function FloorPanel({
   const onMove = (t: FloorTable) => (e: React.PointerEvent) => {
     const d = drag.current;
     if (!d || d.id !== t.id || !local) return;
-    const dx = e.clientX - d.sx;
-    const dy = e.clientY - d.sy;
+    // El plano puede estar reducido para caber: se corrige el arrastre.
+    const k = scale.current || 1;
+    const dx = (e.clientX - d.sx) / k;
+    const dy = (e.clientY - d.sy) / k;
     if (Math.abs(dx) + Math.abs(dy) > 4) d.moved = true;
     setLocal(withTable(local, t.id, { posX: Math.max(0, d.ox + dx), posY: Math.max(0, d.oy + dy) }));
   };
@@ -1839,8 +1857,9 @@ function FloorPanel({
       /* noop */
     }
     if (d.moved) {
-      const fx = Math.max(0, d.ox + (e.clientX - d.sx));
-      const fy = Math.max(0, d.oy + (e.clientY - d.sy));
+      const k = scale.current || 1;
+      const fx = Math.max(0, d.ox + (e.clientX - d.sx) / k);
+      const fy = Math.max(0, d.oy + (e.clientY - d.sy) / k);
       staffMoveTable(code, t.id, fx, fy).catch(() => onChanged());
     } else {
       setEditTable(t);
@@ -1858,6 +1877,9 @@ function FloorPanel({
   const tables = active?.tables ?? [];
   const CW = Math.max(560, ...tables.map((t) => t.posX + t.width)) + 30;
   const CH = Math.max(340, ...tables.map((t) => t.posY + t.height)) + 30;
+  // Cuánto hay que encoger el plano para que quepa a lo ancho (nunca se agranda).
+  const fit = boxW > 0 ? Math.min(1, boxW / CW) : 1;
+  scale.current = fit;
 
   return (
     <div className="mt-4 border border-gold-soft/60 bg-paper p-4">
@@ -1943,8 +1965,16 @@ function FloorPanel({
           Esta sede no tiene zonas. {editing ? "Crea una con “+ Zona”." : "Toca “Editar plano” para crearlas."}
         </p>
       ) : (
-        <div className="mt-3 max-h-[62vh] overflow-auto rounded border border-gold-soft/40 bg-[repeating-linear-gradient(0deg,transparent,transparent_23px,rgba(4,17,29,0.04)_24px),repeating-linear-gradient(90deg,transparent,transparent_23px,rgba(4,17,29,0.04)_24px)]">
-          <div className="relative" style={{ width: CW, height: CH }}>
+        <div
+          ref={boxRef}
+          className="mt-3 max-h-[62vh] overflow-y-auto overflow-x-hidden rounded border border-gold-soft/40 bg-[repeating-linear-gradient(0deg,transparent,transparent_23px,rgba(4,17,29,0.04)_24px),repeating-linear-gradient(90deg,transparent,transparent_23px,rgba(4,17,29,0.04)_24px)]"
+        >
+          {/* El plano se encoge lo justo para caber a lo ancho */}
+          <div style={{ width: CW * fit, height: CH * fit, overflow: "hidden" }}>
+            <div
+              className="relative"
+              style={{ width: CW, height: CH, transform: `scale(${fit})`, transformOrigin: "top left" }}
+            >
             {tables.length === 0 && (
               <p className="absolute left-1/2 top-8 -translate-x-1/2 text-[12px] text-ink-faint">
                 {editing ? "Agrega mesas con “+ Mesa”." : "Sin mesas en esta zona."}
@@ -2030,6 +2060,7 @@ function FloorPanel({
                 </button>
               );
             })}
+            </div>
           </div>
         </div>
       )}
