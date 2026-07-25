@@ -701,7 +701,24 @@ export default function ReservarPage() {
                       className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${decorationId === d.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
                     >
                       {d.image && (
-                        <span className="relative h-16 w-16 shrink-0">
+                        // Tocar la foto la abre en grande; tocar el resto elige.
+                        <span
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`Ver la foto de ${d.name} en grande`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setZoomDeco(d);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              setZoomDeco(d);
+                            }
+                          }}
+                          className="relative h-16 w-16 shrink-0"
+                        >
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
                             src={d.image}
@@ -709,23 +726,8 @@ export default function ReservarPage() {
                             loading="lazy"
                             className="h-16 w-16 rounded border border-gold-soft/40 object-cover"
                           />
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            aria-label={`Ver la foto de ${d.name} en grande`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setZoomDeco(d);
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" || e.key === " ") {
-                                e.stopPropagation();
-                                setZoomDeco(d);
-                              }
-                            }}
-                            className="absolute bottom-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy/80 text-gold-soft"
-                          >
-                            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                          <span className="absolute bottom-0.5 right-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy/80 text-gold-soft" aria-hidden>
+                            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                               <circle cx="11" cy="11" r="7" />
                               <path d="m20 20-3.5-3.5M11 8v6M8 11h6" />
                             </svg>
@@ -794,19 +796,44 @@ export default function ReservarPage() {
                 <p className="font-display text-[18px] text-navy">{zoomDeco.name}</p>
                 <p className="mt-0.5 text-[12px] leading-snug text-ink-soft">{zoomDeco.description}</p>
                 <p className="mt-1 text-[14px] font-semibold text-gold-deep">{formatCOP(zoomDeco.price)}</p>
-                <p className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-verde">
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                    <path d="M20 6 9 17l-5-5" />
-                  </svg>
-                  Elegiste esta decoración
-                </p>
-                <button
-                  type="button"
-                  onClick={() => setZoomDeco(null)}
-                  className="mt-3 h-11 w-full bg-navy text-[14px] font-semibold text-gold-soft"
-                >
-                  Listo
-                </button>
+                {decorationId === zoomDeco.id ? (
+                  <>
+                    <p className="mt-2 flex items-center gap-1.5 text-[12px] font-medium text-verde">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                        <path d="M20 6 9 17l-5-5" />
+                      </svg>
+                      Elegiste esta decoración
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setZoomDeco(null)}
+                      className="mt-3 h-11 w-full bg-navy text-[14px] font-semibold text-gold-soft"
+                    >
+                      Listo
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDecorationId(zoomDeco.id);
+                        setZoomDeco(null);
+                        setDecoOpen(false);
+                      }}
+                      className="mt-3 h-11 w-full bg-navy text-[14px] font-semibold text-gold-soft"
+                    >
+                      Elegir esta decoración
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setZoomDeco(null)}
+                      className="mt-2 h-11 w-full border border-gold-soft/70 bg-paper text-[13.5px] font-semibold text-navy"
+                    >
+                      Volver
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
