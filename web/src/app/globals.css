@@ -21,6 +21,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Evita que deslizar dos dedos de lado en el trackpad haga "atrás" o
+     "adelante" del navegador y saque al usuario de la página. */
+  overscroll-behavior-x: none;
 }
 
 body {
@@ -29,6 +32,7 @@ body {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overscroll-behavior-x: none;
 }
 
 /* ── Columna de página: superficie clara con sombra lateral en escritorio ── */
