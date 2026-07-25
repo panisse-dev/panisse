@@ -90,7 +90,8 @@ export interface Reservation {
   } | null;
   tableId: string | null;
   tableName: string | null;
-  tables: { id: string; name: string }[];
+  tableZone: string | null; // salón de esa mesa (ROKA I, TOSCANA, VIP…)
+  tables: { id: string; name: string; zone?: string | null }[];
 }
 
 // ── Decoraciones (editables en el panel) ──

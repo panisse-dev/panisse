@@ -205,7 +205,7 @@ export default function ReservasPage() {
   const tables = useMemo(
     () =>
       (floor?.zones ?? []).flatMap((z) =>
-        z.tables.map((t) => ({ id: t.id, label: `${z.name} · ${t.name}`, seats: t.seats })),
+        z.tables.map((t) => ({ id: t.id, name: t.name, zone: z.name, seats: t.seats })),
       ),
     [floor],
   );
@@ -225,11 +225,17 @@ export default function ReservasPage() {
     const picked = ids
       .map((id) => tables.find((t) => t.id === id))
       .filter((t): t is (typeof tables)[number] => Boolean(t))
-      .map((t) => ({ id: t.id, name: t.label.split(" · ")[1] ?? t.label }));
+      .map((t) => ({ id: t.id, name: t.name, zone: t.zone }));
     setList((prev) =>
       prev.map((x) =>
         x.id === r.id
-          ? { ...x, tables: picked, tableId: picked[0]?.id ?? null, tableName: picked[0]?.name ?? null }
+          ? {
+              ...x,
+              tables: picked,
+              tableId: picked[0]?.id ?? null,
+              tableName: picked[0]?.name ?? null,
+              tableZone: picked[0]?.zone ?? null,
+            }
           : x,
       ),
     );
@@ -656,7 +662,7 @@ export default function ReservasPage() {
                         key={t.id}
                         className="smallcaps inline-block border border-navy/40 bg-navy/[0.05] px-2 py-1 text-[11px] font-semibold text-navy"
                       >
-                        {t.name}
+                        {t.zone ? `${t.zone} · ${t.name}` : t.name}
                       </span>
                     ))
                   ) : (
