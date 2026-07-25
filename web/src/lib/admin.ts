@@ -87,6 +87,11 @@ export interface Reservation {
     description: string;
     price: number;
     image?: string | null;
+    color?: string | null; // tono de las rosas
+    dessert?: string | null; // postre elegido
+    dessertPrice?: number | null;
+    message?: string | null; // mensaje de la tarjeta
+    total?: number | null; // decoración + postre
   } | null;
   tableId: string | null;
   tableName: string | null;

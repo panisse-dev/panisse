@@ -138,6 +138,26 @@ export interface Decoration {
   advanceDays: number; // días de anticipación con que hay que pedirla
   prepaid: boolean; // hay que pagarla por adelantado
   available: boolean; // alcanza a prepararse para la fecha elegida
+  colorOptions: string[]; // tonos de rosa que ofrece (vacío = no aplica)
+  dessertMode: "none" | "included" | "optional";
+  dessertPrice: number; // valor del postre cuando es opcional
+}
+
+// Postres que acompañan la decoración (In Love / Mini Cake).
+export interface DecorationDessert {
+  id: string;
+  name: string;
+  image: string | null;
+}
+
+export const publicDecorationDesserts = () =>
+  rpc<DecorationDessert[]>("public_decoration_desserts");
+
+// Lo que el cliente escogió: tono, postre y mensaje de la tarjeta.
+export interface DecorationChoice {
+  color?: string;
+  dessert?: string;
+  message?: string;
 }
 
 // Las decoraciones de esa sede; con la fecha se sabe cuáles alcanzan.
@@ -147,8 +167,16 @@ export const publicDecorations = (location?: string | null, date?: string | null
     p_date: date ?? null,
   });
 
-export const reservationSetDecoration = (id: string, decorationId: string) =>
-  rpc<void>("reservation_set_decoration", { p_id: id, p_decoration_id: decorationId });
+export const reservationSetDecoration = (
+  id: string,
+  decorationId: string,
+  choice: DecorationChoice = {},
+) =>
+  rpc<void>("reservation_set_decoration", {
+    p_id: id,
+    p_decoration_id: decorationId,
+    p: choice,
+  });
 
 // ── Ayudas de presentación ──
 

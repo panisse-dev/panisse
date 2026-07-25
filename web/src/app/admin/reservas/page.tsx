@@ -670,14 +670,29 @@ export default function ReservasPage() {
                   </div>
                 )}
 
-                {/* Decoración de celebración elegida (ROKA) */}
+                {/* Decoración de celebración elegida, con lo que pidió el cliente */}
                 {r.decoration && (
                   <div className="mx-4 mt-2 border border-gold/60 bg-gold-soft/12 px-3 py-2">
                     <p className="smallcaps text-[9.5px] text-gold-deep">Decoración 🎉</p>
                     <p className="mt-0.5 text-[12.5px] font-medium text-navy">
-                      {r.decoration.name} · {formatCOP(r.decoration.price)}
+                      {r.decoration.name} · {formatCOP(r.decoration.total ?? r.decoration.price)}
                     </p>
                     <p className="text-[11px] leading-snug text-ink-soft">{r.decoration.description}</p>
+                    {(r.decoration.color || r.decoration.dessert) && (
+                      <p className="mt-1 text-[11.5px] font-medium text-navy">
+                        {r.decoration.color && `Rosas ${r.decoration.color.toLowerCase()}`}
+                        {r.decoration.color && r.decoration.dessert && " · "}
+                        {r.decoration.dessert}
+                        {r.decoration.dessertPrice
+                          ? ` (+${formatCOP(r.decoration.dessertPrice)})`
+                          : ""}
+                      </p>
+                    )}
+                    {r.decoration.message && (
+                      <p className="mt-1 border-l-2 border-gold pl-1.5 text-[11.5px] italic text-gold-deep">
+                        Tarjeta: “{r.decoration.message}”
+                      </p>
+                    )}
                   </div>
                 )}
 

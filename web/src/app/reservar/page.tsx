@@ -8,6 +8,7 @@ import {
   createReservation,
   formatDateLabel,
   formatTime,
+  publicDecorationDesserts,
   publicDecorations,
   publicFloor,
   reservationAvailability,
@@ -15,6 +16,7 @@ import {
   reservationSetDecoration,
   type CreatedReservation,
   type Decoration,
+  type DecorationDessert,
   type PublicFloor,
   type PublicTable,
   type ReservationConfig,
@@ -43,6 +45,11 @@ function fullPhone(raw: string): string {
   if (t.startsWith("+")) return t;
   const digits = t.replace(/\D/g, "");
   return digits ? `+57${digits}` : "";
+}
+
+// ¿Esta decoración necesita que el cliente escoja algo antes de agregarla?
+function hasOptions(d: Decoration): boolean {
+  return d.colorOptions.length > 0 || d.dessertMode !== "none";
 }
 
 function isoDow(iso: string): number {
@@ -91,6 +98,11 @@ export default function ReservarPage() {
   const [isRoka, setIsRoka] = useState(false);
   const [decorations, setDecorations] = useState<Decoration[]>([]);
   const [decorationId, setDecorationId] = useState<string>(""); // "" = sin decoración
+  // Lo que el cliente escoge sobre esa decoración.
+  const [desserts, setDesserts] = useState<DecorationDessert[]>([]);
+  const [decoColor, setDecoColor] = useState("");
+  const [decoDessert, setDecoDessert] = useState("");
+  const [decoMessage, setDecoMessage] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -110,6 +122,10 @@ export default function ReservarPage() {
       .catch(() => setDecorations([]));
   }, [sedeId, date]);
 
+  useEffect(() => {
+    publicDecorationDesserts().then(setDesserts).catch(() => setDesserts([]));
+  }, []);
+
   const showDecorations = decorations.length > 0;
   const chosenDecoration =
     (showDecorations && decorations.find((d) => d.id === decorationId && d.available)) || null;
@@ -119,6 +135,8 @@ export default function ReservarPage() {
   }, [decorationId, decorations, chosenDecoration]);
   // La lista larga vive en una ventana aparte para no alargar el formulario.
   const [decoOpen, setDecoOpen] = useState(false);
+  // Decoración cuyo detalle (tono, postre, mensaje) se está llenando.
+  const [decoDetail, setDecoDetail] = useState<Decoration | null>(null);
   // Foto ampliada de la decoración que el cliente acaba de tocar
   const [zoomDeco, setZoomDeco] = useState<Decoration | null>(null);
 
@@ -274,7 +292,11 @@ export default function ReservarPage() {
       // creación de la reserva. Si falla, la reserva ya quedó igual.
       if (showDecorations && decorationId) {
         try {
-          await reservationSetDecoration(created.id, decorationId);
+          await reservationSetDecoration(created.id, decorationId, {
+            color: decoColor || undefined,
+            dessert: decoDessert || undefined,
+            message: decoMessage.trim() || undefined,
+          });
         } catch {
           /* la reserva ya se creó; la decoración se puede agregar luego */
         }
@@ -432,6 +454,18 @@ export default function ReservarPage() {
                   <p className="mt-0.5 text-[11.5px] leading-snug text-ink-soft">
                     {chosenDecoration.description}
                   </p>
+                  {(decoColor || decoDessert) && (
+                    <p className="mt-1 text-[11.5px] text-navy">
+                      {decoColor && `Rosas ${decoColor.toLowerCase()}`}
+                      {decoColor && decoDessert && " · "}
+                      {decoDessert && desserts.find((p) => p.id === decoDessert)?.name}
+                    </p>
+                  )}
+                  {decoMessage.trim() && (
+                    <p className="mt-1 border-l-2 border-gold pl-1.5 text-[11.5px] italic text-gold-deep">
+                      “{decoMessage.trim()}”
+                    </p>
+                  )}
                 </div>
               </div>
               {chosenDecoration.prepaid && (
@@ -637,8 +671,20 @@ export default function ReservarPage() {
                         <span className="block text-[13.5px] font-medium text-navy">
                           {chosenDecoration.name}
                         </span>
+                        {(decoColor || decoDessert) && (
+                          <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">
+                            {decoColor && `Rosas ${decoColor.toLowerCase()}`}
+                            {decoColor && decoDessert && " · "}
+                            {decoDessert && desserts.find((p) => p.id === decoDessert)?.name}
+                          </span>
+                        )}
                         <span className="mt-0.5 block text-[12px] font-semibold text-gold-deep">
-                          {formatCOP(chosenDecoration.price)}
+                          {formatCOP(
+                            chosenDecoration.price +
+                              (chosenDecoration.dessertMode === "optional" && decoDessert
+                                ? chosenDecoration.dessertPrice
+                                : 0),
+                          )}
                         </span>
                       </>
                     ) : (
@@ -675,8 +721,149 @@ export default function ReservarPage() {
               </button>
         </div>
 
+        {/* Detalle de una decoración: tono de las rosas, postre y mensaje */}
+        {decoDetail && (
+          <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label={`Opciones de ${decoDetail.name}`}>
+            <button
+              type="button"
+              aria-label="Cerrar"
+              onClick={() => setDecoDetail(null)}
+              className="anim-fade-in absolute inset-0 bg-navy/70 backdrop-blur-[2px]"
+            />
+            <div className="anim-fade-up relative flex max-h-[88dvh] w-full max-w-md flex-col border border-gold-soft/60 bg-card shadow-[0_12px_40px_rgba(4,17,29,0.4)]">
+              <header className="flex items-start justify-between gap-3 border-b border-gold-soft/40 px-4 py-3">
+                <div className="min-w-0">
+                  <p className="font-display text-[17px] leading-tight text-navy">{decoDetail.name}</p>
+                  <p className="mt-0.5 text-[12px] font-semibold text-gold-deep">
+                    {formatCOP(decoDetail.price)}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDecoDetail(null)}
+                  aria-label="Volver"
+                  className="-mr-1 flex h-8 w-8 shrink-0 items-center justify-center text-ink-soft"
+                >
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              </header>
+
+              <div className="flex-1 overflow-y-auto px-4 py-3">
+                {decoDetail.image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={decoDetail.image}
+                    alt={`Decoración ${decoDetail.name}`}
+                    className="max-h-[30vh] w-full rounded border border-gold-soft/40 bg-paper object-contain"
+                  />
+                )}
+                <p className="mt-2 text-[11.5px] leading-snug text-ink-soft">{decoDetail.description}</p>
+
+                {/* Tono de las rosas */}
+                {decoDetail.colorOptions.length > 0 && (
+                  <>
+                    <p className="smallcaps mt-4 text-[10px] text-gold-deep">Tono de las rosas</p>
+                    <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+                      {decoDetail.colorOptions.map((c) => (
+                        <button
+                          key={c}
+                          type="button"
+                          onClick={() => setDecoColor(c)}
+                          className={`h-10 border text-[12.5px] transition-colors ${decoColor === c ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/70 bg-paper text-ink"}`}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Postre: incluido (elige cuál) u opcional (lo suma) */}
+                {decoDetail.dessertMode !== "none" && desserts.length > 0 && (
+                  <>
+                    <p className="smallcaps mt-4 text-[10px] text-gold-deep">
+                      {decoDetail.dessertMode === "included"
+                        ? "Postre incluido · elige cuál"
+                        : `Agregar postre · ${formatCOP(decoDetail.dessertPrice)}`}
+                    </p>
+                    <div className="mt-1.5 flex flex-col gap-1.5">
+                      {decoDetail.dessertMode === "optional" && (
+                        <button
+                          type="button"
+                          onClick={() => setDecoDessert("")}
+                          className={`flex h-10 items-center justify-between border px-3 text-left text-[12.5px] transition-colors ${decoDessert === "" ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                        >
+                          <span className="text-ink">Sin postre</span>
+                          <span className={`h-4 w-4 shrink-0 rounded-full border ${decoDessert === "" ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                        </button>
+                      )}
+                      {desserts.map((p) => (
+                        <button
+                          key={p.id}
+                          type="button"
+                          onClick={() => setDecoDessert(p.id)}
+                          className={`flex items-center gap-2.5 border px-3 py-2 text-left transition-colors ${decoDessert === p.id ? "border-navy bg-navy/[0.04]" : "border-gold-soft/70 bg-paper"}`}
+                        >
+                          {p.image && (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={p.image}
+                              alt={p.name}
+                              loading="lazy"
+                              className="h-12 w-12 shrink-0 rounded border border-gold-soft/40 bg-card object-cover"
+                            />
+                          )}
+                          <span className="min-w-0 flex-1 text-[12.5px] text-ink">{p.name}</span>
+                          <span className={`h-4 w-4 shrink-0 rounded-full border ${decoDessert === p.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Mensaje de la tarjeta */}
+                <label className="mt-4 block">
+                  <span className="smallcaps text-[10px] text-gold-deep">Mensaje de la tarjeta</span>
+                  <textarea
+                    value={decoMessage}
+                    onChange={(e) => setDecoMessage(e.target.value.slice(0, 200))}
+                    rows={3}
+                    placeholder="Ej. Feliz aniversario, mi amor…"
+                    className="mt-1 w-full resize-none border border-gold-soft/70 bg-paper px-3 py-2 text-[14px] text-ink outline-none focus:border-navy"
+                  />
+                  <span className="mt-0.5 block text-right text-[10px] text-ink-faint">
+                    {decoMessage.length}/200
+                  </span>
+                </label>
+              </div>
+
+              <footer className="border-t border-gold-soft/40 px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDecorationId(decoDetail.id);
+                    setDecoDetail(null);
+                    setDecoOpen(false);
+                  }}
+                  className="h-11 w-full bg-navy text-[13.5px] font-semibold text-gold-soft"
+                >
+                  Agregar ·{" "}
+                  {formatCOP(
+                    decoDetail.price +
+                      (decoDetail.dessertMode === "optional" && decoDessert
+                        ? decoDetail.dessertPrice
+                        : 0),
+                  )}
+                </button>
+              </footer>
+            </div>
+          </div>
+        )}
+
         {/* Ventana con las decoraciones, para no alargar el formulario */}
-        {decoOpen && (
+        {decoOpen && !decoDetail && (
           <div className="fixed inset-0 z-40 flex items-end justify-center sm:items-center" role="dialog" aria-modal="true" aria-label="Elegir decoración">
             <button
               type="button"
@@ -712,8 +899,17 @@ export default function ReservarPage() {
                       type="button"
                       disabled={!d.available}
                       onClick={() => {
-                        setDecorationId(d.id);
-                        setDecoOpen(false);
+                        // Con opciones (tono, postre, mensaje) se abre su detalle;
+                        // si no tiene, se elige de una.
+                        if (hasOptions(d)) {
+                          setDecoColor(d.colorOptions[0] ?? "");
+                          setDecoDessert(d.dessertMode === "included" ? desserts[0]?.id ?? "" : "");
+                          setDecoMessage("");
+                          setDecoDetail(d);
+                        } else {
+                          setDecorationId(d.id);
+                          setDecoOpen(false);
+                        }
                       }}
                       className={`flex items-start gap-2.5 border px-3 py-2.5 text-left transition-colors ${
                         !d.available
