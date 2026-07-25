@@ -146,6 +146,8 @@ export default function PedidosPage() {
   const [noteEditId, setNoteEditId] = useState<string | null>(null);
   const [noteDraft, setNoteDraft] = useState("");
   const [copiedBillId, setCopiedBillId] = useState<string | null>(null);
+  // Qué cocina se está mirando: todas, o solo Roka / solo Panisse.
+  const [kitchen, setKitchen] = useState<"todas" | "roka" | "panisse">("todas");
 
   const seenIds = useRef<Set<string>>(new Set());
   const seenPendingIds = useRef<Set<string>>(new Set());
@@ -305,8 +307,27 @@ export default function PedidosPage() {
   };
 
   const live = day === null;
-  const active = orders.filter((o) => o.status !== "recogido");
-  const done = orders.filter((o) => o.status === "recogido");
+
+  // ── Filtro por cocina (Pilares: Roka y Panisse cocinan aparte) ──
+  // Si en lo que hay en pantalla solo aparece una marca, el filtro no se
+  // muestra: no tiene sentido en Cerritos, donde todo es Panisse.
+  const brandsPresent = Array.from(
+    new Set([...orders, ...pending].flatMap((o) => o.items.map((i) => i.brand || "panisse"))),
+  );
+  const showKitchenFilter = brandsPresent.length > 1 || kitchen !== "todas";
+  // Deja en cada pedido solo los platos de la cocina elegida; si no queda
+  // ninguno, el pedido no es de esa cocina y se sale de la lista.
+  const forKitchen = (list: Order[]) =>
+    kitchen === "todas"
+      ? list
+      : list
+          .map((o) => ({ ...o, items: o.items.filter((i) => (i.brand || "panisse") === kitchen) }))
+          .filter((o) => o.items.length > 0);
+
+  const visible = forKitchen(orders);
+  const visiblePending = forKitchen(pending);
+  const active = visible.filter((o) => o.status !== "recogido");
+  const done = visible.filter((o) => o.status === "recogido");
   const dayTotal = orders.reduce((s, o) => s + o.total, 0);
   const byStatus = (s: OrderStatus) =>
     active.filter((o) => o.status === s).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
@@ -634,6 +655,30 @@ export default function PedidosPage() {
         )}
       </div>
 
+      {/* Cocinas: en Pilares, Roka y Panisse preparan aparte */}
+      {showKitchenFilter && (
+        <div className="mt-2 flex gap-1.5">
+          {(["todas", "roka", "panisse"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              onClick={() => setKitchen(k)}
+              className={`smallcaps h-8 flex-1 border text-[10.5px] font-medium ${
+                kitchen === k ? "border-navy bg-navy text-gold-soft" : "border-gold-soft/60 bg-card text-ink-soft"
+              }`}
+            >
+              {k === "todas" ? "Las dos cocinas" : `Cocina ${brandLabel(k)}`}
+            </button>
+          ))}
+        </div>
+      )}
+      {kitchen !== "todas" && (
+        <p className="mt-1.5 border-l-2 border-gold bg-gold-soft/10 px-2 py-1.5 text-[11px] leading-snug text-ink-soft">
+          Estás viendo solo los platos de la cocina {brandLabel(kitchen)}. Un pedido puede llevar
+          también platos de la otra cocina; el total que aparece es el del pedido completo.
+        </p>
+      )}
+
       <p className="mt-2 text-[11px] text-ink-faint">
         {live ? (
           <>
@@ -646,19 +691,19 @@ export default function PedidosPage() {
       </p>
 
       {/* Por confirmar pago — aparte de la cocina; al confirmar, entra a la cola */}
-      {live && pending.length > 0 && (
+      {live && visiblePending.length > 0 && (
         <section className="mt-4 rounded-lg border border-gold/50 bg-gold-soft/10 p-2.5 sm:p-3">
           <header className="mb-2.5 flex items-center gap-2 px-1">
             <span className="h-2.5 w-2.5 rounded-full bg-gold" />
             <h2 className="smallcaps text-[11px] font-semibold text-navy">Por confirmar pago</h2>
-            <span className="ml-auto text-[11px] font-medium text-ink-faint">{pending.length}</span>
+            <span className="ml-auto text-[11px] font-medium text-ink-faint">{visiblePending.length}</span>
           </header>
           <p className="mb-3 px-1 text-[11.5px] leading-relaxed text-ink-soft">
             Estos pedidos aún no entran a la cocina. Cuando veas la plata en la cuenta o el
             comprobante, dale <b>Confirmar pago y preparar</b> y arrancan de una en preparación.
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {pending.map(pendingCard)}
+            {visiblePending.map(pendingCard)}
           </div>
         </section>
       )}
