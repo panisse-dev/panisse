@@ -136,9 +136,11 @@ export interface Decoration {
   price: number;
   image: string | null;
   advanceDays: number; // días de anticipación con que hay que pedirla
+  advanceHours: number; // o, si es del mismo día, horas de anticipación
   prepaid: boolean; // hay que pagarla por adelantado
   available: boolean; // alcanza a prepararse para la fecha elegida
-  colorOptions: string[]; // tonos de rosa que ofrece (vacío = no aplica)
+  colorOptions: string[]; // opciones a elegir (vacío = no aplica)
+  optionLabel: string; // cómo se llama esa opción ("Tono de las rosas"…)
   dessertMode: "none" | "included" | "optional";
   dessertPrice: number; // valor del postre cuando es opcional
 }
@@ -161,10 +163,15 @@ export interface DecorationChoice {
 }
 
 // Las decoraciones de esa sede; con la fecha se sabe cuáles alcanzan.
-export const publicDecorations = (location?: string | null, date?: string | null) =>
+export const publicDecorations = (
+  location?: string | null,
+  date?: string | null,
+  time?: string | null,
+) =>
   rpc<Decoration[]>("public_decorations", {
     p_location: location ?? null,
     p_date: date ?? null,
+    p_time: time ?? null,
   });
 
 export const reservationSetDecoration = (

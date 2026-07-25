@@ -52,6 +52,13 @@ function hasOptions(d: Decoration): boolean {
   return d.colorOptions.length > 0 || d.dessertMode !== "none";
 }
 
+// "1 día" / "3 horas" — con cuánta anticipación se pide, en palabras.
+function antelacion(d: Decoration): string {
+  if (d.advanceDays > 0) return `${d.advanceDays} día${d.advanceDays === 1 ? "" : "s"}`;
+  if (d.advanceHours > 0) return `${d.advanceHours} hora${d.advanceHours === 1 ? "" : "s"}`;
+  return "";
+}
+
 function isoDow(iso: string): number {
   const [y, m, d] = iso.split("-").map(Number);
   return ((new Date(y, m - 1, d).getDay() + 6) % 7) + 1; // 1=lun … 7=dom
@@ -117,16 +124,19 @@ export default function ReservarPage() {
   // se sabe cuáles alcanzan a prepararse (algunas piden un día de anticipación).
   useEffect(() => {
     if (!sedeId) return;
-    publicDecorations(sedeId, date || null)
+    publicDecorations(sedeId, date || null, time || null)
       .then(setDecorations)
       .catch(() => setDecorations([]));
-  }, [sedeId, date]);
+  }, [sedeId, date, time]);
 
   useEffect(() => {
     publicDecorationDesserts().then(setDesserts).catch(() => setDesserts([]));
   }, []);
 
   const showDecorations = decorations.length > 0;
+  // Se separan las que alcanzan para su reserva de las que no.
+  const decoReady = decorations.filter((d) => d.available);
+  const decoLate = decorations.filter((d) => !d.available);
   const chosenDecoration =
     (showDecorations && decorations.find((d) => d.id === decorationId && d.available)) || null;
   // Si el cliente cambia la fecha y su decoración ya no alcanza, se suelta.
@@ -764,7 +774,9 @@ export default function ReservarPage() {
                 {/* Tono de las rosas */}
                 {decoDetail.colorOptions.length > 0 && (
                   <>
-                    <p className="smallcaps mt-4 text-[10px] text-gold-deep">Tono de las rosas</p>
+                    <p className="smallcaps mt-4 text-[10px] text-gold-deep">
+                      {decoDetail.optionLabel || "Elige una opción"}
+                    </p>
                     <div className="mt-1.5 grid grid-cols-3 gap-1.5">
                       {decoDetail.colorOptions.map((c) => (
                         <button
@@ -892,8 +904,21 @@ export default function ReservarPage() {
               </header>
 
               <div className="flex-1 overflow-y-auto px-4 py-3">
+                {/* Primero las que sí alcanzan para su reserva; después, las
+                    que necesitan más tiempo, para que se entienda por qué. */}
+                {decoReady.length > 0 && decoLate.length > 0 && (
+                  <p className="smallcaps mb-1.5 text-[10px] text-verde">
+                    Puedes pedir ahora
+                  </p>
+                )}
                 <div className="flex flex-col gap-2">
-                  {decorations.map((d) => (
+                  {[...decoReady, ...decoLate].map((d, i) => (
+                    <div key={`w-${d.id}`} className="contents">
+                    {i === decoReady.length && decoReady.length > 0 && (
+                      <p className="smallcaps mb-0.5 mt-3 text-[10px] text-ink-faint">
+                        Necesitan más tiempo
+                      </p>
+                    )}
                     <button
                       key={d.id}
                       type="button"
@@ -958,18 +983,17 @@ export default function ReservarPage() {
                         <span className="mt-0.5 block text-[11px] leading-snug text-ink-soft">{d.description}</span>
                         <span className="mt-1 block text-[12.5px] font-semibold text-gold-deep">{formatCOP(d.price)}</span>
                         {d.available ? (
-                          (d.advanceDays > 0 || d.prepaid) && (
+                          (antelacion(d) || d.prepaid) && (
                             <span className="mt-1 block text-[10.5px] leading-snug text-ink-faint">
-                              {d.advanceDays > 0 &&
-                                `Se pide con ${d.advanceDays} día${d.advanceDays === 1 ? "" : "s"} de anticipación`}
-                              {d.advanceDays > 0 && d.prepaid && " · "}
+                              {antelacion(d) && `Se pide con ${antelacion(d)} de anticipación`}
+                              {antelacion(d) && d.prepaid && " · "}
                               {d.prepaid && "Se paga por adelantado"}
                             </span>
                           )
                         ) : (
                           <span className="mt-1 block text-[10.5px] font-medium leading-snug text-[#b3261e]">
-                            No alcanza para esa fecha: se pide con {d.advanceDays} día
-                            {d.advanceDays === 1 ? "" : "s"} de anticipación.
+                            Para esa hora ya no alcanza: se pide con {antelacion(d)} de
+                            anticipación.
                           </span>
                         )}
                       </span>
@@ -977,6 +1001,7 @@ export default function ReservarPage() {
                         <span className={`mt-0.5 h-4 w-4 shrink-0 rounded-full border ${decorationId === d.id ? "border-navy bg-navy" : "border-gold-soft/70"}`} />
                       )}
                     </button>
+                    </div>
                   ))}
                 </div>
               </div>
