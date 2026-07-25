@@ -8,6 +8,11 @@ import {
   isAuthError,
   staffMenuTree,
   staffUpdateProduct,
+  staffCreateProduct,
+  staffCreateSection,
+  staffDeleteSection,
+  staffMoveProduct,
+  staffMoveSection,
   staffUpdateSection,
   uploadImage,
   type AdminMenu,
@@ -93,6 +98,10 @@ export default function MenuAdminPage() {
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState("");
 
+  // Si se está creando un plato: en qué sección va (null = se está editando uno)
+  const [creatingIn, setCreatingIn] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
   // Categoría en edición
   const [editingSection, setEditingSection] = useState<AdminSection | null>(null);
   const [secName, setSecName] = useState("");
@@ -174,13 +183,30 @@ export default function MenuAdminPage() {
     setFormError("");
   };
 
+  const openNew = (sectionId: string) => {
+    setEditing(null);
+    setCreatingIn(sectionId);
+    setDraft({
+      name: "",
+      description: "",
+      image: null,
+      prices: [{ label: "", price: "", discounted: "" }],
+      hidePrice: false,
+      isNew: false,
+      veg: false,
+      visible: true,
+    });
+    setFormError("");
+  };
+
   const closeEditor = () => {
     setEditing(null);
+    setCreatingIn(null);
     setDraft(null);
   };
 
   const save = async () => {
-    if (!editing || !draft || saving) return;
+    if ((!editing && !creatingIn) || !draft || saving) return;
     setFormError("");
     const name = draft.name.trim();
     if (!name) {
@@ -210,8 +236,13 @@ export default function MenuAdminPage() {
     };
     setSaving(true);
     try {
-      await staffUpdateProduct(code, editing.id, patch);
-      patchLocal(editing.id, patch as Partial<AdminProduct>);
+      if (creatingIn) {
+        await staffCreateProduct(code, creatingIn, patch);
+        await load(); // el plato nuevo entra al árbol
+      } else if (editing) {
+        await staffUpdateProduct(code, editing.id, patch);
+        patchLocal(editing.id, patch as Partial<AdminProduct>);
+      }
       closeEditor();
     } catch (e) {
       if (isAuthError(e)) logout();
@@ -265,6 +296,36 @@ export default function MenuAdminPage() {
     }
   };
 
+  // Corre las operaciones que sí necesitan recargar el árbol.
+  const run = async (fn: () => Promise<unknown>) => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await fn();
+      await load();
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else window.alert(e instanceof Error ? e.message : "No se pudo hacer el cambio.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const addSection = (parentId: string | null) => {
+    const name = window.prompt(
+      parentId ? "Nombre de la subsección nueva:" : "Nombre de la sección nueva:",
+      "",
+    );
+    if (!name?.trim() || !menuSlug) return;
+    run(() => staffCreateSection(code, menuSlug, parentId, name.trim()));
+  };
+
+  const removeSection = (s: AdminSection) => {
+    if (!window.confirm(`¿Borrar la sección "${s.name}"? Solo se puede si está vacía.`)) return;
+    run(() => staffDeleteSection(code, s.id));
+    setEditingSection(null);
+  };
+
   const priceSummary = (p: AdminProduct): string => {
     if (p.hidePrice || p.prices.length === 0) return "Sin precio";
     const first = p.prices[0];
@@ -303,7 +364,27 @@ export default function MenuAdminPage() {
           <path d="m9 5 7 7-7 7" />
         </svg>
       </button>
-      <Toggle on={p.visible} onChange={(v) => quickToggle(p, v)} label={`Visible: ${p.name}`} />
+      <span className="flex shrink-0 items-center gap-1">
+        <button
+          type="button"
+          onClick={() => run(() => staffMoveProduct(code, p.id, -1))}
+          aria-label={`Subir ${p.name}`}
+          title="Subir"
+          className="flex h-7 w-6 items-center justify-center border border-gold-soft/50 text-[10px] text-ink-faint"
+        >
+          ▲
+        </button>
+        <button
+          type="button"
+          onClick={() => run(() => staffMoveProduct(code, p.id, 1))}
+          aria-label={`Bajar ${p.name}`}
+          title="Bajar"
+          className="flex h-7 w-6 items-center justify-center border border-gold-soft/50 text-[10px] text-ink-faint"
+        >
+          ▼
+        </button>
+        <Toggle on={p.visible} onChange={(v) => quickToggle(p, v)} label={`Visible: ${p.name}`} />
+      </span>
     </li>
   );
 
@@ -318,16 +399,36 @@ export default function MenuAdminPage() {
             <p className="truncate text-[11.5px] italic text-ink-faint">{s.description}</p>
           )}
         </div>
-        <button
-          type="button"
-          onClick={() => openSection(s)}
-          aria-label={`Editar categoría ${s.name}`}
-          className="flex h-8 w-8 shrink-0 items-center justify-center text-ink-faint active:bg-paper-deep"
-        >
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
-          </svg>
-        </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => run(() => staffMoveSection(code, s.id, -1))}
+            aria-label={`Subir ${s.name}`}
+            title="Subir"
+            className="flex h-8 w-7 items-center justify-center border border-gold-soft/50 text-[12px] text-ink-faint"
+          >
+            ▲
+          </button>
+          <button
+            type="button"
+            onClick={() => run(() => staffMoveSection(code, s.id, 1))}
+            aria-label={`Bajar ${s.name}`}
+            title="Bajar"
+            className="flex h-8 w-7 items-center justify-center border border-gold-soft/50 text-[12px] text-ink-faint"
+          >
+            ▼
+          </button>
+          <button
+            type="button"
+            onClick={() => openSection(s)}
+            aria-label={`Editar categoría ${s.name}`}
+            className="flex h-8 w-8 items-center justify-center text-ink-faint active:bg-paper-deep"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+        </div>
       </header>
       {s.products.length > 0 && (
         <ul className="mt-1 divide-y divide-gold-soft/20 lg:grid lg:grid-cols-2 lg:gap-x-8 lg:divide-y-0">
@@ -339,6 +440,24 @@ export default function MenuAdminPage() {
       {(s.subsections || []).map((ss) => (
         <SectionBlock key={ss.id} s={ss} sub />
       ))}
+      <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <button
+          type="button"
+          onClick={() => openNew(s.id)}
+          className="smallcaps h-8 border border-navy bg-navy px-3 text-[10px] font-semibold text-gold-soft"
+        >
+          + Plato
+        </button>
+        {!sub && (
+          <button
+            type="button"
+            onClick={() => addSection(s.id)}
+            className="smallcaps h-8 border border-gold-soft/70 px-3 text-[10px] font-medium text-gold-deep"
+          >
+            + Subsección
+          </button>
+        )}
+      </div>
     </section>
   );
 
@@ -368,17 +487,27 @@ export default function MenuAdminPage() {
               </button>
             ))}
           </div>
-          <p className="mt-2 text-[11px] text-ink-faint">
-            Toca un producto para editarlo · el interruptor lo muestra u oculta en la carta.
-          </p>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-[11px] text-ink-faint">
+              Toca un plato para editarlo · el interruptor lo muestra u oculta en la carta · las
+              flechas cambian el orden.
+            </p>
+            <button
+              type="button"
+              onClick={() => addSection(null)}
+              className="smallcaps h-8 shrink-0 border border-gold-soft/70 px-3 text-[10px] font-medium text-gold-deep"
+            >
+              + Sección
+            </button>
+          </div>
 
           {menu?.sections.map((s) => <SectionBlock key={s.id} s={s} />)}
         </>
       )}
 
       {/* ── Editor de producto ── */}
-      {editing && draft && (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6" role="dialog" aria-modal="true" aria-label={`Editar ${editing.name}`}>
+      {(editing || creatingIn) && draft && (
+        <div className="fixed inset-0 z-50 flex flex-col justify-end lg:items-center lg:justify-center lg:p-6" role="dialog" aria-modal="true" aria-label={creatingIn ? "Nuevo plato" : `Editar ${editing?.name ?? ""}`}>
           <button
             type="button"
             aria-label="Cerrar"
@@ -388,7 +517,9 @@ export default function MenuAdminPage() {
           <div className="anim-sheet-up relative mx-auto w-full max-w-md lg:max-w-lg">
             <div className="max-h-[92dvh] overflow-y-auto rounded-t-3xl bg-card pb-[calc(env(safe-area-inset-bottom)+20px)] shadow-[0_-12px_40px_rgba(4,17,29,0.25)] lg:max-h-[85vh] lg:rounded-2xl lg:pb-6">
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gold-soft/40 bg-card px-5 pb-3 pt-4">
-                <h3 className="font-display text-[18px] text-navy">Editar producto</h3>
+                <h3 className="font-display text-[18px] text-navy">
+                  {creatingIn ? "Nuevo plato" : "Editar producto"}
+                </h3>
                 <button
                   type="button"
                   onClick={closeEditor}
@@ -643,6 +774,17 @@ export default function MenuAdminPage() {
                   Cancelar
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={() => removeSection(editingSection)}
+                className="mt-2 h-11 w-full border border-[#b3261e]/50 text-[12.5px] font-medium text-[#b3261e]"
+              >
+                Borrar esta sección
+              </button>
+              <p className="mt-1.5 text-[11px] leading-snug text-ink-faint">
+                Solo se puede borrar si ya no tiene platos ni subsecciones. Para quitar un plato de
+                la carta sin perderlo, apaga su interruptor.
+              </p>
             </div>
           </div>
         </div>

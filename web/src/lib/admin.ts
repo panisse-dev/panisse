@@ -247,6 +247,35 @@ export const staffSetNote = (code: string, id: string, note: string) =>
 export const staffMenuTree = (code: string) =>
   rpc<AdminMenu[]>("staff_menu_tree", { p_code: code });
 
+// ── Crear y ordenar la carta desde el panel ──
+export const staffCreateProduct = (
+  code: string,
+  sectionId: string,
+  data: Partial<Omit<AdminProduct, "id" | "order">>,
+) => rpc<string>("staff_create_product", { p_code: code, p_section_id: sectionId, p: data });
+
+export const staffCreateSection = (
+  code: string,
+  menuSlug: string,
+  parentId: string | null,
+  name: string,
+) =>
+  rpc<string>("staff_create_section", {
+    p_code: code,
+    p_menu_slug: menuSlug,
+    p_parent_id: parentId,
+    p_name: name,
+  });
+
+export const staffDeleteSection = (code: string, id: string) =>
+  rpc<void>("staff_delete_section", { p_code: code, p_id: id });
+
+export const staffMoveProduct = (code: string, id: string, dir: number) =>
+  rpc<void>("staff_move_product", { p_code: code, p_id: id, p_dir: dir });
+
+export const staffMoveSection = (code: string, id: string, dir: number) =>
+  rpc<void>("staff_move_section", { p_code: code, p_id: id, p_dir: dir });
+
 export const staffUpdateProduct = (
   code: string,
   id: string,
