@@ -6,6 +6,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { isAuthError, staffAnalytics, staffLocations, type Analytics } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
+import ExportButton from "@/components/admin/ExportButton";
 import { formatCOP } from "@/lib/format";
 
 const RANGES = [
@@ -209,9 +210,51 @@ export default function AnaliticaPage() {
   const showRate = decided > 0 ? Math.round((res!.fulfilled / decided) * 100) : null;
   const noShowRate = decided > 0 ? Math.round((res!.noShow / decided) * 100) : null;
 
+  // Todo el informe en una sola hoja: cada fila es un dato con su grupo.
+  const csvAnalitica: (string | number)[][] = [];
+  if (data && kpis) {
+    const add = (grupo: string, concepto: string, valor: string | number) =>
+      csvAnalitica.push([grupo, concepto, valor]);
+    add("Resumen", "Visitas al menú", kpis.menuVisits);
+    add("Resumen", "Sesiones", kpis.sessions);
+    add("Resumen", "Vistas de producto", kpis.productViews);
+    add("Resumen", "Pedidos", kpis.orders);
+    add("Resumen", "Ingresos por pedidos", kpis.revenue);
+    for (const d of data.visitsByDay ?? []) {
+      csvAnalitica.push(["Por día", d.day, d.visits]);
+      csvAnalitica.push(["Pedidos por día", d.day, d.orders]);
+      csvAnalitica.push(["Ingresos por día", d.day, d.revenue]);
+    }
+    for (const m of data.menuVisits ?? []) add("Visitas por carta", m.menu, m.visits);
+    for (const p of data.topProductsOrders ?? []) {
+      csvAnalitica.push(["Más pedidos", p.name, p.qty]);
+      csvAnalitica.push(["Ingresos por plato", p.name, p.revenue]);
+    }
+    for (const p of data.topProductsViews ?? []) add("Más vistos", p.name, p.views);
+    for (const c of data.topCategories ?? []) add("Categorías más vistas", c.name, c.views);
+    for (const d of data.devices ?? []) add("Dispositivos", d.device, d.sessions);
+    if (res) {
+      add("Reservas", "Total", res.total);
+      add("Reservas", "Confirmadas", res.confirmed);
+      add("Reservas", "Cumplidas", res.fulfilled);
+      add("Reservas", "Canceladas", res.cancelled);
+      add("Reservas", "No llegaron", res.noShow);
+      add("Reservas", "Personas", res.guests);
+      add("Reservas", "Abonos", res.deposits);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl">
-      <h1 className="mt-3 hidden font-display text-[20px] text-navy lg:block">Analítica</h1>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <h1 className="hidden font-display text-[20px] text-navy lg:block">Analítica</h1>
+        <ExportButton
+          name={`analitica-${range}`}
+          headers={["Grupo", "Concepto", "Valor"]}
+          rows={csvAnalitica}
+          className="ml-auto"
+        />
+      </div>
       <div className="chips-scroll -mx-1 mt-3 flex gap-1.5 overflow-x-auto px-1">
         {RANGES.map((r) => (
           <button

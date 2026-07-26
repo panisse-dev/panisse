@@ -47,6 +47,7 @@ import {
   type StaffContext,
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
+import ExportButton from "@/components/admin/ExportButton";
 
 const POLL_MS = 20000;
 
@@ -328,6 +329,25 @@ export default function ReservasPage() {
   const active = list.filter((r) => r.status !== "cancelada");
   // Se muestran para llevar la cuenta de cuántos cancelan y cuántos no llegan.
   const cancelledCount = list.filter((r) => r.status === "cancelada").length;
+  // Reservas del día, listas para Excel.
+  const csvReservas = list.map((r) => [
+    r.code,
+    r.date,
+    fmtTime(r.time),
+    r.party,
+    STATUS_LABEL[r.status] ?? r.status,
+    r.customer.name,
+    r.customer.phone,
+    r.customer.email,
+    r.tables.map((t) => (t.zone ? `${t.zone} · ${t.name}` : t.name)).join(", "),
+    SOURCE_LABEL[r.source] ?? r.source,
+    r.petFriendly,
+    r.reducedMobility,
+    r.decoration?.name ?? "",
+    r.decoration?.total ?? r.decoration?.price ?? "",
+    r.note,
+    r.staffNote,
+  ]);
   const noShowCount = list.filter((r) => r.status === "no_show").length;
   const totalPeople = active
     .filter((r) => r.status !== "no_show")
@@ -563,6 +583,30 @@ export default function ReservasPage() {
             </p>
 
             {/* Pestañas por comida: las cuatro caben en una línea, sin correr */}
+            <div className="mt-1.5">
+              <ExportButton
+                name={`reservas-${day}`}
+                headers={[
+                  "Código",
+                  "Fecha",
+                  "Hora",
+                  "Personas",
+                  "Estado",
+                  "Cliente",
+                  "Teléfono",
+                  "Correo",
+                  "Mesa",
+                  "Origen",
+                  "Mascota",
+                  "Movilidad reducida",
+                  "Decoración",
+                  "Valor decoración",
+                  "Nota del cliente",
+                  "Nota interna",
+                ]}
+                rows={csvReservas}
+              />
+            </div>
             <div className="mt-2 grid grid-cols-4 gap-1">
               {(["todos", ...MEALS.map((m) => m.key)] as (Meal | "todos")[]).map((k) => {
                 const on = mealFilter === k;

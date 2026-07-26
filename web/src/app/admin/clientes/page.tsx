@@ -12,6 +12,7 @@ import {
   type ClientRow,
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
+import ExportButton from "@/components/admin/ExportButton";
 import { formatCOP, normalize } from "@/lib/format";
 
 interface ClientForm {
@@ -185,37 +186,21 @@ export default function ClientesPage() {
     }
   };
 
-  const exportCsv = () => {
-    if (!clients) return;
-    const head =
-      "Nombre,Celular,Email,Cumpleaños,VIP,Lista negra,Pedidos,Reservas,Total,Registro,Última actividad,Notas";
-    const rows = clients.map((c) =>
-      [
-        c.name,
-        c.phone,
-        c.email ?? "",
-        c.birthday ?? "",
-        c.vip ? "Sí" : "",
-        c.blacklisted ? "Sí" : "",
-        c.ordersCount,
-        c.reservationsCount,
-        c.totalSpent,
-        fmtDate(c.createdAt),
-        fmtDate(c.lastActivityAt),
-        c.notes,
-      ]
-        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
-        .join(","),
-    );
-    const blob = new Blob(["﻿" + [head, ...rows].join("\n")], {
-      type: "text/csv;charset=utf-8",
-    });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "clientes-panisse.csv";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
+  // Los clientes que se están viendo (respeta el buscador y los filtros).
+  const csvClientes = filtered.map((c) => [
+    c.name,
+    c.phone,
+    c.email ?? "",
+    c.birthday ?? "",
+    c.vip,
+    c.blacklisted,
+    c.ordersCount,
+    c.reservationsCount,
+    c.totalSpent,
+    fmtDate(c.createdAt),
+    fmtDate(c.lastActivityAt),
+    c.notes,
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -233,16 +218,25 @@ export default function ClientesPage() {
             <path d="m20 20-3.5-3.5" />
           </svg>
         </div>
-        <button
-          type="button"
-          onClick={exportCsv}
-          aria-label="Exportar CSV"
-          className="flex h-11 w-11 shrink-0 items-center justify-center border border-gold-soft/70 bg-card text-ink-soft"
-        >
-          <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <path d="M12 3v12m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
-          </svg>
-        </button>
+        <ExportButton
+          name="clientes"
+          className="!h-11"
+          headers={[
+            "Nombre",
+            "Celular",
+            "Correo",
+            "Cumpleaños",
+            "VIP",
+            "Lista negra",
+            "Pedidos",
+            "Reservas",
+            "Total gastado",
+            "Registro",
+            "Última actividad",
+            "Notas",
+          ]}
+          rows={csvClientes}
+        />
         <button
           type="button"
           onClick={openNew}

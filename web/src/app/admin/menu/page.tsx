@@ -21,6 +21,7 @@ import {
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
 import Sortable, { DragHandle } from "@/components/admin/Sortable";
+import ExportButton from "@/components/admin/ExportButton";
 import { formatCOP } from "@/lib/format";
 
 interface PriceDraft {
@@ -90,6 +91,7 @@ export default function MenuAdminPage() {
   const { code, logout } = useStaff();
   const [tree, setTree] = useState<AdminMenu[] | null>(null);
   const [menuSlug, setMenuSlug] = useState("");
+  const [q, setQ] = useState(""); // buscador de platos
   const [error, setError] = useState("");
 
   // Producto en edición
@@ -128,6 +130,58 @@ export default function MenuAdminPage() {
     () => tree?.find((m) => m.slug === menuSlug) ?? null,
     [tree, menuSlug],
   );
+
+  // ── Buscador: recorre todas las cartas y devuelve dónde está cada plato ──
+  const found = useMemo(() => {
+    const t = q.trim().toLowerCase();
+    if (t.length < 2 || !tree) return null;
+    const out: { p: AdminProduct; ruta: string; menuLabel: string }[] = [];
+    for (const m of tree) {
+      for (const s of m.sections) {
+        for (const p of s.products) {
+          if (`${p.name} ${p.description}`.toLowerCase().includes(t)) {
+            out.push({ p, ruta: s.name, menuLabel: m.label });
+          }
+        }
+        for (const ss of s.subsections || []) {
+          for (const p of ss.products) {
+            if (`${p.name} ${p.description}`.toLowerCase().includes(t)) {
+              out.push({ p, ruta: `${s.name} › ${ss.name}`, menuLabel: m.label });
+            }
+          }
+        }
+      }
+    }
+    return out;
+  }, [q, tree]);
+
+  // Toda la carta, lista para Excel.
+  const csvRows = useMemo(() => {
+    const rows: (string | number | boolean)[][] = [];
+    for (const m of tree ?? []) {
+      const push = (s: AdminSection, ruta: string) => {
+        for (const p of s.products) {
+          const pr = p.prices[0];
+          rows.push([
+            m.label,
+            ruta,
+            p.name,
+            p.description,
+            p.hidePrice ? "Consultar" : (pr?.discounted ?? pr?.price ?? 0),
+            p.prices.length > 1 ? p.prices.length : 1,
+            p.visible,
+            p.isNew,
+            p.veg,
+          ]);
+        }
+      };
+      for (const s of m.sections) {
+        push(s, s.name);
+        for (const ss of s.subsections || []) push(ss, `${s.name} › ${ss.name}`);
+      }
+    }
+    return rows;
+  }, [tree]);
 
   // Reemplaza un producto en el árbol local (sin recargar todo)
   const patchLocal = (id: string, patch: Partial<AdminProduct>) => {
@@ -471,21 +525,102 @@ export default function MenuAdminPage() {
               </button>
             ))}
           </div>
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-            <p className="text-[11px] text-ink-faint">
-              Toca un plato para editarlo · el interruptor lo muestra u oculta en la carta ·
-              arrástralo por los puntitos (⠿) para cambiar el orden.
-            </p>
+          {/* Buscador: encuentra el plato en cualquier carta */}
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <div className="relative min-w-0 flex-1">
+              <svg viewBox="0 0 24 24" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-faint" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" aria-hidden>
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar un plato en todas las cartas…"
+                className="h-10 w-full border border-gold-soft/70 bg-card pl-9 pr-9 text-[14px] text-ink outline-none focus:border-navy"
+              />
+              {q && (
+                <button
+                  type="button"
+                  onClick={() => setQ("")}
+                  aria-label="Limpiar búsqueda"
+                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-ink-faint"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden>
+                    <path d="M6 6l12 12M18 6 6 18" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <ExportButton
+              name="carta-panisse"
+              headers={[
+                "Carta",
+                "Sección",
+                "Plato",
+                "Descripción",
+                "Precio",
+                "Variantes",
+                "Visible",
+                "Nuevo",
+                "Vegetariano",
+              ]}
+              rows={csvRows}
+            />
             <button
               type="button"
               onClick={() => addSection(null)}
-              className="smallcaps h-8 shrink-0 border border-gold-soft/70 px-3 text-[10px] font-medium text-gold-deep"
+              className="smallcaps h-9 shrink-0 border border-gold-soft/70 px-3 text-[10px] font-medium text-gold-deep"
             >
               + Sección
             </button>
           </div>
 
-          {menu && (
+          {!found && (
+            <p className="mt-2 text-[11px] text-ink-faint">
+              Toca un plato para editarlo · el interruptor lo muestra u oculta en la carta ·
+              arrástralo por los puntitos (⠿) para cambiar el orden.
+            </p>
+          )}
+
+          {/* Resultados de la búsqueda (reemplazan la carta mientras se busca) */}
+          {found && (
+            <div className="mt-3 border border-gold-soft/50 bg-card px-4 py-3">
+              <p className="text-[11.5px] text-ink-faint">
+                {found.length === 0
+                  ? `Ningún plato con “${q.trim()}”.`
+                  : `${found.length} plato${found.length === 1 ? "" : "s"} con “${q.trim()}”`}
+              </p>
+              {found.map(({ p, ruta, menuLabel }) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => openEditor(p)}
+                  className={`flex w-full items-center gap-3 border-b border-gold-soft/20 py-2 text-left ${p.visible ? "" : "opacity-50"}`}
+                >
+                  {p.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.image} alt="" className="h-11 w-11 shrink-0 border border-gold-soft/50 object-cover" />
+                  ) : (
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center border border-gold-soft/40 bg-paper-deep text-[15px] text-ink-faint">
+                      🍽
+                    </span>
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[13.5px] font-medium text-ink">{p.name}</span>
+                    <span className="block truncate text-[11px] text-ink-faint">
+                      {menuLabel} › {ruta} · {priceSummary(p)}
+                      {!p.visible && " · oculto"}
+                    </span>
+                  </span>
+                  <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-ink-faint" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                    <path d="m9 5 7 7-7 7" />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!found && menu && (
             <Sortable
               items={menu.sections}
               onReorder={(ids) => run(() => staffReorderSections(code, menuSlug, null, ids))}

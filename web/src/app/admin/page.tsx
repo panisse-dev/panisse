@@ -16,6 +16,8 @@ import {
   staffSetStatus,
 } from "@/lib/admin";
 import { useStaff } from "@/components/admin/AdminShell";
+import ExportButton from "@/components/admin/ExportButton";
+import { csvDateTime } from "@/lib/csv";
 
 const POLL_MS = 8000;
 
@@ -329,6 +331,26 @@ export default function PedidosPage() {
   const active = visible.filter((o) => o.status !== "recogido");
   const done = visible.filter((o) => o.status === "recogido");
   const dayTotal = orders.reduce((s, o) => s + o.total, 0);
+
+  // Pedidos que se están viendo, listos para Excel (una fila por plato).
+  const csvPedidos = orders.flatMap((o) =>
+    o.items.map((i) => [
+      o.code,
+      csvDateTime(o.createdAt),
+      STATUS_LABEL[o.status] ?? o.status,
+      o.paid,
+      o.orderType === "delivery" ? "Domicilio" : "Recoger",
+      o.customer.name,
+      o.customer.phone,
+      brandLabel(i.brand),
+      i.name,
+      i.variant ?? "",
+      i.qty,
+      i.unitPrice,
+      i.unitPrice * i.qty,
+      o.total,
+    ]),
+  );
   const byStatus = (s: OrderStatus) =>
     active.filter((o) => o.status === s).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 
@@ -624,6 +646,7 @@ export default function PedidosPage() {
             }`}
           />
         </div>
+        <div className="flex items-center gap-2">
         {live ? (
           <button
             type="button"
@@ -653,6 +676,27 @@ export default function PedidosPage() {
             {orders.length} pedido{orders.length === 1 ? "" : "s"} · {formatCOP(dayTotal)}
           </p>
         )}
+        <ExportButton
+              name={`pedidos-${day ?? "en-vivo"}`}
+              headers={[
+                "Pedido",
+                "Fecha",
+                "Estado",
+                "Pagado",
+                "Tipo",
+                "Cliente",
+                "Teléfono",
+                "Cocina",
+                "Plato",
+                "Variante",
+                "Cantidad",
+                "Precio unitario",
+                "Subtotal",
+                "Total del pedido",
+              ]}
+          rows={csvPedidos}
+        />
+        </div>
       </div>
 
       {/* Cocinas: en Pilares, Roka y Panisse preparan aparte */}
