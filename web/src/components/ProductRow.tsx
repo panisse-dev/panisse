@@ -111,6 +111,18 @@ export default function ProductRow({
             </div>
           )}
         </div>
+        {/* Señal clara de que el plato se puede agregar. Sin esto, las filas
+            sin foto se veían como texto suelto y nadie las tocaba. */}
+        <span className="order-last mt-0.5 flex shrink-0 flex-col items-center gap-1.5 self-start">
+          <span
+            aria-hidden
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-navy text-gold-soft shadow-[0_2px_8px_rgba(4,27,49,0.18)]"
+          >
+            <svg viewBox="0 0 24 24" className="h-4.5 w-4.5" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+          </span>
+        </span>
         {product.image && (
           <div className="relative h-[76px] w-[76px] shrink-0 overflow-hidden border border-gold-soft/70 bg-paper-deep">
             <Image
