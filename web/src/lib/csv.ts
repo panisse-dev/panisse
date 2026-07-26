@@ -1,8 +1,10 @@
-// Exportar tablas del panel a un archivo que abre Excel.
+// Exportar tablas del panel a un archivo que abre Excel (Windows).
 //
-// Se genera un CSV con punto y coma (el separador que espera Excel en
-// español) y con la marca UTF-8 al inicio, para que las tildes y la ñ no
-// salgan rotas al abrirlo.
+// Tres cosas lo hacen abrir bien de doble clic:
+//   · punto y coma como separador (lo que espera Excel en español),
+//   · la línea "sep=;" al inicio, que se lo dice a Excel explícitamente
+//     por si el computador está configurado en inglés,
+//   · la marca UTF-8, para que las tildes y la ñ no salgan rotas.
 
 export type CsvValue = string | number | boolean | null | undefined;
 
@@ -21,7 +23,8 @@ export function toCsv(headers: string[], rows: CsvValue[][]): string {
 
 /** Descarga la tabla como archivo. `name` sin extensión. */
 export function downloadCsv(name: string, headers: string[], rows: CsvValue[][]) {
-  const csv = "﻿" + toCsv(headers, rows); // ﻿ = marca UTF-8 para Excel
+  // ﻿ = marca UTF-8 · "sep=;" = separador explícito para Excel
+  const csv = "﻿sep=;\r\n" + toCsv(headers, rows);
   const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8;" }));
   const a = document.createElement("a");
   a.href = url;
