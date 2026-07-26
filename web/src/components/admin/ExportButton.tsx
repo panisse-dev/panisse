@@ -3,7 +3,7 @@
 // Botón "Excel": descarga lo que se está viendo como archivo para abrir
 // en Excel. Se usa igual en todas las pantallas del panel.
 
-import { downloadCsv, type CsvValue } from "@/lib/csv";
+import { downloadXlsx, type CellValue } from "@/lib/xlsx";
 
 export default function ExportButton({
   name,
@@ -15,7 +15,7 @@ export default function ExportButton({
   /** Nombre del archivo, sin fecha ni extensión (se agregan solas). */
   name: string;
   headers: string[];
-  rows: CsvValue[][];
+  rows: CellValue[][];
   label?: string;
   className?: string;
 }) {
@@ -25,7 +25,7 @@ export default function ExportButton({
       type="button"
       disabled={vacío}
       title={vacío ? "No hay datos para exportar" : "Descargar para abrir en Excel"}
-      onClick={() => downloadCsv(name, headers, rows)}
+      onClick={() => downloadXlsx(name, headers, rows)}
       className={`smallcaps flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3 text-[10.5px] font-medium disabled:opacity-40 ${
         vacío ? "border-gold-soft/40 text-ink-faint" : "border-verde/50 bg-verde/10 text-verde"
       } ${className}`}
