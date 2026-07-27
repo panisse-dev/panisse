@@ -10,6 +10,7 @@ import {
   staffUpdateProduct,
   staffCreateProduct,
   staffCreateSection,
+  staffMoveProductToSection,
   staffDeleteSection,
   staffReorderProducts,
   staffReorderSections,
@@ -103,6 +104,7 @@ export default function MenuAdminPage() {
 
   // Si se está creando un plato: en qué sección va (null = se está editando uno)
   const [creatingIn, setCreatingIn] = useState<string | null>(null);
+  const [moveTo, setMoveTo] = useState(""); // sección a la que se pasa el plato
   const [busy, setBusy] = useState(false);
 
   // Categoría en edición
@@ -154,6 +156,33 @@ export default function MenuAdminPage() {
     }
     return out;
   }, [q, tree]);
+
+  // Todas las secciones, con su ruta, para el selector de "mover a".
+  const allSections = useMemo(() => {
+    const out: { id: string; label: string }[] = [];
+    for (const m of tree ?? []) {
+      for (const sec of m.sections) {
+        out.push({ id: sec.id, label: `${m.label} › ${sec.name}` });
+        for (const ss of sec.subsections || []) {
+          out.push({ id: ss.id, label: `${m.label} › ${sec.name} › ${ss.name}` });
+        }
+      }
+    }
+    return out;
+  }, [tree]);
+
+  // En qué sección está el plato que se está editando.
+  const sectionOf = (id: string): string => {
+    for (const m of tree ?? []) {
+      for (const sec of m.sections) {
+        if (sec.products.some((p) => p.id === id)) return sec.id;
+        for (const ss of sec.subsections || []) {
+          if (ss.products.some((p) => p.id === id)) return ss.id;
+        }
+      }
+    }
+    return "";
+  };
 
   // Toda la carta, lista para Excel.
   const csvRows = useMemo(() => {
@@ -235,11 +264,13 @@ export default function MenuAdminPage() {
   const openEditor = (p: AdminProduct) => {
     setEditing(p);
     setDraft(toDraft(p));
+    setMoveTo(sectionOf(p.id));
     setFormError("");
   };
 
   const openNew = (sectionId: string) => {
     setEditing(null);
+    setMoveTo(sectionId);
     setCreatingIn(sectionId);
     setDraft({
       name: "",
@@ -296,7 +327,13 @@ export default function MenuAdminPage() {
         await load(); // el plato nuevo entra al árbol
       } else if (editing) {
         await staffUpdateProduct(code, editing.id, patch);
-        patchLocal(editing.id, patch as Partial<AdminProduct>);
+        const actual = sectionOf(editing.id);
+        if (moveTo && moveTo !== actual) {
+          await staffMoveProductToSection(code, editing.id, moveTo);
+          await load(); // el plato cambió de lugar en el árbol
+        } else {
+          patchLocal(editing.id, patch as Partial<AdminProduct>);
+        }
       }
       closeEditor();
     } catch (e) {
@@ -696,8 +733,30 @@ export default function MenuAdminPage() {
                   </div>
                 </div>
 
-                {/* Nombre y descripción */}
+                {/* En qué sección vive el plato (se puede pasar a otra) */}
                 <label className="mt-4 block">
+                  <span className="smallcaps text-[10px] text-gold-deep">Sección</span>
+                  <select
+                    value={moveTo}
+                    onChange={(e) => setMoveTo(e.target.value)}
+                    className="mt-1 h-11 w-full border border-gold-soft/70 bg-paper px-2 text-[13.5px] text-ink outline-none focus:border-navy"
+                  >
+                    {allSections.map((o) => (
+                      <option key={o.id} value={o.id}>
+                        {o.label}
+                      </option>
+                    ))}
+                  </select>
+                  {!creatingIn && moveTo !== sectionOf(editing?.id ?? "") && (
+                    <span className="mt-1 block text-[11px] leading-snug text-gold-deep">
+                      Al guardar, el plato se pasa a esa sección y queda de último; después lo
+                      acomodas arrastrándolo.
+                    </span>
+                  )}
+                </label>
+
+                {/* Nombre y descripción */}
+                <label className="mt-3 block">
                   <span className="smallcaps text-[10px] text-gold-deep">Nombre</span>
                   <input
                     value={draft.name}

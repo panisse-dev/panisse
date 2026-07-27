@@ -267,6 +267,14 @@ export const staffCreateSection = (
     p_name: name,
   });
 
+// Pasa un plato a otra sección (o a otra carta) sin perder su historial.
+export const staffMoveProductToSection = (code: string, id: string, sectionId: string) =>
+  rpc<void>("staff_move_product_to_section", {
+    p_code: code,
+    p_id: id,
+    p_section_id: sectionId,
+  });
+
 export const staffDeleteSection = (code: string, id: string) =>
   rpc<void>("staff_delete_section", { p_code: code, p_id: id });
 
