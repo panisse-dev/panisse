@@ -19,7 +19,11 @@ import { useStaff } from "@/components/admin/AdminShell";
 import ExportButton from "@/components/admin/ExportButton";
 import { csvDateTime } from "@/lib/csv";
 
-const POLL_MS = 8000;
+// Cada cuánto se le pregunta al servidor. Cuando hay pedidos en marcha se
+// pregunta seguido; cuando no pasa nada, se espacia. Con los paneles abiertos
+// todo el día, esto baja muchísimo el tráfico sin que la cocina lo note.
+const POLL_ACTIVO_MS = 8000;
+const POLL_QUIETO_MS = 30000;
 
 const brandLabel = (b?: string) => (b === "roka" ? "Roka" : "Panisse");
 
@@ -223,20 +227,35 @@ export default function PedidosPage() {
     }
   }, [code, beep, logout]);
 
-  // Polling — pausa cuando el panel no está visible para no gastar recursos.
+  // ¿Hay algo en marcha ahora mismo? (pedidos sin entregar o pagos por confirmar)
+  const hayMovimiento =
+    pending.length > 0 || orders.some((o) => o.status !== "recogido");
+  const ritmoRef = useRef(POLL_ACTIVO_MS);
+  // En el historial de un día pasado nada cambia: no hay por qué insistir.
+  ritmoRef.current = day !== null || !hayMovimiento ? POLL_QUIETO_MS : POLL_ACTIVO_MS;
+
+  // Consulta en ciclo — se detiene cuando el panel no está a la vista.
   useEffect(() => {
     firstLoad.current = true;
     seenIds.current = new Set();
-    poll();
-    const iv = setInterval(() => {
-      if (!document.hidden) poll();
-    }, POLL_MS);
+    let timer: ReturnType<typeof setTimeout>;
+    let vivo = true;
+
+    const ciclo = async () => {
+      if (!vivo) return;
+      if (!document.hidden) await poll();
+      if (vivo) timer = setTimeout(ciclo, ritmoRef.current);
+    };
+    ciclo();
+
+    // Al volver a la pantalla, se refresca de una.
     const onVisible = () => {
       if (!document.hidden) poll();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
-      clearInterval(iv);
+      vivo = false;
+      clearTimeout(timer);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [poll, day]);

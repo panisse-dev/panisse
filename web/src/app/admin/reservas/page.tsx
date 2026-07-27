@@ -49,7 +49,10 @@ import {
 import { useStaff } from "@/components/admin/AdminShell";
 import ExportButton from "@/components/admin/ExportButton";
 
-const POLL_MS = 20000;
+// Igual que en Pedidos: seguido cuando hay reservas por atender hoy,
+// espaciado cuando no hay nada en marcha.
+const POLL_ACTIVO_MS = 20000;
+const POLL_QUIETO_MS = 60000;
 
 const STATUS_LABEL: Record<ReservationStatusAdmin, string> = {
   pendiente: "Pendiente",
@@ -269,12 +272,31 @@ export default function ReservasPage() {
     }
   };
 
+  // ¿Queda algo por atender hoy? (pendientes o confirmadas sin cerrar)
+  const hayMovimiento =
+    day === todayBogota() &&
+    list.some((r) => r.status === "pendiente" || r.status === "confirmada");
+  const ritmoRef = useRef(POLL_ACTIVO_MS);
+  ritmoRef.current = hayMovimiento ? POLL_ACTIVO_MS : POLL_QUIETO_MS;
+
   useEffect(() => {
-    poll();
-    const iv = setInterval(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    let vivo = true;
+    const ciclo = async () => {
+      if (!vivo) return;
+      if (!document.hidden) await poll();
+      if (vivo) timer = setTimeout(ciclo, ritmoRef.current);
+    };
+    ciclo();
+    const onVisible = () => {
       if (!document.hidden) poll();
-    }, POLL_MS);
-    return () => clearInterval(iv);
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      vivo = false;
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [poll]);
 
   const setStatus = async (r: Reservation, status: ReservationStatusAdmin) => {
