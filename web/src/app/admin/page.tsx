@@ -746,6 +746,10 @@ export default function PedidosPage() {
         {live ? (
           <>
             {active.length} activo{active.length === 1 ? "" : "s"}
+            <span className="hidden sm:inline">
+              {" "}
+              · los entregados salen de aquí a las 2 horas y quedan en el historial del día
+            </span>
             {connError && <span className="text-[#b3261e]"> · sin conexión</span>}
           </>
         ) : (
