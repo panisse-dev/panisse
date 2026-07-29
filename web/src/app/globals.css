@@ -83,10 +83,18 @@ body {
   background-repeat: repeat-y, repeat, no-repeat, no-repeat;
 }
 
-/* Con fondo de arena las tarjetas se aclaran menos, para que la textura
-   se siga viendo a través de ellas y no quede un bloque blanco encima. */
+/* Con fondo de arena no hay tarjetas: los platos van directo sobre la
+   arena, para que la textura se vea completa de lado a lado. Queda solo
+   una línea muy fina que separa una sección de otra. */
 [data-menu-skin][data-bg="sand"] main > section {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: transparent;
+  border-color: color-mix(in srgb, var(--color-gold) 22%, transparent);
+  box-shadow: none;
+}
+/* La barra de arriba toma el mismo tono de la arena, para que no se vea
+   una franja clara cortando el fondo. */
+[data-menu-skin][data-bg="sand"] > .sticky {
+  background-color: color-mix(in srgb, var(--color-paper) 94%, transparent);
 }
 
 /* ── Dotted leader between dish name and price, like a typeset menu ── */
