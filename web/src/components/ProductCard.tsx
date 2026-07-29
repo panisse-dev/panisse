@@ -57,8 +57,8 @@ export default function ProductCard({
         )}
 
         {/* Botón agregar */}
-        <span className="absolute bottom-1.5 right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-navy text-gold-soft shadow-[0_2px_6px_rgba(4,17,29,0.35)]">
-          <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden>
+        <span className="absolute bottom-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-navy/85 text-gold-soft shadow-[0_1px_4px_rgba(4,17,29,0.25)]">
+          <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" aria-hidden>
             <path d="M12 5v14M5 12h14" />
           </svg>
         </span>
