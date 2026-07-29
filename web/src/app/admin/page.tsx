@@ -18,6 +18,7 @@ import {
 import { useStaff } from "@/components/admin/AdminShell";
 import ExportButton from "@/components/admin/ExportButton";
 import { csvDateTime } from "@/lib/csv";
+import { brandName } from "@/lib/ishiro";
 
 // Cada cuánto se le pregunta al servidor. Cuando hay pedidos en marcha se
 // pregunta seguido; cuando no pasa nada, se espacia. Con los paneles abiertos
@@ -25,7 +26,7 @@ import { csvDateTime } from "@/lib/csv";
 const POLL_ACTIVO_MS = 8000;
 const POLL_QUIETO_MS = 30000;
 
-const brandLabel = (b?: string) => (b === "roka" ? "Roka" : "Panisse");
+const brandLabel = (b?: string) => brandName(b);
 
 // Lista de platos del pedido. Si hay platos de dos marcas (Pilares: Roka +
 // Panisse), se muestran divididos por cocina; si todos son de una, va normal.

@@ -16,7 +16,7 @@ export interface HomeTheme {
   showMarble: boolean;
 }
 
-export type FontKey = "playfair" | "outfit" | "cormorant" | "montserrat" | "dancing";
+export type FontKey = "playfair" | "outfit" | "cormorant" | "montserrat" | "dancing" | "mono";
 
 // Cada tipo de letra → su pila de fuentes (usa las variables cargadas en layout).
 export const FONT_STACK: Record<FontKey, string> = {
@@ -25,6 +25,9 @@ export const FONT_STACK: Record<FontKey, string> = {
   cormorant: 'var(--font-cormorant), "Cormorant Garamond", Georgia, serif',
   montserrat: 'var(--font-montserrat), "Montserrat", system-ui, sans-serif',
   dancing: 'var(--font-dancing), "Dancing Script", cursive',
+  // Letra de máquina, geométrica: es el equivalente libre de la Degular
+  // Mono de la propuesta de ISHIRO (esa es de pago y necesita licencia).
+  mono: 'var(--font-mono-brand), "DM Mono", ui-monospace, monospace',
 };
 
 // Opciones para el selector del panel (nombre amigable).
@@ -34,6 +37,7 @@ export const FONT_OPTIONS: { key: FontKey; label: string }[] = [
   { key: "outfit", label: "Outfit (moderna)" },
   { key: "montserrat", label: "Montserrat (redonda)" },
   { key: "dancing", label: "Dancing (cursiva)" },
+  { key: "mono", label: "Mono (de máquina)" },
 ];
 
 export const fontStack = (f: string): string => FONT_STACK[(f as FontKey)] ?? FONT_STACK.playfair;

@@ -23,6 +23,7 @@ import {
   type Slot,
 } from "@/lib/reservations";
 import { formatCOP } from "@/lib/format";
+import { sinRoka } from "@/lib/ishiro";
 import { useLocation } from "@/lib/location";
 
 type Step = "elige" | "mesa" | "datos" | "listo";
@@ -125,7 +126,8 @@ export default function ReservarPage() {
   useEffect(() => {
     if (!sedeId) return;
     publicDecorations(sedeId, date || null, time || null)
-      .then(setDecorations)
+      // Los nombres guardados dicen "ROKA"; se muestran con la marca nueva.
+      .then((list) => setDecorations(list.map((d) => ({ ...d, name: sinRoka(d.name) }))))
       .catch(() => setDecorations([]));
   }, [sedeId, date, time]);
 

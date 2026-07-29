@@ -5,6 +5,7 @@ import {
   Cormorant_Garamond,
   Montserrat,
   Dancing_Script,
+  DM_Mono,
 } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart";
@@ -44,6 +45,14 @@ const dancing = Dancing_Script({
   display: "swap",
 });
 
+// Letra de máquina de ISHIRO (equivalente libre de la Degular Mono).
+const monoBrand = DM_Mono({
+  variable: "--font-mono-brand",
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "PANISSE · Menú",
@@ -71,7 +80,7 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${playfair.variable} ${outfit.variable} ${cormorant.variable} ${montserrat.variable} ${dancing.variable}`}
+      className={`${playfair.variable} ${outfit.variable} ${cormorant.variable} ${montserrat.variable} ${dancing.variable} ${monoBrand.variable}`}
     >
       <body className="antialiased">
         <SwCleanup />

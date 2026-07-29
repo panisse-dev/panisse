@@ -65,6 +65,16 @@ body {
   background-position: top center;
 }
 
+/* ── Fondo de arena (ISHIRO): textura suave de dunas sobre el color base ── */
+.sand-fixed {
+  background-image: url("/marca/arena.png");
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  /* Muy tenue: la textura acompaña, no compite con la carta. */
+  opacity: 0.55;
+}
+
 /* ── Dotted leader between dish name and price, like a typeset menu ── */
 .leader {
   flex: 1 1 1.25rem;

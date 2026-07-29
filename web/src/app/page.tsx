@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBrands, fetchMenuTitles, menus, restaurant, type BrandTitle, type MenuTitle } from "@/lib/menu";
 import { useLocation } from "@/lib/location";
+import { ishiroSkin, isIshiro, ISHIRO_LOGO, PREVIEW_ISHIRO, sinRoka } from "@/lib/ishiro";
 import { menuThemeFor, menuThemeVars, publicMenuThemes, type MenuTheme } from "@/lib/menuTheme";
 import { DEFAULT_HOME_THEME, fontStack, publicHomeTheme, type HomeTheme } from "@/lib/theme";
 
@@ -25,7 +26,7 @@ export default function Home() {
   // Aspecto de cada marca, para que su botón se vea con sus colores.
   const [skins, setSkins] = useState<Record<string, MenuTheme>>({
     panisse: menuThemeFor("panisse"),
-    roka: menuThemeFor("roka"),
+    roka: ishiroSkin("roka", menuThemeFor("roka")),
   });
 
   // Apariencia editable desde el panel (se aplica en vivo).
@@ -44,7 +45,7 @@ export default function Home() {
       .then((all) =>
         setSkins({
           panisse: { ...menuThemeFor("panisse"), ...(all?.panisse ?? {}) },
-          roka: { ...menuThemeFor("roka"), ...(all?.roka ?? {}) },
+          roka: ishiroSkin("roka", { ...menuThemeFor("roka"), ...(all?.roka ?? {}) }),
         }),
       )
       .catch(() => {
@@ -185,12 +186,22 @@ export default function Home() {
                   const tileStyle = menuThemeVars(skins[b] ?? menuThemeFor(b));
                   const inner = (
                     <>
+                      {PREVIEW_ISHIRO && isIshiro(b) && (
+                        /* Logo circular de ISHIRO en su botón de la portada */
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={ISHIRO_LOGO}
+                          alt=""
+                          aria-hidden
+                          className="mx-auto mb-3 h-14 w-14 object-contain"
+                        />
+                      )}
                       <span className="smallcaps block font-display text-[22px] font-medium leading-tight tracking-[0.14em] text-navy">
-                        {brands ? brands[b]?.label || "" : BRANDS[b].label}
+                        {sinRoka(brands ? brands[b]?.label || "" : BRANDS[b].label)}
                       </span>
                       {(brands ? brands[b]?.tagline : BRANDS[b].tagline) && (
                         <span className="mt-1 block text-[12px] text-gold-deep">
-                          {brands ? brands[b].tagline : BRANDS[b].tagline}
+                          {sinRoka(brands ? brands[b].tagline : BRANDS[b].tagline)}
                         </span>
                       )}
                     </>

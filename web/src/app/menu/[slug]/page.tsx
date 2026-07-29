@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import MenuClient from "@/components/MenuClient";
+import { sinRoka } from "@/lib/ishiro";
 import { getMenu, menus } from "@/lib/menu";
 
 export function generateStaticParams() {
@@ -15,9 +16,10 @@ export async function generateMetadata({
   const { slug } = await params;
   const menu = getMenu(slug);
   if (!menu) return {};
+  const label = sinRoka(menu.label);
   return {
-    title: menu.label,
-    description: `${menu.label} — ${menu.tagline}. Carta de PANISSE, cocina italiana en Pereira.`,
+    title: label,
+    description: `${label} — ${menu.tagline}. Carta de PANISSE, cocina italiana en Pereira.`,
   };
 }
 

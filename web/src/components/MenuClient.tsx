@@ -9,6 +9,7 @@ import {
   publicMenuThemes,
   type MenuTheme,
 } from "@/lib/menuTheme";
+import { brandName, ishiroSkin, isIshiro, ISHIRO_LOGO, PREVIEW_ISHIRO, sinRoka } from "@/lib/ishiro";
 import { track } from "@/lib/track";
 import { useScrollLock } from "@/lib/scrollLock";
 import ProductRow from "./ProductRow";
@@ -197,8 +198,10 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
   const isRoka = menu.brand === "roka";
 
   // Apariencia de la carta: se edita en el panel y se aplica en vivo.
-  const [skin, setSkin] = useState<MenuTheme>(menuThemeFor(menu.brand));
+  // (En la marca nueva manda ISHIRO, no lo guardado en el panel.)
+  const [skin, setSkin] = useState<MenuTheme>(ishiroSkin(menu.brand, menuThemeFor(menu.brand)));
   useEffect(() => {
+    if (PREVIEW_ISHIRO && isIshiro(menu.brand)) return;
     publicMenuThemes()
       .then((all) => {
         const mine = all?.[isRoka ? "roka" : "panisse"];
@@ -218,9 +221,9 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
     >
       {/* Fondo de la carta: mármol, color liso o una foto */}
       <div
-        className="marble-fixed"
+        className={`marble-fixed ${skin.background === "sand" ? "sand-fixed" : ""}`}
         style={
-          skin.background === "marble"
+          skin.background === "marble" || skin.background === "sand"
             ? undefined
             : skin.background === "image" && skin.bgImage
               ? {
@@ -244,9 +247,16 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
               <path d="M15 5l-7 7 7 7" />
             </svg>
           </Link>
-          <div className="text-center">
-            <p className="smallcaps text-[9px] text-gold-deep">{isRoka ? "Roka" : "Panisse"}</p>
-            <h1 className="font-display text-[19px] leading-tight text-navy">{menu.label}</h1>
+          <div className="flex items-center gap-2.5 text-center">
+            {PREVIEW_ISHIRO && isRoka && (
+              /* Logo circular de ISHIRO, en la barra de la carta */
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={ISHIRO_LOGO} alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
+            )}
+            <div>
+              <p className="smallcaps text-[9px] text-gold-deep">{brandName(menu.brand)}</p>
+              <h1 className="font-display text-[19px] leading-tight text-navy">{sinRoka(menu.label)}</h1>
+            </div>
           </div>
           <button
             type="button"
@@ -303,9 +313,15 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
             </svg>
             <span className="smallcaps text-[14px] font-medium tracking-[0.12em]">Reservar una mesa</span>
           </Link>
-          <div className="ornament mt-14 w-full text-gold">
-            <span className="text-[10px]">❦</span>
-          </div>
+          {PREVIEW_ISHIRO && isRoka ? (
+            /* Cierre de la carta con el logo de la marca */
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={ISHIRO_LOGO} alt="ISHIRO" className="mx-auto mt-14 h-11 w-11 object-contain opacity-70" />
+          ) : (
+            <div className="ornament mt-14 w-full text-gold">
+              <span className="text-[10px]">❦</span>
+            </div>
+          )}
           <p className="mt-4 text-[11px] leading-relaxed text-ink-faint">
             Precios en pesos colombianos (COP) · Impuestos incluidos
           </p>

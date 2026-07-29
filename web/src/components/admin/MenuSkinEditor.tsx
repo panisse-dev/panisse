@@ -1,6 +1,6 @@
 "use client";
 
-// Editor de la apariencia de las cartas (Panisse / Roka).
+// Editor de la apariencia de las cartas (Panisse / ISHIRO).
 //
 // Todo lo que se toca aquí se ve al instante en la vista previa, que usa
 // exactamente las mismas variables CSS que la carta real: lo que se ve es
@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { isAuthError, staffMenuThemes, staffSaveMenuTheme, uploadImage } from "@/lib/admin";
+import { brandName, ISHIRO_NAME } from "@/lib/ishiro";
 import {
   DEFAULT_MENU_THEME,
   menuThemeVars,
@@ -19,7 +20,7 @@ import { FONT_OPTIONS, type FontKey } from "@/lib/theme";
 
 const BRANDS: { id: string; label: string }[] = [
   { id: "panisse", label: "Carta Panisse" },
-  { id: "roka", label: "Carta Roka" },
+  { id: "roka", label: `Carta ${ISHIRO_NAME}` },
 ];
 
 const SCALES: { v: number; label: string }[] = [
@@ -31,6 +32,7 @@ const SCALES: { v: number; label: string }[] = [
 
 const BACKGROUNDS: { v: Background; label: string }[] = [
   { v: "marble", label: "Mármol" },
+  { v: "sand", label: "Arena" },
   { v: "plain", label: "Color liso" },
   { v: "image", label: "Foto" },
 ];
@@ -266,6 +268,8 @@ export default function MenuSkinEditor({
                   ? `linear-gradient(rgba(255,255,255,0.72), rgba(255,255,255,0.72)), url(${t.bgImage})`
                   : t.background === "marble"
                     ? 'url("/images/menus/dfc3a969-3a35-45ba-88f0-630986c314bb.webp")'
+                    : t.background === "sand"
+                    ? 'url("/marca/arena.png")'
                     : undefined,
               backgroundSize: "cover",
               backgroundPosition: "center",
@@ -273,7 +277,7 @@ export default function MenuSkinEditor({
             className="mt-1 overflow-hidden border border-gold-soft/60 p-4"
           >
             <p className="smallcaps text-center text-[9px] text-gold-deep">
-              {brand === "roka" ? "Roka" : "Panisse"}
+              {brandName(brand)}
             </p>
             <div className="ornament mt-2 text-center text-gold">
               <h2 className="font-display text-[22px] leading-tight text-navy">Entradas</h2>

@@ -7,7 +7,7 @@
 import { rpc } from "./supabase";
 import { fontStack, type FontKey } from "./theme";
 
-export type Background = "marble" | "plain" | "image";
+export type Background = "marble" | "plain" | "image" | "sand";
 export type SectionStyle = "ornament" | "boxed";
 
 export interface MenuTheme {
