@@ -65,14 +65,18 @@ body {
   background-position: top center;
 }
 
-/* ── Fondo de arena (ISHIRO): textura suave de dunas sobre el color base ── */
+/* ── Fondo de arena (ISHIRO) ──
+   Grano de papel dibujado, no una foto: así se ve nítido en cualquier
+   pantalla y no se pixela como una imagen estirada. Encima, una veladura
+   muy suave en tono tierra para que el fondo no quede plano. */
 .sand-fixed {
-  background-image: url("/marca/arena.png");
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
-  /* Muy tenue: la textura acompaña, no compite con la carta. */
-  opacity: 0.55;
+  background-color: var(--color-paper);
+  background-image:
+    radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
+    radial-gradient(90% 60% at 50% 100%, rgba(116, 90, 82, 0.07), transparent 70%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.14'/%3E%3C/svg%3E");
+  background-size: 100% 100%, 100% 100%, 180px 180px;
+  background-repeat: no-repeat, no-repeat, repeat;
 }
 
 /* ── Dotted leader between dish name and price, like a typeset menu ── */
@@ -175,6 +179,10 @@ body {
 [data-menu-skin][data-section-style="boxed"] .ornament::before,
 [data-menu-skin][data-section-style="boxed"] .ornament::after {
   display: none;
+}
+/* Sin las líneas del adorno, el recuadro se queda pegado a la izquierda. */
+[data-menu-skin][data-section-style="boxed"] .ornament {
+  justify-content: center;
 }
 [data-menu-skin][data-section-style="boxed"] .ornament h2 {
   display: inline-block;

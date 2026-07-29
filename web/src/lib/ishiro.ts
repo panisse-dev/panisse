@@ -50,11 +50,11 @@ export const sinRoka = (text: string | null | undefined): string =>
  * arena #eae8dc, tinta gris cálida #3e3f3b, tierra #745a52.
  */
 export const ISHIRO_THEME: MenuTheme = {
-  bgColor: "#eae8dc",
-  cardColor: "#f2f0e6",
-  titleColor: "#3e3f3b",
+  bgColor: "#e2dfd0",
+  cardColor: "#f7f5ed",
+  titleColor: "#33342f",
   textColor: "#4c4d47",
-  goldColor: "#8a6f63",
+  goldColor: "#7d6154",
   titleFont: "mono",
   bodyFont: "outfit",
   scale: 1,
