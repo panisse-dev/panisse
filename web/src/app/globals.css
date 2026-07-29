@@ -72,15 +72,16 @@ body {
 .sand-fixed {
   background-color: var(--color-paper);
   background-image:
-    /* Ondas de la arena, dibujadas: nítidas en cualquier pantalla */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='620' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23745a52' stroke-opacity='0.13' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M-40 70 C 120 20, 300 110, 470 55'/%3E%3Cpath d='M-40 150 C 140 100, 290 190, 470 135'/%3E%3Cpath d='M-40 232 C 110 185, 310 268, 470 212'/%3E%3Cpath d='M-40 315 C 150 265, 280 350, 470 296'/%3E%3Cpath d='M-40 398 C 120 350, 300 432, 470 378'/%3E%3Cpath d='M-40 480 C 145 432, 285 515, 470 460'/%3E%3Cpath d='M-40 562 C 115 515, 305 598, 470 543'/%3E%3C/g%3E%3C/svg%3E"),
-    /* Grano de papel */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.2'/%3E%3C/svg%3E"),
-    /* Luz arriba, sombra abajo: le da profundidad */
-    radial-gradient(130% 70% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 62%),
-    radial-gradient(110% 60% at 50% 100%, rgba(116, 90, 82, 0.12), transparent 72%);
-  background-size: 100% 620px, 180px 180px, 100% 100%, 100% 100%;
-  background-repeat: repeat-y, repeat, no-repeat, no-repeat;
+    /* Grano de papel, para que la foto no se vea lisa al ampliarla */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.16'/%3E%3C/svg%3E"),
+    /* Velo muy tenue: baja el brillo de las crestas para que la carta
+       se siga leyendo encima, sin perder la textura */
+    linear-gradient(rgba(226, 223, 208, 0.3), rgba(226, 223, 208, 0.3)),
+    /* La arena de la propuesta de marca, llenando la pantalla */
+    url("/marca/arena.png");
+  background-size: 180px 180px, 100% 100%, cover;
+  background-repeat: repeat, no-repeat, no-repeat;
+  background-position: top left, center, center center;
 }
 
 /* Con fondo de arena no hay tarjetas: los platos van directo sobre la

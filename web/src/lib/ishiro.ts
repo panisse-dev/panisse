@@ -53,7 +53,7 @@ export const ISHIRO_THEME: MenuTheme = {
   bgColor: "#e2dfd0",
   cardColor: "#f7f5ed",
   titleColor: "#33342f",
-  textColor: "#4c4d47",
+  textColor: "#3f4039",
   goldColor: "#7d6154",
   titleFont: "mono",
   bodyFont: "outfit",
