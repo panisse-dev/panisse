@@ -9,7 +9,7 @@ import {
   publicMenuThemes,
   type MenuTheme,
 } from "@/lib/menuTheme";
-import { brandName, ishiroSkin, isIshiro, ISHIRO_LOGO, PREVIEW_ISHIRO, sinRoka } from "@/lib/ishiro";
+import { brandName, ishiroLayout, ishiroSkin, isIshiro, ISHIRO_LOGO, PREVIEW_ISHIRO, sinRoka } from "@/lib/ishiro";
 import { track } from "@/lib/track";
 import { useScrollLock } from "@/lib/scrollLock";
 import ProductRow from "./ProductRow";
@@ -51,11 +51,16 @@ function ProductGroup({
 function SectionBlock({
   section,
   onOpen,
+  fichas,
 }: {
   section: Section;
   onOpen: (p: Product) => void;
+  /** ISHIRO: la comida va en fichas con foto, como en Panisse. */
+  fichas?: boolean;
 }) {
-  const cards = section.layout === "cards";
+  const layoutDe = (nombre: string, layout: Layout): Layout =>
+    fichas ? (ishiroLayout(nombre, layout) as Layout) : layout;
+  const cards = layoutDe(section.name, section.layout) === "cards";
   return (
     <section
       id={section.slug}
@@ -78,7 +83,7 @@ function SectionBlock({
       </header>
 
       {section.products.length > 0 && (
-        <ProductGroup products={section.products} layout={section.layout} onOpen={onOpen} />
+        <ProductGroup products={section.products} layout={layoutDe(section.name, section.layout)} onOpen={onOpen} />
       )}
 
       {section.subsections.map((ss) => (
@@ -91,7 +96,7 @@ function SectionBlock({
               </p>
             )}
           </header>
-          <ProductGroup products={ss.products} layout={ss.layout} onOpen={onOpen} />
+          <ProductGroup products={ss.products} layout={layoutDe(ss.name, ss.layout)} onOpen={onOpen} />
         </div>
       ))}
     </section>
@@ -299,7 +304,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
       {/* ── Contenido ── */}
       <main className="relative z-10 pt-2 pb-[calc(env(safe-area-inset-bottom)+120px)]">
         {menu.sections.map((s) => (
-          <SectionBlock key={s.id} section={s} onOpen={openProduct} />
+          <SectionBlock key={s.id} section={s} onOpen={openProduct} fichas={PREVIEW_ISHIRO && isRoka} />
         ))}
 
         <footer className="mt-14 px-5 text-center">

@@ -38,6 +38,17 @@ export const brandName = (brand?: string | null) =>
   isIshiro(brand) ? (PREVIEW_ISHIRO ? ISHIRO_NAME : "Roka") : "Panisse";
 
 /**
+ * Igual que en Panisse: la comida se muestra en fichas con foto y las
+ * bebidas en lista, porque una carta de vinos en fichas es una pared de
+ * cuadros repetidos que no aporta nada.
+ */
+const BEBIDAS = /vino|c[oó]ctel|cerveza|soda|limonada|agua|t[óo]nica|gaseosa|caf[eé]|bebida|licor|whisk|ron|gin|tequila|aguardiente/i;
+
+/** Qué disposición usar en una sección de la carta de ISHIRO. */
+export const ishiroLayout = <T,>(sectionName: string, layout: T): T | "cards" =>
+  BEBIDAS.test(sectionName) ? layout : "cards";
+
+/**
  * Cambia "Roka" por "ISHIRO" en cualquier texto que venga de la base
  * (títulos de carta, nombres de decoración, salones…). Así la versión de
  * prueba se ve completa sin tocar los datos de producción.
