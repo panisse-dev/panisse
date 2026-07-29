@@ -72,11 +72,21 @@ body {
 .sand-fixed {
   background-color: var(--color-paper);
   background-image:
-    radial-gradient(120% 80% at 50% 0%, rgba(255, 255, 255, 0.55), transparent 60%),
-    radial-gradient(90% 60% at 50% 100%, rgba(116, 90, 82, 0.07), transparent 70%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.14'/%3E%3C/svg%3E");
-  background-size: 100% 100%, 100% 100%, 180px 180px;
-  background-repeat: no-repeat, no-repeat, repeat;
+    /* Ondas de la arena, dibujadas: nítidas en cualquier pantalla */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='620' preserveAspectRatio='none'%3E%3Cg fill='none' stroke='%23745a52' stroke-opacity='0.13' stroke-width='9' stroke-linecap='round'%3E%3Cpath d='M-40 70 C 120 20, 300 110, 470 55'/%3E%3Cpath d='M-40 150 C 140 100, 290 190, 470 135'/%3E%3Cpath d='M-40 232 C 110 185, 310 268, 470 212'/%3E%3Cpath d='M-40 315 C 150 265, 280 350, 470 296'/%3E%3Cpath d='M-40 398 C 120 350, 300 432, 470 378'/%3E%3Cpath d='M-40 480 C 145 432, 285 515, 470 460'/%3E%3Cpath d='M-40 562 C 115 515, 305 598, 470 543'/%3E%3C/g%3E%3C/svg%3E"),
+    /* Grano de papel */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)' opacity='0.2'/%3E%3C/svg%3E"),
+    /* Luz arriba, sombra abajo: le da profundidad */
+    radial-gradient(130% 70% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 62%),
+    radial-gradient(110% 60% at 50% 100%, rgba(116, 90, 82, 0.12), transparent 72%);
+  background-size: 100% 620px, 180px 180px, 100% 100%, 100% 100%;
+  background-repeat: repeat-y, repeat, no-repeat, no-repeat;
+}
+
+/* Con fondo de arena las tarjetas se aclaran menos, para que la textura
+   se siga viendo a través de ellas y no quede un bloque blanco encima. */
+[data-menu-skin][data-bg="sand"] main > section {
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 /* ── Dotted leader between dish name and price, like a typeset menu ── */

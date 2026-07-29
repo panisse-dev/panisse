@@ -215,6 +215,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
   return (
     <div
       data-menu-skin
+      data-bg={skin.background}
       data-section-style={skin.sectionStyle}
       style={menuThemeVars(skin)}
       className="page-col relative mx-auto min-h-dvh w-full max-w-md"
