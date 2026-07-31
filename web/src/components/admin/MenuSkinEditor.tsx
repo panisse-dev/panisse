@@ -1,6 +1,6 @@
 "use client";
 
-// Editor de la apariencia de las cartas (Panisse / ISHIRO).
+// Editor de la apariencia de las cartas (Panisse / Roka).
 //
 // Todo lo que se toca aquí se ve al instante en la vista previa, que usa
 // exactamente las mismas variables CSS que la carta real: lo que se ve es
@@ -8,7 +8,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { isAuthError, staffMenuThemes, staffSaveMenuTheme, uploadImage } from "@/lib/admin";
-import { brandName, ISHIRO_NAME } from "@/lib/ishiro";
+import { brandName } from "@/lib/ishiro";
 import {
   DEFAULT_MENU_THEME,
   menuThemeVars,
@@ -20,7 +20,7 @@ import { FONT_OPTIONS, type FontKey } from "@/lib/theme";
 
 const BRANDS: { id: string; label: string }[] = [
   { id: "panisse", label: "Carta Panisse" },
-  { id: "roka", label: `Carta ${ISHIRO_NAME}` },
+  { id: "roka", label: "Carta Roka" },
 ];
 
 const SCALES: { v: number; label: string }[] = [

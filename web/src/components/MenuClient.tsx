@@ -9,7 +9,16 @@ import {
   publicMenuThemes,
   type MenuTheme,
 } from "@/lib/menuTheme";
-import { brandName, ishiroLayout, ishiroSkin, isIshiro, ISHIRO_LOGO, PREVIEW_ISHIRO, sinRoka } from "@/lib/ishiro";
+import {
+  ASPECTO_NUEVO,
+  brandName,
+  ishiroLayout,
+  ishiroSkin,
+  isIshiro,
+  ISHIRO_LOGO,
+  muestraLogo,
+  sinRoka,
+} from "@/lib/ishiro";
 import { track } from "@/lib/track";
 import { useScrollLock } from "@/lib/scrollLock";
 import ProductRow from "./ProductRow";
@@ -206,7 +215,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
   // (En la marca nueva manda ISHIRO, no lo guardado en el panel.)
   const [skin, setSkin] = useState<MenuTheme>(ishiroSkin(menu.brand, menuThemeFor(menu.brand)));
   useEffect(() => {
-    if (PREVIEW_ISHIRO && isIshiro(menu.brand)) return;
+    if (ASPECTO_NUEVO && isIshiro(menu.brand)) return;
     publicMenuThemes()
       .then((all) => {
         const mine = all?.[isRoka ? "roka" : "panisse"];
@@ -254,7 +263,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
             </svg>
           </Link>
           <div className="flex items-center gap-2.5 text-center">
-            {PREVIEW_ISHIRO && isRoka && (
+            {muestraLogo(menu.brand) && (
               /* Logo circular de ISHIRO, en la barra de la carta */
               // eslint-disable-next-line @next/next/no-img-element
               <img src={ISHIRO_LOGO} alt="" aria-hidden className="h-9 w-9 shrink-0 object-contain" />
@@ -304,7 +313,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
       {/* ── Contenido ── */}
       <main className="relative z-10 pt-2 pb-[calc(env(safe-area-inset-bottom)+120px)]">
         {menu.sections.map((s) => (
-          <SectionBlock key={s.id} section={s} onOpen={openProduct} fichas={PREVIEW_ISHIRO && isRoka} />
+          <SectionBlock key={s.id} section={s} onOpen={openProduct} fichas={ASPECTO_NUEVO && isRoka} />
         ))}
 
         <footer className="mt-14 px-5 text-center">
@@ -319,7 +328,7 @@ export default function MenuClient({ menu: initialMenu }: { menu: Menu }) {
             </svg>
             <span className="smallcaps text-[14px] font-medium tracking-[0.12em]">Reservar una mesa</span>
           </Link>
-          {PREVIEW_ISHIRO && isRoka ? (
+          {muestraLogo(menu.brand) ? (
             /* Cierre de la carta con el logo de la marca */
             // eslint-disable-next-line @next/next/no-img-element
             <img src={ISHIRO_LOGO} alt="ISHIRO" className="mx-auto mt-14 h-11 w-11 object-contain opacity-70" />

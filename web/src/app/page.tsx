@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchBrands, fetchMenuTitles, menus, restaurant, type BrandTitle, type MenuTitle } from "@/lib/menu";
 import { useLocation } from "@/lib/location";
-import { ishiroSkin, isIshiro, ISHIRO_LOGO, PREVIEW_ISHIRO, sinRoka } from "@/lib/ishiro";
+import { ishiroSkin, ISHIRO_LOGO, muestraLogo, sinRoka } from "@/lib/ishiro";
 import { menuThemeFor, menuThemeVars, publicMenuThemes, type MenuTheme } from "@/lib/menuTheme";
 import { DEFAULT_HOME_THEME, fontStack, publicHomeTheme, type HomeTheme } from "@/lib/theme";
 
@@ -186,7 +186,7 @@ export default function Home() {
                   const tileStyle = menuThemeVars(skins[b] ?? menuThemeFor(b));
                   const inner = (
                     <>
-                      {PREVIEW_ISHIRO && isIshiro(b) && (
+                      {muestraLogo(b) && (
                         /* Logo circular de ISHIRO en su botón de la portada */
                         // eslint-disable-next-line @next/next/no-img-element
                         <img

@@ -144,7 +144,7 @@ export default function AjustesPage() {
       <section className="mt-8">
         <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">Marcas de la portada</h2>
         <p className="mt-1 text-[11.5px] text-ink-faint">
-          Los botones que ve el cliente en Pilares para elegir entre Panisse e ISHIRO. Si dejas la
+          Los botones que ve el cliente en Pilares para elegir entre Panisse y Roka. Si dejas la
           frase vacía, no aparece nada debajo del título.
         </p>
         <div className="mt-3 flex flex-col gap-3">
@@ -156,9 +156,9 @@ export default function AjustesPage() {
 
       {/* ── Decoraciones de ROKA ── */}
       <section className="mt-8">
-        <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">Decoraciones (ISHIRO)</h2>
+        <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">Decoraciones (ROKA)</h2>
         <p className="mt-1 text-[11.5px] text-ink-faint">
-          Las decoraciones de celebración que el cliente puede agregar al reservar en ISHIRO. Puedes
+          Las decoraciones de celebración que el cliente puede agregar al reservar en ROKA. Puedes
           cambiar nombre, descripción, precio o apagar una.
         </p>
         <div className="mt-3 flex flex-col gap-3">
