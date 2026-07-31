@@ -18,7 +18,7 @@ import {
   type DeliveryConfig,
 } from "@/lib/api";
 import { DOC_TYPES, type DocType, type OrderStatus } from "@/lib/orders";
-import { BANK_TRANSFER, DAVIVIENDA_PAYMENT_URL } from "@/lib/payment";
+import PagoBloque from "./PagoBloque";
 import { useScrollLock } from "@/lib/scrollLock";
 import StatusTrack from "./StatusTrack";
 
@@ -63,8 +63,6 @@ export default function CartBar() {
   const [paidName, setPaidName] = useState(""); // nombre para que el restaurante cruce el pago
   // Bloque de pago, para llevar al cliente ahí desde el aviso de arriba.
   const payRef = useRef<HTMLDivElement | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [copiedAccount, setCopiedAccount] = useState(false);
 
   const open = view !== "hidden";
 
@@ -235,41 +233,6 @@ export default function CartBar() {
     }
   };
 
-  // Copia texto al portapapeles. Usa la Clipboard API y cae a execCommand para
-  // los webviews (Instagram/WhatsApp) que la bloquean. `flash` marca el "¡Copiado!".
-  const copyToClipboard = (text: string, flash: () => void) => {
-    const fallback = () => {
-      try {
-        const ta = document.createElement("textarea");
-        ta.value = text;
-        ta.style.position = "fixed";
-        ta.style.opacity = "0";
-        document.body.appendChild(ta);
-        ta.focus();
-        ta.select();
-        if (document.execCommand("copy")) flash();
-        document.body.removeChild(ta);
-      } catch {
-        /* si falla, el cliente puede escribir el dato a mano */
-      }
-    };
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(flash, fallback);
-    } else {
-      fallback();
-    }
-  };
-
-  const flashFor = (set: (v: boolean) => void) => () => {
-    set(true);
-    window.setTimeout(() => set(false), 2500);
-  };
-
-  // El valor va sin símbolos ni puntos (ej. "25000") para pegarlo tal cual en el
-  // campo "Total a pagar" del portal, que es numérico.
-  const copyAmount = () => copyToClipboard(String(paidTotal), flashFor(setCopied));
-  const copyAccount = () => copyToClipboard(BANK_TRANSFER.number, flashFor(setCopiedAccount));
-
   const closeAll = () => {
     setView("hidden");
     setName("");
@@ -296,8 +259,6 @@ export default function CartBar() {
     setPaidTotal(0);
     setPaidSummary("");
     setPaidName("");
-    setCopied(false);
-    setCopiedAccount(false);
   };
 
   return (
@@ -844,106 +805,12 @@ export default function CartBar() {
                       </p>
                     </div>
                   ) : (
-                  <div ref={payRef} className="mt-4 scroll-mt-4 border-2 border-gold-soft bg-paper px-4 py-4 text-left">
-                    <p className="smallcaps text-[10px] text-gold-deep">Paga tu pedido</p>
-                    <div className="mt-2 flex items-center justify-between gap-3">
-                      <div>
-                        <p className="text-[11px] text-ink-faint">Total a pagar</p>
-                        <p className="font-display text-[22px] font-semibold leading-none text-navy">
-                          {formatCOP(paidTotal)}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={copyAmount}
-                        className="h-9 shrink-0 border border-gold-soft/70 px-3 text-[12.5px] font-medium text-ink-soft active:bg-gold-soft/20"
-                      >
-                        {copied ? "¡Copiado!" : "Copiar valor"}
-                      </button>
-                    </div>
-
-                    {/* Opción 1: portal de Davivienda */}
-                    <a
-                      href={DAVIVIENDA_PAYMENT_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={copyAmount}
-                      className="mt-3 flex h-12 w-full items-center justify-center bg-navy text-[14px] font-semibold text-gold-soft transition-transform active:scale-[0.98]"
-                    >
-                      Pagar con Davivienda
-                    </a>
-
-                    {/* Separador */}
-                    <div className="my-3 flex items-center gap-2 text-[10px] text-ink-faint">
-                      <span className="h-px flex-1 bg-gold-soft/40" />
-                      <span className="smallcaps">o por transferencia</span>
-                      <span className="h-px flex-1 bg-gold-soft/40" />
-                    </div>
-
-                    {/* Opción 2: transferencia directa a la cuenta */}
-                    <div className="border border-gold-soft/50 bg-card px-3.5 py-3">
-                      <p className="text-[12px] text-ink-soft">
-                        {BANK_TRANSFER.bank} · {BANK_TRANSFER.type}
-                      </p>
-                      <div className="mt-1 flex items-center justify-between gap-3">
-                        <p className="font-display text-[19px] font-semibold leading-none tracking-wide text-navy">
-                          {BANK_TRANSFER.number}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={copyAccount}
-                          className="h-9 shrink-0 border border-gold-soft/70 px-3 text-[12.5px] font-medium text-ink-soft active:bg-gold-soft/20"
-                        >
-                          {copiedAccount ? "¡Copiado!" : "Copiar número"}
-                        </button>
-                      </div>
-                      <p className="mt-1.5 text-[11px] text-ink-faint">
-                        A nombre de <b>{BANK_TRANSFER.holder}</b>
-                      </p>
-
-                      {/* Código QR: se escanea con la app de cualquier banco o
-                          billetera (Nequi, Daviplata, Bancolombia…) para pagar. */}
-                      <div className="mt-3 border-t border-gold-soft/30 pt-3">
-                        <p className="text-center text-[11.5px] text-ink-soft">
-                          O escanéalo con la app de tu banco o billetera
-                        </p>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src="/pago-qr.svg"
-                          alt="Código QR para pagar a PANISSE con cualquier banco o billetera"
-                          width={200}
-                          height={200}
-                          className="mx-auto mt-2 h-44 w-44 bg-white p-2"
-                        />
-                        <p className="mt-1.5 text-center text-[10.5px] text-ink-faint">
-                          Nequi · Daviplata · Bancolombia · BBVA y más
-                        </p>
-                      </div>
-                    </div>
-
-                    <p className="mt-3 text-[11px] leading-relaxed text-ink-faint">
-                      Pon tu nombre como referencia.
-                    </p>
-
-                    {/* Aviso de pago: abre WhatsApp con el pedido ya escrito; el
-                        cliente sólo adjunta el comprobante y envía. */}
-                    <a
-                      href={`https://wa.me/${restaurant.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(
-                        `¡Hola PANISSE! Ya pagué mi pedido 🧾${paidName ? `\n\nA nombre de: ${paidName}` : ""}\n\nMi pedido:\n${paidSummary}\n\nTotal: ${formatCOP(paidTotal)}\n\nAdjunto el comprobante de pago 👇`,
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-3 flex h-12 w-full items-center justify-center gap-2 bg-verde text-[14px] font-semibold text-white transition-transform active:scale-[0.98]"
-                    >
-                      <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
-                        <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.4-3c-.3-.4 0-.5.1-.7l.4-.5c.1-.2.2-.3.3-.5v-.5c0-.1-.5-1.4-.7-1.9-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1.1 2.7c.1.2 1.9 2.9 4.6 4a15 15 0 0 0 1.5.6c.6.2 1.2.2 1.7.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.3Z" />
-                      </svg>
-                      Ya pagué · Enviar comprobante
-                    </a>
-                    <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
-                      Te abre WhatsApp con tu pedido escrito: solo adjunta la foto del comprobante y
-                      envía. Así confirmamos tu pago más rápido.
-                    </p>
+                  <div ref={payRef} className="scroll-mt-4">
+                    <PagoBloque
+                      total={paidTotal}
+                      resumen={`Mi pedido:\n${paidSummary}`}
+                      nombre={paidName || undefined}
+                    />
                   </div>
                   )}
 

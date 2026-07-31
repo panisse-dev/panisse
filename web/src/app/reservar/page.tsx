@@ -24,6 +24,7 @@ import {
 } from "@/lib/reservations";
 import { formatCOP } from "@/lib/format";
 import { sinRoka } from "@/lib/ishiro";
+import PagoBloque from "@/components/PagoBloque";
 import { useLocation } from "@/lib/location";
 
 type Step = "elige" | "mesa" | "datos" | "listo";
@@ -324,6 +325,25 @@ export default function ReservarPage() {
 
   const deposit = cfg ? cfg.depositPerPerson * party : 0;
 
+  // ── Qué hay que pagar por adelantado ──
+  // La decoración prepagada (con su postre, si lo eligió) más el abono que
+  // separa la mesa. Si suma cero, no se le muestra nada de pago al cliente.
+  const decoTotal = chosenDecoration
+    ? chosenDecoration.price +
+      (chosenDecoration.dessertMode === "optional" && decoDessert ? chosenDecoration.dessertPrice : 0)
+    : 0;
+  const porPagar = (chosenDecoration?.prepaid ? decoTotal : 0) + deposit;
+  // Se arma solo al mostrarlo: antes de elegir día y hora, formatear una
+  // fecha vacía revienta.
+  const resumenPago = () =>
+    [
+      chosenDecoration?.prepaid ? `Decoración: ${chosenDecoration.name}` : null,
+      deposit > 0 ? `Abono de la reserva: ${formatCOP(deposit)}` : null,
+      `Reserva: ${formatDateLabel(date)} · ${formatTime(time)} · ${party} ${party === 1 ? "persona" : "personas"}`,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
   // ── Pantalla de carga / error ──
   if (loadErr) {
     return (
@@ -482,7 +502,7 @@ export default function ReservarPage() {
               </div>
               {chosenDecoration.prepaid && (
                 <p className="mt-2 text-[11px] leading-relaxed text-gold-deep">
-                  Te escribimos para confirmarla y cobrarla: se paga por adelantado.
+                  La decoración se paga por adelantado. Puedes pagarla aquí mismo 👇
                 </p>
               )}
             </div>
@@ -491,11 +511,35 @@ export default function ReservarPage() {
           <p className="mx-auto mt-5 max-w-[19rem] text-[13px] leading-relaxed text-ink-soft">
             ¡Te esperamos! Revisa tu correo con los datos de tu reserva.
           </p>
-          {deposit > 0 && (
-            <p className="mt-2 text-[12.5px] leading-relaxed text-gold-deep">
-              Para separar la mesa se pide un abono de <b>{formatCOP(deposit)}</b>. Te escribimos para
-              contarte cómo pagarlo y dejar tu mesa separada.
-            </p>
+
+          {/* Pago por adelantado: la decoración prepagada y/o el abono que
+              separa la mesa. Mismo bloque que usa el pedido. */}
+          {porPagar > 0 && (
+            <div className="mx-auto max-w-[22rem]">
+              <PagoBloque
+                total={porPagar}
+                titulo={
+                  chosenDecoration?.prepaid && deposit > 0
+                    ? "Paga tu decoración y el abono"
+                    : chosenDecoration?.prepaid
+                      ? "Paga tu decoración"
+                      : "Paga el abono de tu mesa"
+                }
+                resumen={resumenPago()}
+                nombre={name.trim() || undefined}
+                whatsapp={sede?.whatsapp}
+                avisoWhatsApp={
+                  chosenDecoration?.prepaid
+                    ? "Ya pagué la decoración de mi reserva 🎉"
+                    : "Ya pagué el abono de mi reserva 🧾"
+                }
+                nota={
+                  chosenDecoration?.prepaid
+                    ? "Pon tu nombre como referencia. Tu reserva ya está confirmada; el pago es para dejar lista la decoración."
+                    : "Pon tu nombre como referencia. El abono deja tu mesa separada."
+                }
+              />
+            </div>
           )}
           <Link
             href="/"
