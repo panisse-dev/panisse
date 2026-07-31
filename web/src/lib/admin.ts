@@ -110,6 +110,7 @@ export interface DecorationRow {
   price: number;
   active: boolean;
   image: string | null;
+  locationId: string | null; // null = se ofrece en todas las sedes
 }
 
 export const staffDecorations = (code: string) =>

@@ -159,11 +159,19 @@ export default function AjustesPage() {
         <h2 className="smallcaps text-[11px] font-semibold text-gold-deep">Decoraciones (ROKA)</h2>
         <p className="mt-1 text-[11.5px] text-ink-faint">
           Las decoraciones de celebración que el cliente puede agregar al reservar en ROKA. Puedes
-          cambiar nombre, descripción, precio o apagar una.
+          cambiar nombre, descripción, precio o apagar una. Solo ves las de tu sede; las que están
+          marcadas se ofrecen únicamente ahí.
         </p>
         <div className="mt-3 flex flex-col gap-3">
           {decorations.map((d) => (
-            <DecorationCard key={d.id} code={code} dec={d} onSaved={load} onAuth={logout} />
+            <DecorationCard
+              key={d.id}
+              code={code}
+              dec={d}
+              sede={locations.find((l) => l.id === d.locationId)?.name ?? d.locationId ?? ""}
+              onSaved={load}
+              onAuth={logout}
+            />
           ))}
         </div>
       </section>
@@ -174,11 +182,14 @@ export default function AjustesPage() {
 function DecorationCard({
   code,
   dec,
+  sede,
   onSaved,
   onAuth,
 }: {
   code: string;
   dec: DecorationRow;
+  /** Nombre de la sede, si esta decoración es de una sola. */
+  sede: string;
   onSaved: () => void;
   onAuth: () => void;
 }) {
@@ -233,7 +244,15 @@ function DecorationCard({
   return (
     <div className={`border p-4 ${active ? "border-gold-soft/60 bg-paper" : "border-gold-soft/40 bg-paper-deep/40"}`}>
       <div className="flex items-center justify-between">
-        <p className="font-display text-[16px] text-navy">{dec.name}</p>
+        <div className="min-w-0">
+          <p className="font-display text-[16px] text-navy">{dec.name}</p>
+          {/* De qué sede es. Solo aparece cuando se administran varias. */}
+          {dec.locationId && (
+            <span className="smallcaps mt-0.5 inline-block border border-gold-soft/70 px-1.5 py-0.5 text-[9px] font-semibold text-gold-deep">
+              Solo {sede}
+            </span>
+          )}
+        </div>
         <label className="flex items-center gap-2 text-[12px] text-ink-soft">
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="h-4 w-4 accent-[#04111D]" />
           Activa
