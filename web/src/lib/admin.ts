@@ -94,6 +94,8 @@ export interface Reservation {
     message?: string | null; // mensaje de la tarjeta
     total?: number | null; // decoración + postre
   } | null;
+  decorationPaid: boolean; // el restaurante ya vio el comprobante
+  decorationPaidAt: string | null;
   tableId: string | null;
   tableName: string | null;
   tableZone: string | null; // salón de esa mesa (ROKA I, TOSCANA, VIP…)
@@ -502,6 +504,10 @@ export const staffSetReservationNote = (code: string, id: string, note: string) 
 
 export const staffSetReservationDeposit = (code: string, id: string, paid: boolean) =>
   rpc<void>("staff_set_reservation_deposit", { p_code: code, p_id: id, p_paid: paid });
+
+/** Marca (o desmarca) el pago de la decoración de una reserva. */
+export const staffSetDecorationPaid = (code: string, id: string, paid: boolean) =>
+  rpc<void>("staff_set_decoration_paid", { p_code: code, p_id: id, p_paid: paid });
 
 // ── Bloqueos de días/horas ──
 export interface ReservationBlock {

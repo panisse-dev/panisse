@@ -26,6 +26,7 @@ import {
   staffReservationSettings,
   staffReservationStats,
   staffReservationsUpcoming,
+  staffSetDecorationPaid,
   staffSetReservationDeposit,
   staffSetReservationNote,
   staffSetReservationSource,
@@ -321,6 +322,20 @@ export default function ReservasPage() {
     }
   };
 
+  // La decoración se cobra por adelantado y el cliente paga por el portal,
+  // por transferencia o por QR. Ninguno avisa solo: lo marca quien ve el
+  // comprobante, igual que con los pedidos.
+  const toggleDecorationPaid = async (r: Reservation) => {
+    const paid = !r.decorationPaid;
+    setList((prev) => prev.map((x) => (x.id === r.id ? { ...x, decorationPaid: paid } : x)));
+    try {
+      await staffSetDecorationPaid(code, r.id, paid);
+    } catch (e) {
+      if (isAuthError(e)) logout();
+      else poll();
+    }
+  };
+
   const saveNote = async (r: Reservation) => {
     const note = noteDraft.trim();
     setNoteEditId(null);
@@ -367,6 +382,7 @@ export default function ReservasPage() {
     r.reducedMobility,
     r.decoration?.name ?? "",
     r.decoration?.total ?? r.decoration?.price ?? "",
+    r.decoration ? (r.decorationPaid ? "Pagada" : "Sin pagar") : "",
     r.note,
     r.staffNote,
   ]);
@@ -623,6 +639,7 @@ export default function ReservasPage() {
                   "Movilidad reducida",
                   "Decoración",
                   "Valor decoración",
+                  "Pago decoración",
                   "Nota del cliente",
                   "Nota interna",
                 ]}
@@ -738,8 +755,25 @@ export default function ReservasPage() {
 
                 {/* Decoración de celebración elegida, con lo que pidió el cliente */}
                 {r.decoration && (
-                  <div className="mx-4 mt-2 border border-gold/60 bg-gold-soft/12 px-3 py-2">
-                    <p className="smallcaps text-[9.5px] text-gold-deep">Decoración 🎉</p>
+                  <div
+                    className={`mx-4 mt-2 border px-3 py-2 ${
+                      r.decorationPaid
+                        ? "border-verde/50 bg-verde/[0.07]"
+                        : "border-gold/60 bg-gold-soft/12"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="smallcaps text-[9.5px] text-gold-deep">Decoración 🎉</p>
+                      <span
+                        className={`smallcaps shrink-0 border px-1.5 py-0.5 text-[9px] font-bold ${
+                          r.decorationPaid
+                            ? "border-verde bg-verde text-white"
+                            : "border-[#b3261e] bg-[#b3261e]/10 text-[#b3261e]"
+                        }`}
+                      >
+                        {r.decorationPaid ? "Pagada" : "Sin pagar"}
+                      </span>
+                    </div>
                     <p className="mt-0.5 text-[12.5px] font-medium text-navy">
                       {r.decoration.name} · {formatCOP(r.decoration.total ?? r.decoration.price)}
                     </p>
@@ -759,6 +793,17 @@ export default function ReservasPage() {
                         Tarjeta: “{r.decoration.message}”
                       </p>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => toggleDecorationPaid(r)}
+                      className={`smallcaps mt-2 h-8 w-full border text-[10.5px] font-semibold ${
+                        r.decorationPaid
+                          ? "border-gold-soft/70 bg-card text-ink-soft"
+                          : "border-verde bg-verde text-white"
+                      }`}
+                    >
+                      {r.decorationPaid ? "Quitar el pago" : "Marcar como pagada"}
+                    </button>
                   </div>
                 )}
 
